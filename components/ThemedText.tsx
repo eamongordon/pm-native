@@ -1,5 +1,4 @@
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { useFonts, WorkSans_400Regular, WorkSans_700Bold } from '@expo-google-fonts/work-sans';
 import { StyleSheet, Text, type TextProps } from 'react-native';
 
 export type ThemedTextProps = TextProps & {
@@ -16,15 +15,6 @@ export function ThemedText({
   ...rest
 }: ThemedTextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-  
-  const [fontsLoaded] = useFonts({
-    WorkSans_400Regular,
-    WorkSans_700Bold,
-  });
-
-  if (!fontsLoaded) {
-    return null; // Or use <AppLoading /> for a better UX
-  }
   
   return (
     <Text
