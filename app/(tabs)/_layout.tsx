@@ -30,21 +30,21 @@ export default function TabLayout() {
                 name="index"
                 options={{
                     title: 'Home',
-                    tabBarIcon: ({ color }) => <House size={28} />,
+                    tabBarIcon: ({ color }) => <House size={28} color={color} />,
                 }}
             />
             <Tabs.Screen
                 name="explore"
                 options={{
                     title: 'Explore',
-                    tabBarIcon: ({ color }) => <Sparkle size={28} />,
+                    tabBarIcon: ({ color }) => <Sparkle size={28} color={color} />,
                 }}
             />
             <Tabs.Screen
                 name="minerals/index"
                 options={{
                     title: 'Minerals',
-                    tabBarIcon: ({ color }) => <Image size={28} />,
+                    tabBarIcon: ({ color }) => <Image size={28} color={color} />,
                 }}
             />
             <Tabs.Screen
