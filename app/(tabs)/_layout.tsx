@@ -25,26 +25,27 @@ export default function TabLayout() {
                     },
                     default: {},
                 }),
+                tabBarLabelPosition: 'below-icon', // <-- Add this line
             }}>
             <Tabs.Screen
                 name="index"
                 options={{
                     title: 'Home',
-                    tabBarIcon: ({ color }) => <House size={28} color={color} />,
+                    tabBarIcon: ({ color }) => <House size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
                 name="explore"
                 options={{
                     title: 'Explore',
-                    tabBarIcon: ({ color }) => <Sparkle size={28} color={color} />,
+                    tabBarIcon: ({ color }) => <Sparkle size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
                 name="minerals/index"
                 options={{
                     title: 'Minerals',
-                    tabBarIcon: ({ color }) => <Image size={28} color={color} />,
+                    tabBarIcon: ({ color }) => <Image size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
