@@ -21,84 +21,115 @@ const CRYSTAL_SYSTEM_OPTIONS = [
 export default function HomeScreen() {
     const [minerals, setMinerals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [search, setSearch] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [hardnessRange, setHardnessRange] = useState<[number, number]>([1, 10]);
     const [lusters, setLusters] = useState<string[]>([]);
     const [mineralClass, setMineralClass] = useState<string[]>([]);
     const [crystalSystems, setCrystalSystems] = useState<string[]>([]);
+    const [cursor, setCursor] = useState<string | null>(null);
 
-    const fetchMinerals = async (
-        nameFilter: string = '',
-        hardness: [number, number] = [1, 10],
-        lustersArr: string[] = [],
-        mineralClassArr: string[] = [],
-        crystalSystemsArr: string[] = []
-    ) => {
-        setLoading(true);
-        let url = 'https://corsproxy.io/?url=https://www.prospectorminerals.com/api/minerals';
-        let filterObj: any = {};
-        if (nameFilter) filterObj.name = nameFilter;
-        if (hardness && (hardness[0] !== 1 || hardness[1] !== 10)) {
-            filterObj.minHardness = hardness[0];
-            filterObj.maxHardness = hardness[1];
+    const LIMIT = 10;
+
+    const buildFilterObj = () => {
+        let filterObj: Record<string, any> = {};
+        if (search) filterObj.name = search;
+        if (hardnessRange && (hardnessRange[0] !== 1 || hardnessRange[1] !== 10)) {
+            filterObj.minHardness = hardnessRange[0];
+            filterObj.maxHardness = hardnessRange[1];
         }
-        if (lustersArr.length > 0) {
-            filterObj.lusters = lustersArr;
-        }
-        if (mineralClassArr.length > 0) {
-            filterObj.mineralClass = mineralClassArr;
-        }
-        if (crystalSystemsArr.length > 0) {
-            filterObj.crystalSystems = crystalSystemsArr;
-        }
-        if (Object.keys(filterObj).length > 0) {
-            const filter = encodeURIComponent(JSON.stringify(filterObj));
-            url += `?filter=${filter}`;
-        }
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
-            setMinerals(data.results);
-        } catch {
-            setMinerals([]);
-        }
-        setLoading(false);
+        if (lusters.length > 0) filterObj.lusters = lusters;
+        if (mineralClass.length > 0) filterObj.mineralClass = mineralClass;
+        if (crystalSystems.length > 0) filterObj.crystalSystems = crystalSystems;
+        return filterObj;
     };
 
-    useEffect(() => {
-        fetchMinerals();
-    }, []);
+    type FetchMineralsArgs = {
+        append?: boolean;
+        cursorParam?: string | null;
+        signal?: AbortSignal;
+    };
 
+    const fetchMinerals = async ({
+        append = false,
+        cursorParam = null,
+        signal
+    }: FetchMineralsArgs = {}) => {
+        if (append) setIsFetchingMore(true);
+        else setLoading(true);
+
+        // Always add limit directly to the endpoint URL
+        let url = `https://www.prospectorminerals.com/api/minerals?limit=${LIMIT}`;
+        const filterObj = buildFilterObj();
+        const params: Record<string, string> = {};
+        if (cursorParam) params.cursor = cursorParam;
+        if (Object.keys(filterObj).length > 0) params.filter = JSON.stringify(filterObj);
+
+        const query = Object.entries(params)
+            .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+            .join('&');
+        if (query) url += `&${query}`;
+
+        try {
+            const res = await fetch(url, { signal });
+            const data = await res.json();
+            if (append) {
+                setMinerals((prev) => [...prev, ...((data.results as any[]) || [])]);
+            } else {
+                setMinerals((data.results as any[]) || []);
+            }
+            setCursor((data as any).next || null);
+        } catch {
+            if (!append) setMinerals([]);
+        }
+        setLoading(false);
+        setIsFetchingMore(false);
+    };
+
+    // Reset minerals and cursor when filters/search change
     useEffect(() => {
-        // Debounce search input
+        const controller = new AbortController();
+        setCursor(null);
+        setMinerals([]);
+        setLoading(true);
         const timeout = setTimeout(() => {
-            fetchMinerals(search, hardnessRange, lusters, mineralClass, crystalSystems);
+            fetchMinerals({ append: false, cursorParam: cursor, signal: controller.signal });
         }, 300);
-        return () => clearTimeout(timeout);
+        return () => {
+            controller.abort();
+            clearTimeout(timeout);
+        };
+        // eslint-disable-next-line
     }, [search, hardnessRange, lusters, mineralClass, crystalSystems]);
 
     // Checkbox toggle handler
     const toggleLuster = (luster: string) => {
-        setLusters((prev) =>
+        setLusters((prev: string[]) =>
             prev.includes(luster)
                 ? prev.filter((l) => l !== luster)
                 : [...prev, luster]
         );
     };
     const toggleMineralClass = (cls: string) => {
-        setMineralClass((prev) =>
+        setMineralClass((prev: string[]) =>
             prev.includes(cls)
                 ? prev.filter((c) => c !== cls)
                 : [...prev, cls]
         );
     };
     const toggleCrystalSystem = (sys: string) => {
-        setCrystalSystems((prev) =>
+        setCrystalSystems((prev: string[]) =>
             prev.includes(sys)
                 ? prev.filter((c) => c !== sys)
                 : [...prev, sys]
         );
+    };
+
+    const handleEndReached = () => {
+        if (!loading && !isFetchingMore && cursor) {
+            fetchMinerals({ append: true, cursorParam: cursor });
+        }
     };
 
     return (
@@ -228,21 +259,21 @@ export default function HomeScreen() {
                         </View>
                     </View>
                 </Modal>
-                {loading ? (
+                {loading && minerals.length === 0 ? (
                     <ActivityIndicator />
                 ) : minerals.length === 0 ? (
                     <ThemedText>No minerals found</ThemedText>
                 ) : (
                     <FlatList
                         data={minerals}
-                        keyExtractor={(item) => item.id?.toString() ?? item.name}
+                        keyExtractor={(item) => item.id} // changed from item to item.id
                         style={{ alignSelf: 'stretch' }}
                         contentContainerStyle={{ paddingBottom: 16 }}
                         renderItem={({ item }) => (
                             <Link href={`/minerals/${item.id}`} asChild>
                                 <View style={styles.itemRow}>
                                     <Image
-                                        source={{ uri: item.photos[0].photo.image || 'https://via.placeholder.com/60' }}
+                                        source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
                                         style={styles.itemImage}
                                     />
                                     <ThemedText style={styles.itemName}>{item.name}</ThemedText>
@@ -250,6 +281,10 @@ export default function HomeScreen() {
                             </Link>
                         )}
                         ItemSeparatorComponent={() => <View style={styles.divider} />}
+                        onEndReached={handleEndReached}
+                        ListFooterComponent={
+                            isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
+                        }
                     />
                 )}
             </View>
