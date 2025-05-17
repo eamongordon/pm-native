@@ -1,5 +1,6 @@
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
+import MultiSlider from '@ptomasroos/react-native-multi-slider'; // <-- add this import
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -9,14 +10,17 @@ export default function HomeScreen() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
-    const [extraFilter, setExtraFilter] = useState(''); // Example extra filter
+    const [hardnessRange, setHardnessRange] = useState<[number, number]>([1, 10]);
 
-    const fetchMinerals = async (nameFilter: string = '', extra: string = '') => {
+    const fetchMinerals = async (nameFilter: string = '', hardness: [number, number] = [1, 10]) => {
         setLoading(true);
         let url = 'https://corsproxy.io/?url=https://www.prospectorminerals.com/api/minerals';
         let filterObj: any = {};
         if (nameFilter) filterObj.name = nameFilter;
-        if (extra) filterObj.extra = extra; // Example, adjust as needed
+        if (hardness && (hardness[0] !== 1 || hardness[1] !== 10)) {
+            filterObj.minHardness = hardness[0];
+            filterObj.maxHardness = hardness[1];
+        }
         if (Object.keys(filterObj).length > 0) {
             const filter = encodeURIComponent(JSON.stringify(filterObj));
             url += `?filter=${filter}`;
@@ -38,10 +42,10 @@ export default function HomeScreen() {
     useEffect(() => {
         // Debounce search input
         const timeout = setTimeout(() => {
-            fetchMinerals(search, extraFilter);
+            fetchMinerals(search, hardnessRange);
         }, 300);
         return () => clearTimeout(timeout);
-    }, [search, extraFilter]);
+    }, [search, hardnessRange]);
 
     return (
         <ParallaxScrollView
@@ -72,13 +76,24 @@ export default function HomeScreen() {
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalContent}>
                             <ThemedText style={{ fontWeight: 'bold', fontSize: 18 }}>More Filters</ThemedText>
-                            {/* Example filter field */}
-                            <TextInput
-                                placeholder="Extra filter (example)"
-                                value={extraFilter}
-                                onChangeText={setExtraFilter}
-                                style={styles.modalInput}
-                            />
+                            {/* Hardness Range Slider */}
+                            <View style={{ marginTop: 24 }}>
+                                <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Hardness Range</Text>
+                                <MultiSlider
+                                    values={hardnessRange}
+                                    min={1}
+                                    max={10}
+                                    step={1}
+                                    onValuesChange={(values) => setHardnessRange([values[0], values[1]] as [number, number])}
+                                    allowOverlap={false}
+                                    snapped
+                                    containerStyle={{ marginHorizontal: 10 }}
+                                />
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+                                    <Text>Min: {hardnessRange[0]}</Text>
+                                    <Text>Max: {hardnessRange[1]}</Text>
+                                </View>
+                            </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>
                                 <Button title="Cancel" onPress={() => setModalVisible(false)} />
                                 <View style={{ width: 8 }} />
