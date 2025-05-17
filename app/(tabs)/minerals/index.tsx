@@ -1,3 +1,4 @@
+import Select from '@/components/Select';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
@@ -20,6 +21,12 @@ const CRYSTAL_SYSTEM_OPTIONS = [
     'Monoclinic', 'Trigonal', 'Orthorhombic'
 ];
 
+const SORT_OPTIONS = [
+    { label: 'Sort: Default', value: 'default' },
+    { label: 'A-Z', value: 'name-asc' },
+    { label: 'Z-A', value: 'name-desc' },
+];
+
 export default function HomeScreen() {
     const [minerals, setMinerals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -31,6 +38,7 @@ export default function HomeScreen() {
     const [mineralClass, setMineralClass] = useState<string[]>([]);
     const [crystalSystems, setCrystalSystems] = useState<string[]>([]);
     const [cursor, setCursor] = useState<string | null>(null);
+    const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
 
     const LIMIT = 10;
 
@@ -44,6 +52,10 @@ export default function HomeScreen() {
         if (lusters.length > 0) filterObj.lusters = lusters;
         if (mineralClass.length > 0) filterObj.mineralClass = mineralClass;
         if (crystalSystems.length > 0) filterObj.crystalSystems = crystalSystems;
+        // Add sort if not default
+        if (sort && sort.property !== 'default') {
+            filterObj.sort = sort;
+        }
         return filterObj;
     };
 
@@ -109,7 +121,7 @@ export default function HomeScreen() {
             clearTimeout(timeout);
         };
         // eslint-disable-next-line
-    }, [search, hardnessRange, lusters, mineralClass, crystalSystems]);
+    }, [search, hardnessRange, lusters, mineralClass, crystalSystems, sort]);
 
     // Checkbox toggle handler
     const toggleLuster = (luster: string) => {
@@ -141,6 +153,21 @@ export default function HomeScreen() {
         }
     };
 
+    // Helper for menu label
+    const getSortLabel = () => {
+        if (!sort || sort.property === 'default') return 'Sort: Default';
+        if (sort.property === 'name' && sort.sort === 'asc') return 'A-Z';
+        if (sort.property === 'name' && sort.sort === 'desc') return 'Z-A';
+        return 'Sort';
+    };
+
+    // Add a handler for Select value change
+    const handleSortChange = (value: string) => {
+        if (value === 'default') setSort(null);
+        else if (value === 'name-asc') setSort({ property: 'name', sort: 'asc' });
+        else if (value === 'name-desc') setSort({ property: 'name', sort: 'desc' });
+    };
+
     return (
         <SafeAreaProvider>
             <ThemedView style={styles.container}>
@@ -164,6 +191,23 @@ export default function HomeScreen() {
                                 <ThemedText>Filter</ThemedText>
                             </View>
                         </TouchableOpacity>
+                        {/* Sort Dropdown using Select */}
+                        <View style={styles.sortDropdownContainer}>
+                            <Select
+                                options={SORT_OPTIONS}
+                                selectedValue={
+                                    !sort || sort.property === 'default'
+                                        ? 'default'
+                                        : sort.property === 'name' && sort.sort === 'asc'
+                                        ? 'name-asc'
+                                        : sort.property === 'name' && sort.sort === 'desc'
+                                        ? 'name-desc'
+                                        : 'default'
+                                }
+                                onValueChange={handleSortChange}
+                                placeholder="Sort"
+                            />
+                        </View>
                         <Modal
                             visible={modalVisible}
                             animationType="slide"
@@ -360,6 +404,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    sortDropdownContainer: {
+        marginTop: 8,
+        marginBottom: 8,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    sortDropdown: {
+        height: 40,
+        width: '100%',
+        backgroundColor: '#fff',
+    },
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.3)',
@@ -419,5 +476,14 @@ const styles = StyleSheet.create({
         height: 12,
         borderRadius: 2,
         backgroundColor: '#26c6da',
+    },
+    sortMenuTrigger: {
+        height: 40,
+        borderColor: '#e0e0e0',
+        borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        backgroundColor: '#fff',
+        justifyContent: 'center',
     },
 });
