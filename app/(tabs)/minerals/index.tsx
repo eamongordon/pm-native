@@ -2,18 +2,23 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Button, FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
     const [minerals, setMinerals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [extraFilter, setExtraFilter] = useState(''); // Example extra filter
 
-    const fetchMinerals = async (nameFilter: string = '') => {
+    const fetchMinerals = async (nameFilter: string = '', extra: string = '') => {
         setLoading(true);
         let url = 'https://corsproxy.io/?url=https://www.prospectorminerals.com/api/minerals';
-        if (nameFilter) {
-            const filter = encodeURIComponent(JSON.stringify({ name: nameFilter }));
+        let filterObj: any = {};
+        if (nameFilter) filterObj.name = nameFilter;
+        if (extra) filterObj.extra = extra; // Example, adjust as needed
+        if (Object.keys(filterObj).length > 0) {
+            const filter = encodeURIComponent(JSON.stringify(filterObj));
             url += `?filter=${filter}`;
         }
         try {
@@ -33,10 +38,10 @@ export default function HomeScreen() {
     useEffect(() => {
         // Debounce search input
         const timeout = setTimeout(() => {
-            fetchMinerals(search);
+            fetchMinerals(search, extraFilter);
         }, 300);
         return () => clearTimeout(timeout);
-    }, [search]);
+    }, [search, extraFilter]);
 
     return (
         <ParallaxScrollView
@@ -44,15 +49,44 @@ export default function HomeScreen() {
         >
             <View style={styles.container}>
                 <ThemedText>Minerals</ThemedText>
-                <TextInput
-                    style={styles.searchBar}
-                    placeholder="Search minerals..."
-                    value={search}
-                    onChangeText={setSearch}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    clearButtonMode="while-editing"
-                />
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 16 }}>
+                    <TextInput
+                        style={[styles.searchBar, { flex: 1 }]}
+                        placeholder="Search minerals..."
+                        value={search}
+                        onChangeText={setSearch}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        clearButtonMode="while-editing"
+                    />
+                    <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.filterButton}>
+                        <Text style={{ fontSize: 16 }}>More Filters</Text>
+                    </TouchableOpacity>
+                </View>
+                <Modal
+                    visible={modalVisible}
+                    animationType="slide"
+                    transparent={true}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <ThemedText style={{ fontWeight: 'bold', fontSize: 18 }}>More Filters</ThemedText>
+                            {/* Example filter field */}
+                            <TextInput
+                                placeholder="Extra filter (example)"
+                                value={extraFilter}
+                                onChangeText={setExtraFilter}
+                                style={styles.modalInput}
+                            />
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>
+                                <Button title="Cancel" onPress={() => setModalVisible(false)} />
+                                <View style={{ width: 8 }} />
+                                <Button title="Apply" onPress={() => setModalVisible(false)} />
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
                 {loading ? (
                     <ActivityIndicator />
                 ) : minerals.length === 0 ? (
@@ -117,5 +151,36 @@ const styles = StyleSheet.create({
     divider: {
         height: 1,
         backgroundColor: '#e0e0e0',
+    },
+    filterButton: {
+        marginLeft: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        backgroundColor: '#e0e0e0',
+        borderRadius: 8,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        justifyContent: 'flex-end', // changed from 'center'
+        alignItems: 'stretch',      // changed from 'center'
+    },
+    modalContent: {
+        width: '100%',              // changed from '80%'
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 16,    // changed for bottom sheet effect
+        borderTopRightRadius: 16,   // changed for bottom sheet effect
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        padding: 24,
+        alignItems: 'stretch',
+        minHeight: 200,             // optional: ensures some height
+    },
+    modalInput: {
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+        borderRadius: 8,
+        padding: 8,
+        marginTop: 16,
     },
 });
