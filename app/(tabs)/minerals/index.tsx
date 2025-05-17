@@ -1,12 +1,15 @@
 import Select from '@/components/Select';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Link } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Image, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemedIcon } from '../../../components/ThemedIcon';
 
 const LUSTER_OPTIONS = [
     'Silky', 'Vitreous', 'Waxy', 'Submetallic', 'Metallic',
@@ -39,7 +42,7 @@ export default function HomeScreen() {
     const [crystalSystems, setCrystalSystems] = useState<string[]>([]);
     const [cursor, setCursor] = useState<string | null>(null);
     const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
-
+    const colorScheme = useColorScheme() ?? 'light';
     const LIMIT = 10;
 
     const buildFilterObj = () => {
@@ -176,8 +179,13 @@ export default function HomeScreen() {
                         <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: '#e0e0e0', display: 'flex', gap: 8 }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <TextInput
-                                    style={[styles.searchBar, { flex: 1, fontFamily: 'WorkSans_400Regular' }]}
+                                    style={[
+                                        styles.searchBar,
+                                        { flex: 1, fontFamily: 'WorkSans_400Regular' },
+                                        colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark
+                                    ]}
                                     placeholder="Search minerals..."
+                                    placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
                                     value={search}
                                     onChangeText={setSearch}
                                     autoCapitalize="none"
@@ -189,9 +197,13 @@ export default function HomeScreen() {
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                                 <TouchableOpacity
                                     onPress={() => setModalVisible(true)}
-                                    style={styles.filterButton}
+                                    style={[styles.filterButton, colorScheme === 'light' ? styles.filterButtonLight : styles.filterButtonDark]}
                                 >
-                                    <SlidersHorizontal size={18} style={{ marginRight: 6 }} />
+                                    <ThemedIcon
+                                        Icon={SlidersHorizontal}
+                                        size={18}
+                                        style={{ marginRight: 6 }}
+                                    />
                                     <ThemedText style={{ fontSize: 14 }}>Filter</ThemedText>
                                 </TouchableOpacity>
                                 <View style={styles.sortDropdownContainer}>
@@ -371,10 +383,17 @@ const styles = StyleSheet.create({
     searchBar: {
         height: 40,
         borderColor: '#e0e0e0',
-        borderWidth: 1,
         borderRadius: 8,
         paddingHorizontal: 12,
         backgroundColor: '#fff',
+    },
+    searchBarLight: {
+        backgroundColor: Colors.light.inputBackground,
+        color: Colors.light.inputText,
+    },
+    searchBarDark: {
+        backgroundColor: Colors.dark.inputBackground,
+        color: Colors.dark.inputText,
     },
     itemRow: {
         flexDirection: 'row',
@@ -411,6 +430,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         flexDirection: 'row',
         height: 40,
+    },
+    filterButtonLight: {
+        borderColor: Colors.light.border,
+    },
+    filterButtonDark: {
+        borderColor: Colors.dark.border,
     },
     sortDropdownContainer: {
         overflow: 'hidden',

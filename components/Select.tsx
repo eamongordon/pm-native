@@ -1,3 +1,4 @@
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { ArrowUpDown } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
@@ -7,6 +8,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import { ThemedIcon } from './ThemedIcon';
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
 
@@ -34,6 +36,8 @@ const Select: React.FC<SelectProps> = ({
     const [dropdownWidth, setDropdownWidth] = useState(0);
     const selectBoxRef = useRef<View>(null);
 
+    const theme = useThemeColor({}, "border");
+
     const openDropdown = () => {
         if (selectBoxRef.current) {
             selectBoxRef.current.measureInWindow((x, y, width, height) => {
@@ -54,12 +58,16 @@ const Select: React.FC<SelectProps> = ({
         <View>
             <View ref={selectBoxRef}>
                 <TouchableOpacity
-                    style={styles.selectBox}
+                    style={[styles.selectBox, { borderColor: theme }]}
                     onPress={openDropdown}
                     activeOpacity={0.8}
                 >
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <ArrowUpDown size={18} style={{ marginRight: 8 }} />
+                        <ThemedIcon
+                            Icon={ArrowUpDown}
+                            size={18}
+                            style={{ marginRight: 8 }}
+                        />
                         <ThemedText style={{ fontSize: 14 }}>
                             {selectedLabel}
                         </ThemedText>
