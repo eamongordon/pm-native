@@ -9,6 +9,14 @@ const LUSTER_OPTIONS = [
     'Silky', 'Vitreous', 'Waxy', 'Submetallic', 'Metallic',
     'Resinous', 'Pearly', 'Greasy', 'Dull', 'Adamantine'
 ];
+const MINERAL_CLASS_OPTIONS = [
+    'Silicates', 'Phosphates', 'Carbonates', 'Sulfates',
+    'Sulfides', 'Halides', 'Oxides', 'Native Elements'
+];
+const CRYSTAL_SYSTEM_OPTIONS = [
+    'Tetragonal', 'Isometric', 'Hexagonal', 'Triclinic',
+    'Monoclinic', 'Trigonal', 'Orthorhombic'
+];
 
 export default function HomeScreen() {
     const [minerals, setMinerals] = useState<any[]>([]);
@@ -17,8 +25,16 @@ export default function HomeScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [hardnessRange, setHardnessRange] = useState<[number, number]>([1, 10]);
     const [lusters, setLusters] = useState<string[]>([]);
+    const [mineralClass, setMineralClass] = useState<string[]>([]);
+    const [crystalSystems, setCrystalSystems] = useState<string[]>([]);
 
-    const fetchMinerals = async (nameFilter: string = '', hardness: [number, number] = [1, 10], lustersArr: string[] = []) => {
+    const fetchMinerals = async (
+        nameFilter: string = '',
+        hardness: [number, number] = [1, 10],
+        lustersArr: string[] = [],
+        mineralClassArr: string[] = [],
+        crystalSystemsArr: string[] = []
+    ) => {
         setLoading(true);
         let url = 'https://corsproxy.io/?url=https://www.prospectorminerals.com/api/minerals';
         let filterObj: any = {};
@@ -29,6 +45,12 @@ export default function HomeScreen() {
         }
         if (lustersArr.length > 0) {
             filterObj.lusters = lustersArr;
+        }
+        if (mineralClassArr.length > 0) {
+            filterObj.mineralClass = mineralClassArr;
+        }
+        if (crystalSystemsArr.length > 0) {
+            filterObj.crystalSystems = crystalSystemsArr;
         }
         if (Object.keys(filterObj).length > 0) {
             const filter = encodeURIComponent(JSON.stringify(filterObj));
@@ -51,10 +73,10 @@ export default function HomeScreen() {
     useEffect(() => {
         // Debounce search input
         const timeout = setTimeout(() => {
-            fetchMinerals(search, hardnessRange, lusters);
+            fetchMinerals(search, hardnessRange, lusters, mineralClass, crystalSystems);
         }, 300);
         return () => clearTimeout(timeout);
-    }, [search, hardnessRange, lusters]);
+    }, [search, hardnessRange, lusters, mineralClass, crystalSystems]);
 
     // Checkbox toggle handler
     const toggleLuster = (luster: string) => {
@@ -62,6 +84,20 @@ export default function HomeScreen() {
             prev.includes(luster)
                 ? prev.filter((l) => l !== luster)
                 : [...prev, luster]
+        );
+    };
+    const toggleMineralClass = (cls: string) => {
+        setMineralClass((prev) =>
+            prev.includes(cls)
+                ? prev.filter((c) => c !== cls)
+                : [...prev, cls]
+        );
+    };
+    const toggleCrystalSystem = (sys: string) => {
+        setCrystalSystems((prev) =>
+            prev.includes(sys)
+                ? prev.filter((c) => c !== sys)
+                : [...prev, sys]
         );
     };
 
@@ -132,6 +168,54 @@ export default function HomeScreen() {
                                                 {lusters.includes(luster) && <View style={styles.checkboxDot} />}
                                             </View>
                                             <Text style={{ marginLeft: 8 }}>{luster}</Text>
+                                        </Pressable>
+                                    ))}
+                                </View>
+                            </View>
+                            {/* Mineral Class Checkboxes */}
+                            <View style={{ marginTop: 24 }}>
+                                <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Mineral Class</Text>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    {MINERAL_CLASS_OPTIONS.map((cls) => (
+                                        <Pressable
+                                            key={cls}
+                                            onPress={() => toggleMineralClass(cls)}
+                                            style={[
+                                                styles.checkboxRow,
+                                                mineralClass.includes(cls) && styles.checkboxRowSelected
+                                            ]}
+                                        >
+                                            <View style={[
+                                                styles.checkbox,
+                                                mineralClass.includes(cls) && styles.checkboxChecked
+                                            ]}>
+                                                {mineralClass.includes(cls) && <View style={styles.checkboxDot} />}
+                                            </View>
+                                            <Text style={{ marginLeft: 8 }}>{cls}</Text>
+                                        </Pressable>
+                                    ))}
+                                </View>
+                            </View>
+                            {/* Crystal Systems Checkboxes */}
+                            <View style={{ marginTop: 24 }}>
+                                <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Crystal Systems</Text>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    {CRYSTAL_SYSTEM_OPTIONS.map((sys) => (
+                                        <Pressable
+                                            key={sys}
+                                            onPress={() => toggleCrystalSystem(sys)}
+                                            style={[
+                                                styles.checkboxRow,
+                                                crystalSystems.includes(sys) && styles.checkboxRowSelected
+                                            ]}
+                                        >
+                                            <View style={[
+                                                styles.checkbox,
+                                                crystalSystems.includes(sys) && styles.checkboxChecked
+                                            ]}>
+                                                {crystalSystems.includes(sys) && <View style={styles.checkboxDot} />}
+                                            </View>
+                                            <Text style={{ marginLeft: 8 }}>{sys}</Text>
                                         </Pressable>
                                     ))}
                                 </View>
