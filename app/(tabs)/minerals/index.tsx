@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Link } from 'expo-router';
+import { Filter } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Image, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -148,7 +149,7 @@ export default function HomeScreen() {
                         <ThemedText>Minerals</ThemedText>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <TextInput
-                                style={[styles.searchBar, { flex: 1 }]}
+                                style={[styles.searchBar, { flex: 1, fontFamily: 'WorkSans_400Regular' }]}
                                 placeholder="Search minerals..."
                                 value={search}
                                 onChangeText={setSearch}
@@ -156,10 +157,13 @@ export default function HomeScreen() {
                                 autoCorrect={false}
                                 clearButtonMode="while-editing"
                             />
-                            <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.filterButton}>
-                                <Text style={{ fontSize: 16 }}>More Filters</Text>
-                            </TouchableOpacity>
                         </View>
+                        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.filterButton}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                                <Filter size={20} style={{ marginRight: 6 }} />
+                                <ThemedText>Filter</ThemedText>
+                            </View>
+                        </TouchableOpacity>
                         <Modal
                             visible={modalVisible}
                             animationType="slide"
@@ -312,7 +316,6 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         padding: 16,
-        gap: 16,
         overflow: 'hidden',
     },
     searchBar: {
@@ -346,11 +349,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#e0e0e0',
     },
     filterButton: {
-        marginLeft: 8,
+        marginTop: 8,
+        marginLeft: 0,
         paddingVertical: 8,
         paddingHorizontal: 12,
-        backgroundColor: '#e0e0e0',
         borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+        backgroundColor: 'transparent',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     modalOverlay: {
         flex: 1,
