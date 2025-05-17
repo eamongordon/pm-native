@@ -3,7 +3,7 @@ import { ThemedText } from '@/components/ThemedText';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, FlatList, Image, Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Button, FlatList, Image, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const LUSTER_OPTIONS = [
     'Silky', 'Vitreous', 'Waxy', 'Submetallic', 'Metallic',
@@ -71,8 +71,14 @@ export default function HomeScreen() {
             .join('&');
         if (query) url += `&${query}`;
 
+        // Only use proxy in web
+        const finalUrl =
+            Platform.OS === 'web'
+                ? `https://corsproxy.io/?url=${encodeURIComponent(url)}`
+                : url;
+
         try {
-            const res = await fetch(url, { signal });
+            const res = await fetch(finalUrl, { signal });
             const data = await res.json();
             if (append) {
                 setMinerals((prev) => [...prev, ...((data.results as any[]) || [])]);
