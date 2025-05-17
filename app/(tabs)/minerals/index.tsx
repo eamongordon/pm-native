@@ -1,9 +1,14 @@
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
-import MultiSlider from '@ptomasroos/react-native-multi-slider'; // <-- add this import
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Button, FlatList, Image, Modal, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+const LUSTER_OPTIONS = [
+    'Silky', 'Vitreous', 'Waxy', 'Submetallic', 'Metallic',
+    'Resinous', 'Pearly', 'Greasy', 'Dull', 'Adamantine'
+];
 
 export default function HomeScreen() {
     const [minerals, setMinerals] = useState<any[]>([]);
@@ -11,8 +16,9 @@ export default function HomeScreen() {
     const [search, setSearch] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [hardnessRange, setHardnessRange] = useState<[number, number]>([1, 10]);
+    const [lusters, setLusters] = useState<string[]>([]);
 
-    const fetchMinerals = async (nameFilter: string = '', hardness: [number, number] = [1, 10]) => {
+    const fetchMinerals = async (nameFilter: string = '', hardness: [number, number] = [1, 10], lustersArr: string[] = []) => {
         setLoading(true);
         let url = 'https://corsproxy.io/?url=https://www.prospectorminerals.com/api/minerals';
         let filterObj: any = {};
@@ -20,6 +26,9 @@ export default function HomeScreen() {
         if (hardness && (hardness[0] !== 1 || hardness[1] !== 10)) {
             filterObj.minHardness = hardness[0];
             filterObj.maxHardness = hardness[1];
+        }
+        if (lustersArr.length > 0) {
+            filterObj.lusters = lustersArr;
         }
         if (Object.keys(filterObj).length > 0) {
             const filter = encodeURIComponent(JSON.stringify(filterObj));
@@ -42,10 +51,19 @@ export default function HomeScreen() {
     useEffect(() => {
         // Debounce search input
         const timeout = setTimeout(() => {
-            fetchMinerals(search, hardnessRange);
+            fetchMinerals(search, hardnessRange, lusters);
         }, 300);
         return () => clearTimeout(timeout);
-    }, [search, hardnessRange]);
+    }, [search, hardnessRange, lusters]);
+
+    // Checkbox toggle handler
+    const toggleLuster = (luster: string) => {
+        setLusters((prev) =>
+            prev.includes(luster)
+                ? prev.filter((l) => l !== luster)
+                : [...prev, luster]
+        );
+    };
 
     return (
         <ParallaxScrollView
@@ -92,6 +110,30 @@ export default function HomeScreen() {
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
                                     <Text>Min: {hardnessRange[0]}</Text>
                                     <Text>Max: {hardnessRange[1]}</Text>
+                                </View>
+                            </View>
+                            {/* Luster Checkboxes */}
+                            <View style={{ marginTop: 24 }}>
+                                <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Lusters</Text>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    {LUSTER_OPTIONS.map((luster) => (
+                                        <Pressable
+                                            key={luster}
+                                            onPress={() => toggleLuster(luster)}
+                                            style={[
+                                                styles.checkboxRow,
+                                                lusters.includes(luster) && styles.checkboxRowSelected
+                                            ]}
+                                        >
+                                            <View style={[
+                                                styles.checkbox,
+                                                lusters.includes(luster) && styles.checkboxChecked
+                                            ]}>
+                                                {lusters.includes(luster) && <View style={styles.checkboxDot} />}
+                                            </View>
+                                            <Text style={{ marginLeft: 8 }}>{luster}</Text>
+                                        </Pressable>
+                                    ))}
                                 </View>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>
@@ -197,5 +239,41 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 8,
         marginTop: 16,
+    },
+    checkboxRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 16,
+        marginBottom: 8,
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+        backgroundColor: '#fff',
+    },
+    checkboxRowSelected: {
+        backgroundColor: '#e0f7fa',
+        borderColor: '#26c6da',
+    },
+    checkbox: {
+        width: 20,
+        height: 20,
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: '#aaa',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fff',
+    },
+    checkboxChecked: {
+        borderColor: '#26c6da',
+        backgroundColor: '#b2ebf2',
+    },
+    checkboxDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 2,
+        backgroundColor: '#26c6da',
     },
 });
