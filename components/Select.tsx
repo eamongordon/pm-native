@@ -1,4 +1,4 @@
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { Colors } from '@/constants/Colors';
 import { ArrowUpDown } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
@@ -6,7 +6,8 @@ import {
     Modal,
     StyleSheet,
     TouchableOpacity,
-    View
+    View,
+    useColorScheme
 } from 'react-native';
 import { ThemedIcon } from './ThemedIcon';
 import { ThemedText } from './ThemedText';
@@ -36,7 +37,7 @@ const Select: React.FC<SelectProps> = ({
     const [dropdownWidth, setDropdownWidth] = useState(0);
     const selectBoxRef = useRef<View>(null);
 
-    const theme = useThemeColor({}, "border");
+    const colorScheme = useColorScheme() ?? 'light';
 
     const openDropdown = () => {
         if (selectBoxRef.current) {
@@ -58,7 +59,7 @@ const Select: React.FC<SelectProps> = ({
         <View>
             <View ref={selectBoxRef}>
                 <TouchableOpacity
-                    style={[styles.selectBox, { borderColor: theme }]}
+                    style={[styles.selectBox, colorScheme === 'light' ? styles.selectBoxLight : styles.selectBoxDark]}
                     onPress={openDropdown}
                     activeOpacity={0.8}
                 >
@@ -88,6 +89,7 @@ const Select: React.FC<SelectProps> = ({
                     <ThemedView
                         style={[
                             styles.dropdownMenu,
+                            colorScheme === 'light' ? styles.dropdownMenuLight : styles.dropdownMenuDark,
                             {
                                 position: 'absolute',
                                 top: dropdownTop,
@@ -108,7 +110,7 @@ const Select: React.FC<SelectProps> = ({
                                         setModalVisible(false);
                                     }}
                                 >
-                                    <ThemedText>{item.label}</ThemedText>
+                                    <ThemedText style={styles.optionText}>{item.label}</ThemedText>
                                 </TouchableOpacity>
                             )}
                         />
@@ -127,12 +129,17 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#e0e0e0',
         backgroundColor: 'transparent',
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
         height: 40,
+    },
+    selectBoxLight: {
+        borderColor: Colors.light.border,
+    },
+    selectBoxDark: {
+        borderColor: Colors.dark.border,
     },
     modalOverlay: {
         flex: 1,
@@ -146,14 +153,23 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
         borderWidth: 1,
-        borderColor: '#eee',
         zIndex: 1000,
+        paddingVertical: 4,
+    },
+    dropdownMenuLight: {
+        borderColor: Colors.light.border,
+        backgroundColor: Colors.light.background,
+    },
+    dropdownMenuDark: {
+        backgroundColor: Colors.dark.inputBackground,
     },
     option: {
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        paddingHorizontal: 16,
+        paddingVertical: 4,
     },
+    optionText: {
+        fontSize: 14
+    }
 });
 
 export default Select;

@@ -176,7 +176,7 @@ export default function HomeScreen() {
             <ThemedView style={styles.container}>
                 <SafeAreaView style={styles.safeArea}>
                     <View style={styles.content}>
-                        <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: '#e0e0e0', display: 'flex', gap: 8 }}>
+                        <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: colorScheme === "light" ? Colors.light.border : Colors.dark.border, display: 'flex', gap: 8 }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <TextInput
                                     style={[
@@ -354,7 +354,7 @@ export default function HomeScreen() {
                                             </View>
                                         </Link>
                                     )}
-                                    ItemSeparatorComponent={() => <View style={styles.divider} />}
+                                    ItemSeparatorComponent={() => <View style={[styles.divider, colorScheme === "light" ? styles.dividerLight : styles.dividerDark]} />}
                                     onEndReached={handleEndReached}
                                     ListFooterComponent={
                                         isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
@@ -415,7 +415,12 @@ const styles = StyleSheet.create({
     },
     divider: {
         height: 1,
-        backgroundColor: '#e0e0e0',
+    },
+    dividerLight: {
+        backgroundColor: Colors.light.border,
+    },
+    dividerDark: {
+        backgroundColor: Colors.dark.border,
     },
     filterButton: {
         marginTop: 0,
