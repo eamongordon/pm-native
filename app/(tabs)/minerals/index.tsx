@@ -3,7 +3,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Link } from 'expo-router';
-import { Filter } from 'lucide-react-native';
+import { SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Button, FlatList, Image, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -173,41 +173,46 @@ export default function HomeScreen() {
             <ThemedView style={styles.container}>
                 <SafeAreaView style={styles.safeArea}>
                     <View style={styles.content}>
-                        <ThemedText>Minerals</ThemedText>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <TextInput
-                                style={[styles.searchBar, { flex: 1, fontFamily: 'WorkSans_400Regular' }]}
-                                placeholder="Search minerals..."
-                                value={search}
-                                onChangeText={setSearch}
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                                clearButtonMode="while-editing"
-                            />
-                        </View>
-                        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.filterButton}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                                <Filter size={20} style={{ marginRight: 6 }} />
-                                <ThemedText>Filter</ThemedText>
+                        <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: '#e0e0e0', display: 'flex', gap: 8 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <TextInput
+                                    style={[styles.searchBar, { flex: 1, fontFamily: 'WorkSans_400Regular' }]}
+                                    placeholder="Search minerals..."
+                                    value={search}
+                                    onChangeText={setSearch}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    clearButtonMode="while-editing"
+                                />
                             </View>
-                        </TouchableOpacity>
-                        {/* Sort Dropdown using Select */}
-                        <View style={styles.sortDropdownContainer}>
-                            <Select
-                                options={SORT_OPTIONS}
-                                selectedValue={
-                                    !sort || sort.property === 'default'
-                                        ? 'default'
-                                        : sort.property === 'name' && sort.sort === 'asc'
-                                        ? 'name-asc'
-                                        : sort.property === 'name' && sort.sort === 'desc'
-                                        ? 'name-desc'
-                                        : 'default'
-                                }
-                                onValueChange={handleSortChange}
-                                placeholder="Sort"
-                            />
+                            {/* Filter and Sort below search bar */}
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                <TouchableOpacity
+                                    onPress={() => setModalVisible(true)}
+                                    style={styles.filterButton}
+                                >
+                                    <SlidersHorizontal size={18} style={{ marginRight: 6 }} />
+                                    <ThemedText style={{ fontSize: 14 }}>Filter</ThemedText>
+                                </TouchableOpacity>
+                                <View style={styles.sortDropdownContainer}>
+                                    <Select
+                                        options={SORT_OPTIONS}
+                                        selectedValue={
+                                            !sort || sort.property === 'default'
+                                                ? 'default'
+                                                : sort.property === 'name' && sort.sort === 'asc'
+                                                    ? 'name-asc'
+                                                    : sort.property === 'name' && sort.sort === 'desc'
+                                                        ? 'name-desc'
+                                                        : 'default'
+                                        }
+                                        onValueChange={handleSortChange}
+                                        placeholder="Sort"
+                                    />
+                                </View>
+                            </View>
                         </View>
+                        {/* Modal for filters */}
                         <Modal
                             visible={modalVisible}
                             animationType="slide"
@@ -315,34 +320,36 @@ export default function HomeScreen() {
                                 </View>
                             </View>
                         </Modal>
-                        {loading && minerals.length === 0 ? (
-                            <ActivityIndicator />
-                        ) : minerals.length === 0 ? (
-                            <ThemedText>No minerals found</ThemedText>
-                        ) : (
-                            <FlatList
-                                data={minerals}
-                                keyExtractor={(item) => item.id}
-                                style={{ alignSelf: 'stretch', flex: 1 }}
-                                contentContainerStyle={{ paddingBottom: 16 }}
-                                renderItem={({ item }) => (
-                                    <Link href={`/minerals/${item.id}`} asChild>
-                                        <View style={styles.itemRow}>
-                                            <Image
-                                                source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
-                                                style={styles.itemImage}
-                                            />
-                                            <ThemedText style={styles.itemName}>{item.name}</ThemedText>
-                                        </View>
-                                    </Link>
-                                )}
-                                ItemSeparatorComponent={() => <View style={styles.divider} />}
-                                onEndReached={handleEndReached}
-                                ListFooterComponent={
-                                    isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
-                                }
-                            />
-                        )}
+                        <View style={{ flex: 1, paddingHorizontal: 16 }}>
+                            {loading && minerals.length === 0 ? (
+                                <ActivityIndicator />
+                            ) : minerals.length === 0 ? (
+                                <ThemedText>No minerals found</ThemedText>
+                            ) : (
+                                <FlatList
+                                    data={minerals}
+                                    keyExtractor={(item) => item.id}
+                                    style={{ alignSelf: 'stretch', flex: 1 }}
+                                    contentContainerStyle={{ paddingBottom: 16 }}
+                                    renderItem={({ item }) => (
+                                        <Link href={`/minerals/${item.id}`} asChild>
+                                            <View style={styles.itemRow}>
+                                                <Image
+                                                    source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
+                                                    style={styles.itemImage}
+                                                />
+                                                <ThemedText style={styles.itemName}>{item.name}</ThemedText>
+                                            </View>
+                                        </Link>
+                                    )}
+                                    ItemSeparatorComponent={() => <View style={styles.divider} />}
+                                    onEndReached={handleEndReached}
+                                    ListFooterComponent={
+                                        isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
+                                    }
+                                />
+                            )}
+                        </View>
                     </View>
                 </SafeAreaView>
             </ThemedView>
@@ -359,7 +366,6 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        padding: 16,
         overflow: 'hidden',
     },
     searchBar: {
@@ -393,7 +399,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#e0e0e0',
     },
     filterButton: {
-        marginTop: 8,
+        marginTop: 0,
         marginLeft: 0,
         paddingVertical: 8,
         paddingHorizontal: 12,
@@ -403,19 +409,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
         alignItems: 'center',
         justifyContent: 'center',
+        flexDirection: 'row',
+        height: 40,
     },
     sortDropdownContainer: {
-        marginTop: 8,
-        marginBottom: 8,
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        borderRadius: 8,
         overflow: 'hidden',
-    },
-    sortDropdown: {
-        height: 40,
-        width: '100%',
-        backgroundColor: '#fff',
     },
     modalOverlay: {
         flex: 1,
