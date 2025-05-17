@@ -344,7 +344,7 @@ export default function HomeScreen() {
                                     style={{ alignSelf: 'stretch', flex: 1 }}
                                     contentContainerStyle={{ paddingBottom: 16 }}
                                     renderItem={({ item }) => (
-                                        <Link href={`/minerals/${item.id}`} asChild>
+                                        <Link href={`/minerals/${item.id}`}>
                                             <View style={styles.itemRow}>
                                                 <Image
                                                     source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
