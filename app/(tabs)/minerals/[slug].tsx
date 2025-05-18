@@ -18,8 +18,8 @@ export default function DetailsScreen() {
         if (!slug) return;
         setLoading(true);
 
-        let url = `https://www.prospectorminerals.com/api/minerals?slug=${encodeURIComponent(
-            slug as string
+        let url = `https://www.prospectorminerals.com/api/minerals?filter=${encodeURIComponent(
+            JSON.stringify({ slug })
         )}&fieldset=full&limit=1`;
 
         // Use proxy for web
