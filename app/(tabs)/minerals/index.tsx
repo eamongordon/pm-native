@@ -209,9 +209,7 @@ export default function HomeScreen() {
                                             style={{ marginRight: 8, opacity: 0.7 }}
                                         />
                                         <TextInput
-                                            style={[
-                                                { flex: 1, fontFamily: 'WorkSans_400Regular', height: 40 },
-                                            ]}
+                                            style={[styles.searchBarInput, colorScheme === 'light' ? styles.searchBarInputLight : styles.searchBarInputDark]}
                                             placeholder="Search minerals..."
                                             placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
                                             value={search}
@@ -491,6 +489,17 @@ const styles = StyleSheet.create({
     },
     searchBarDark: {
         backgroundColor: Colors.dark.inputBackground,
+        color: Colors.dark.inputText,
+    },
+    searchBarInput: {
+        flex: 1,
+        fontFamily: 'WorkSans_400Regular',
+        height: 40,
+    },
+    searchBarInputLight: {
+        color: Colors.light.inputText,
+    },
+    searchBarInputDark: {
         color: Colors.dark.inputText,
     },
     itemRow: {
