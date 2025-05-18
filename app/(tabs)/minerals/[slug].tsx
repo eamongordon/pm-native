@@ -1,58 +1,200 @@
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
-import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import PagerView from 'react-native-pager-view';
-
-const images = [
-    // Replace these URLs with your own images
-    'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/459a90da-a3bf-4620-a324-ffddb2bba39f-nElxfP7Hr4OpAdvxC2moNoHVmpOMeL.jpg',
-    'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/965e7025-1ebd-469d-8793-cfae54c77d9e-FpEbGma6MpXAnt295UKzSUPnkoYEeZ.jpeg',
-    'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/220f2624-dcf4-46f0-b6ca-fa68f14c94c4-8Q78nYgLyTmjZmthfhrE4GoNIh3B52.jpeg',
-];
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
 export default function DetailsScreen() {
     const { slug } = useLocalSearchParams();
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [mineral, setMineral] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!slug) return;
+        setLoading(true);
+        setError(null);
+
+        let url = `https://www.prospectorminerals.com/api/minerals?slug=${encodeURIComponent(
+            slug as string
+        )}&fieldset=full&limit=1`;
+
+        // Use proxy for web
+        if (Platform.OS === 'web') {
+            url = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+        }
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.results && data.results.length > 0) {
+                    setMineral(data.results[0]);
+                } else {
+                    setMineral(null);
+                    setError('Mineral not found');
+                }
+            })
+            .catch(() => setError('Failed to load mineral'))
+            .finally(() => setLoading(false));
+    }, [slug]);
+
+    // Use mineral photos if available, fallback to static images
+    const images =
+        mineral?.photos?.length > 0
+            ? mineral.photos.map((p: any) => p.photo?.image).filter(Boolean)
+            : [
+                'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/459a90da-a3bf-4620-a324-ffddb2bba39f-nElxfP7Hr4OpAdvxC2moNoHVmpOMeL.jpg',
+                'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/965e7025-1ebd-469d-8793-cfae54c77d9e-FpEbGma6MpXAnt295UKzSUPnkoYEeZ.jpeg',
+                'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/220f2624-dcf4-46f0-b6ca-fa68f14c94c4-8Q78nYgLyTmjZmthfhrE4GoNIh3B52.jpeg',
+            ];
 
     return (
-        <View style={styles.container}>
-            <Text>Details of user {slug} </Text>
-            <PagerView
-                style={styles.gallery}
-                initialPage={0}
-                onPageSelected={e => setCurrentIndex(e.nativeEvent.position)}
-            >
-                {images.map((uri, idx) => (
-                    <View key={idx}>
-                        <Image source={{ uri }} style={styles.image} />
-                    </View>
-                ))}
-            </PagerView>
-            <View style={styles.indicatorContainer}>
-                {images.map((_, idx) => (
-                    <View
-                        key={idx}
-                        style={[
-                            styles.indicator,
-                            idx === currentIndex && styles.activeIndicator,
-                        ]}
-                    />
-                ))}
-            </View>
-        </View>
+        <ThemedView style={styles.container}>
+            <SafeAreaProvider>
+                <SafeAreaView style={styles.safeArea}>
+                    {loading ? (
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <ActivityIndicator />
+                        </View>
+                    ) : error ? (
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <ThemedText>{error}</ThemedText>
+                        </View>
+                    ) : (
+                        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                            <PagerView
+                                style={styles.gallery}
+                                initialPage={0}
+                                onPageSelected={e => setCurrentIndex(e.nativeEvent.position)}
+                            >
+                                {images.map((uri: string, idx: number) => (
+                                    <View key={idx}>
+                                        <Image source={{ uri }} style={styles.image} />
+                                    </View>
+                                ))}
+                            </PagerView>
+                            <View style={styles.indicatorContainer}>
+                                {images.map((_: string, idx: number) => (
+                                    <View
+                                        key={idx}
+                                        style={[
+                                            styles.indicator,
+                                            idx === currentIndex && styles.activeIndicator,
+                                        ]}
+                                    />
+                                ))}
+                            </View>
+                            <ThemedView style={styles.mainSection}>
+                                <ThemedText type="title">
+                                    {mineral?.name || 'Mineral Details'}
+                                </ThemedText>
+                                <ThemedText style={styles.section}>
+                                    {mineral?.description || `Details of user ${slug}`}
+                                </ThemedText>
+                                {mineral?.uses && (
+                                    <View style={styles.section}>
+                                        <ThemedText type="subtitle">Uses</ThemedText>
+                                        <ThemedText>
+                                            {mineral?.uses || `Details of user ${slug}`}
+                                        </ThemedText>
+                                    </View>
+                                )}
+                                {mineral.localities_description && (
+                                    <View style={styles.section}>
+                                        <ThemedText type="subtitle">Notable Localities</ThemedText>
+                                        <ThemedText>
+                                            {mineral?.localities_description || `Details of user ${slug}`}
+                                        </ThemedText>
+                                    </View>
+                                )}
+                                {/* Properties Section */}
+                                {(mineral?.chemical_formula ||
+                                    mineral?.hardness_min ||
+                                    mineral?.hardness_max ||
+                                    mineral?.crystal_system ||
+                                    mineral?.mineral_class ||
+                                    mineral?.luster) && (
+                                        <View style={styles.section}>
+                                            <ThemedText type="subtitle">Properties</ThemedText>
+                                            <View style={styles.propertiesTable}>
+                                                {mineral?.chemical_formula && (
+                                                    <View style={styles.propertyRow}>
+                                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                                            Chemical Formula
+                                                        </ThemedText>
+                                                        <ThemedText style={styles.propertyValue}>
+                                                            {mineral.chemical_formula}
+                                                        </ThemedText>
+                                                    </View>
+                                                )}
+                                                {(mineral?.hardness_min || mineral?.hardness_max) && (
+                                                    <View style={styles.propertyRow}>
+                                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                                            Hardness
+                                                        </ThemedText>
+                                                        <ThemedText style={styles.propertyValue}>
+                                                            {mineral?.hardness_min}
+                                                            {mineral?.hardness_max && mineral?.hardness_min !== mineral?.hardness_max
+                                                                ? ` - ${mineral.hardness_max}`
+                                                                : ''}
+                                                        </ThemedText>
+                                                    </View>
+                                                )}
+                                                {mineral?.crystal_system && (
+                                                    <View style={styles.propertyRow}>
+                                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                                            Crystal System
+                                                        </ThemedText>
+                                                        <ThemedText style={styles.propertyValue}>
+                                                            {mineral.crystal_system}
+                                                        </ThemedText>
+                                                    </View>
+                                                )}
+                                                {mineral?.mineral_class && (
+                                                    <View style={styles.propertyRow}>
+                                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                                            Mineral Class
+                                                        </ThemedText>
+                                                        <ThemedText style={styles.propertyValue}>
+                                                            {mineral.mineral_class}
+                                                        </ThemedText>
+                                                    </View>
+                                                )}
+                                                {mineral?.luster && (
+                                                    <View style={styles.propertyRow}>
+                                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                                            Luster
+                                                        </ThemedText>
+                                                        <ThemedText style={styles.propertyValue}>
+                                                            {mineral.luster}
+                                                        </ThemedText>
+                                                    </View>
+                                                )}
+                                            </View>
+                                        </View>
+                                    )}
+                            </ThemedView>
+                        </ScrollView>
+                    )}
+                </SafeAreaView>
+            </SafeAreaProvider>
+        </ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+    },
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     gallery: {
-        marginTop: 20,
         width: width,
         height: 250,
     },
@@ -76,5 +218,33 @@ const styles = StyleSheet.create({
     },
     activeIndicator: {
         backgroundColor: '#333',
+    },
+    mainSection: {
+        padding: 16,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+    },
+    section: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+    },
+    propertiesTable: {
+        marginTop: 4,
+        marginBottom: 4,
+    },
+    propertyRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: 4,
+    },
+    propertyLabel: {
+        minWidth: 130,
+        marginRight: 60,
+    },
+    propertyValue: {
+        flex: 1,
+        flexWrap: 'wrap',
     },
 });
