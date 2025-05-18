@@ -1,3 +1,4 @@
+import { CheckboxGroup } from '@/components/CheckboxGroup';
 import { Collapsible } from '@/components/Collapsible';
 import Select from '@/components/Select';
 import { ThemedText } from '@/components/ThemedText';
@@ -6,9 +7,9 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Link } from 'expo-router';
-import { Check, CheckSquare, SlidersHorizontal } from 'lucide-react-native';
+import { SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, FlatList, Image, Modal, Platform, Pressable, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Button, FlatList, Image, Modal, Platform, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
 
@@ -258,102 +259,31 @@ export default function HomeScreen() {
                                     {/* Luster Checkboxes */}
                                     <Collapsible title="Lusters">
                                         <View style={{ marginTop: 8 }}>
-                                            <ThemedText style={{ fontWeight: 'bold', marginBottom: 8 }}>Lusters</ThemedText>
-                                            <View style={{ flexDirection: 'column' }}>
-                                                {LUSTER_OPTIONS.map((luster) => (
-                                                    <Pressable
-                                                        key={luster}
-                                                        onPress={() => toggleLuster(luster)}
-                                                        style={[
-                                                            styles.checkboxRow,
-                                                        ]}
-                                                    >
-                                                        <View
-                                                            style={[
-                                                                styles.customCheckbox,
-                                                                lusters.includes(luster) && styles.customCheckboxChecked,
-                                                            ]}
-                                                        >
-                                                            {lusters.includes(luster) && (
-                                                                <ThemedIcon
-                                                                    Icon={Check}
-                                                                    size={18}
-                                                                    color="#fff"
-                                                                    style={styles.checkmarkIcon}
-                                                                />
-                                                            )}
-                                                        </View>
-                                                        <ThemedText style={{ marginLeft: 8 }}>{luster}</ThemedText>
-                                                    </Pressable>
-                                                ))}
-                                            </View>
+                                            <CheckboxGroup
+                                                options={LUSTER_OPTIONS}
+                                                selected={lusters}
+                                                onToggle={toggleLuster}
+                                            />
                                         </View>
                                     </Collapsible>
                                     {/* Mineral Class Checkboxes */}
                                     <Collapsible title="Mineral Class">
                                         <View style={{ marginTop: 8 }}>
-                                            <ThemedText style={{ fontWeight: 'bold', marginBottom: 8 }}>Mineral Class</ThemedText>
-                                            <View style={{ flexDirection: 'column' }}>
-                                                {MINERAL_CLASS_OPTIONS.map((cls) => (
-                                                    <Pressable
-                                                        key={cls}
-                                                        onPress={() => toggleMineralClass(cls)}
-                                                        style={[
-                                                            styles.checkboxRow,
-                                                        ]}
-                                                    >
-                                                        <View
-                                                            style={[
-                                                                styles.customCheckbox,
-                                                                mineralClass.includes(cls) && styles.customCheckboxChecked,
-                                                            ]}
-                                                        >
-                                                            {mineralClass.includes(cls) && (
-                                                                <ThemedIcon
-                                                                    Icon={CheckSquare}
-                                                                    size={18}
-                                                                    color="#fff"
-                                                                    style={styles.checkmarkIcon}
-                                                                />
-                                                            )}
-                                                        </View>
-                                                        <ThemedText style={{ marginLeft: 8 }}>{cls}</ThemedText>
-                                                    </Pressable>
-                                                ))}
-                                            </View>
+                                            <CheckboxGroup
+                                                options={MINERAL_CLASS_OPTIONS}
+                                                selected={mineralClass}
+                                                onToggle={toggleMineralClass}
+                                            />
                                         </View>
                                     </Collapsible>
                                     {/* Crystal Systems Checkboxes */}
                                     <Collapsible title="Crystal Systems">
                                         <View style={{ marginTop: 8 }}>
-                                            <View style={{ flexDirection: 'column' }}>
-                                                {CRYSTAL_SYSTEM_OPTIONS.map((sys) => (
-                                                    <Pressable
-                                                        key={sys}
-                                                        onPress={() => toggleCrystalSystem(sys)}
-                                                        style={[
-                                                            styles.checkboxRow,
-                                                        ]}
-                                                    >
-                                                        <View
-                                                            style={[
-                                                                styles.customCheckbox,
-                                                                colorScheme === 'light' ? styles.customCheckboxLight : styles.customCheckboxDark,
-                                                                crystalSystems.includes(sys) && (colorScheme === 'light' ? styles.customCheckboxCheckedLight : styles.customCheckboxCheckedDark),
-                                                            ]}
-                                                        >
-                                                            {crystalSystems.includes(sys) && (
-                                                                <ThemedIcon
-                                                                    Icon={Check}
-                                                                    size={18}
-                                                                    style={styles.checkmarkIcon}
-                                                                />
-                                                            )}
-                                                        </View>
-                                                        <ThemedText style={{ marginLeft: 8 }}>{sys}</ThemedText>
-                                                    </Pressable>
-                                                ))}
-                                            </View>
+                                            <CheckboxGroup
+                                                options={CRYSTAL_SYSTEM_OPTIONS}
+                                                selected={crystalSystems}
+                                                onToggle={toggleCrystalSystem}
+                                            />
                                         </View>
                                     </Collapsible>
                                     <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>
@@ -505,52 +435,5 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 8,
         marginTop: 16,
-    },
-    checkboxRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: 16,
-        marginBottom: 8,
-        paddingVertical: 4,
-        paddingHorizontal: 8,
-    },
-    customCheckbox: {
-        width: 22,
-        height: 22,
-        borderRadius: 4,
-        borderWidth: 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    customCheckboxLight: {
-        borderColor: Colors.light.border,
-    },
-    customCheckboxDark: {
-        borderColor: Colors.dark.border,
-    },
-    customCheckboxChecked: {
-        borderWidth: 0
-    },
-    customCheckboxCheckedLight: {
-        borderColor: Colors.light.inputBackground,
-        backgroundColor: Colors.light.inputBackground,
-    },
-    customCheckboxCheckedDark: {
-        borderColor: Colors.dark.inputBackground,
-        backgroundColor: Colors.dark.inputBackground,
-    },
-    checkmarkIcon: {
-        position: 'absolute',
-        top: 1,
-        left: 1,
-    },
-    sortMenuTrigger: {
-        height: 40,
-        borderColor: '#e0e0e0',
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        backgroundColor: '#fff',
-        justifyContent: 'center',
     },
 });
