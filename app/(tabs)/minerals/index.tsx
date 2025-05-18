@@ -199,34 +199,38 @@ export default function HomeScreen() {
                 <SafeAreaView style={styles.safeArea}>
                     <View style={styles.content}>
                         <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: colorScheme === "light" ? Colors.light.border : Colors.dark.border, display: 'flex', gap: 8 }}>
-                            <View style={[{ flexDirection: 'row', alignItems: 'center', flex: 1 }, styles.searchBar, colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark]}>
-                                {/* Magnifying Glass Icon */}
-                                <ThemedIcon
-                                    Icon={Search}
-                                    size={20}
-                                    style={{ marginRight: 8, opacity: 0.7 }}
-                                />
-                                <TextInput
-                                    style={[
-                                        { flex: 1, fontFamily: 'WorkSans_400Regular', height: 40 },
-                                    ]}
-                                    placeholder="Search minerals..."
-                                    placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
-                                    value={search}
-                                    onChangeText={setSearch}
-                                    autoCapitalize="none"
-                                    autoCorrect={false}
-                                    clearButtonMode="while-editing"
-                                />
-                                <TouchableOpacity onPress={handlePickImage}>
-                                    <ThemedIcon
-                                        Icon={Camera}
-                                        size={20}
-                                        style={{ marginRight: 8 }}
-                                        lightColor={Colors.light.text}
-                                        darkColor={Colors.dark.text}
-                                    />
-                                </TouchableOpacity>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <View style={{ flex: 1 }}>
+                                    <View style={[styles.searchBar, colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark]}>
+                                        {/* Magnifying Glass Icon */}
+                                        <ThemedIcon
+                                            Icon={Search}
+                                            size={20}
+                                            style={{ marginRight: 8, opacity: 0.7 }}
+                                        />
+                                        <TextInput
+                                            style={[
+                                                { flex: 1, fontFamily: 'WorkSans_400Regular', height: 40 },
+                                            ]}
+                                            placeholder="Search minerals..."
+                                            placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
+                                            value={search}
+                                            onChangeText={setSearch}
+                                            autoCapitalize="none"
+                                            autoCorrect={false}
+                                            clearButtonMode="while-editing"
+                                        />
+                                        <TouchableOpacity onPress={handlePickImage}>
+                                            <ThemedIcon
+                                                Icon={Camera}
+                                                size={20}
+                                                style={{ marginRight: 8 }}
+                                                lightColor={Colors.light.text}
+                                                darkColor={Colors.dark.text}
+                                            />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
                             </View>
                             {/* Filter and Sort below search bar */}
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -478,7 +482,8 @@ const styles = StyleSheet.create({
         borderColor: '#e0e0e0',
         borderRadius: 8,
         paddingHorizontal: 12,
-        backgroundColor: '#fff',
+        flexDirection: 'row', 
+        alignItems: 'center', 
     },
     searchBarLight: {
         backgroundColor: Colors.light.inputBackground,
