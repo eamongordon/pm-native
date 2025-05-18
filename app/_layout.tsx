@@ -1,4 +1,4 @@
-import { useFonts, WorkSans_400Regular, WorkSans_700Bold } from '@expo-google-fonts/work-sans';
+import { useFonts, WorkSans_400Regular, WorkSans_600SemiBold } from '@expo-google-fonts/work-sans';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -10,7 +10,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [fontsLoaded] = useFonts({
     WorkSans_400Regular,
-    WorkSans_700Bold,
+    WorkSans_600SemiBold,
   });
 
   if (!fontsLoaded) {
