@@ -275,10 +275,7 @@ export default function HomeScreen() {
                                             style={styles.modalHeaderButton}
                                             accessibilityLabel="Reset"
                                         >
-                                            <ThemedText style={[
-                                                styles.modalHeaderReset,
-                                                { color: '#26c6da' }
-                                            ]}>Reset</ThemedText>
+                                            <ThemedText type="defaultSemiBold">Reset</ThemedText>
                                         </TouchableOpacity>
                                     </View>
                                     {/* Scrollable Content */}
@@ -298,9 +295,23 @@ export default function HomeScreen() {
                                         }}
                                     >
                                         {/* Hardness Range Slider */}
-                                        <Collapsible title="Hardness Range">
-                                            <View style={{ marginTop: 8 }}>
-                                                <ThemedText style={{ fontWeight: 'bold', marginBottom: 8 }}>Hardness Range</ThemedText>
+                                        <Collapsible title="Hardness">
+                                            <View
+                                                style={{
+                                                    marginTop: 8
+                                                }}
+                                            >
+                                                <ThemedText
+                                                    style={{
+                                                        fontWeight: 'bold',
+                                                        marginBottom: 8,
+                                                        color: colorScheme === 'light'
+                                                            ? Colors.light.text
+                                                            : Colors.dark.text,
+                                                    }}
+                                                >
+                                                    Hardness Range
+                                                </ThemedText>
                                                 <MultiSlider
                                                     values={hardnessRange}
                                                     min={1}
@@ -310,11 +321,28 @@ export default function HomeScreen() {
                                                     allowOverlap={false}
                                                     snapped
                                                     containerStyle={{ marginHorizontal: 10 }}
+                                                    selectedStyle={{
+                                                        backgroundColor: Colors[colorScheme].text,
+                                                    }}
+                                                    unselectedStyle={{
+                                                        backgroundColor: colorScheme === 'light'
+                                                            ? Colors.light.border
+                                                            : Colors.dark.border,
+                                                    }}
+                                                    markerStyle={{
+                                                        backgroundColor: colorScheme === 'light'
+                                                            ? Colors.light.background
+                                                            : Colors.dark.background,
+                                                        borderColor: Colors[colorScheme].text,
+                                                        borderWidth: 2,
+                                                        width: 24,
+                                                        height: 24,
+                                                        shadowColor: 'transparent',
+                                                    }}
                                                 />
-                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
-                                                    <ThemedText>Min: {hardnessRange[0]}</ThemedText>
-                                                    <ThemedText>Max: {hardnessRange[1]}</ThemedText>
-                                                </View>
+                                                <ThemedText style={{ color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }}>
+                                                    {hardnessRange[0]} - {hardnessRange[1]}
+                                                </ThemedText>
                                             </View>
                                         </Collapsible>
                                         {/* Luster Checkboxes */}
@@ -356,7 +384,7 @@ export default function HomeScreen() {
                                         <TouchableOpacity
                                             style={[
                                                 styles.showResultsButton,
-                                                { backgroundColor: '#26c6da' }
+                                                { backgroundColor: Colors[colorScheme].primary }
                                             ]}
                                             onPress={() => setModalVisible(false)}
                                         >
@@ -533,10 +561,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         textAlign: 'center',
         flex: 1,
-    },
-    modalHeaderReset: {
-        fontWeight: 'bold',
-        fontSize: 16,
     },
     modalFooter: {
         bottom: 0,
