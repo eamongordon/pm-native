@@ -7,7 +7,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Link } from 'expo-router';
-import { SlidersHorizontal } from 'lucide-react-native';
+import { Camera, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Modal, Platform, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -179,12 +179,16 @@ export default function HomeScreen() {
                 <SafeAreaView style={styles.safeArea}>
                     <View style={styles.content}>
                         <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: colorScheme === "light" ? Colors.light.border : Colors.dark.border, display: 'flex', gap: 8 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={[{ flexDirection: 'row', alignItems: 'center', flex: 1 }, styles.searchBar, colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark]}>
+                                {/* Magnifying Glass Icon */}
+                                <ThemedIcon
+                                    Icon={Search}
+                                    size={20}
+                                    style={{ marginRight: 8, opacity: 0.7 }}
+                                />
                                 <TextInput
                                     style={[
-                                        styles.searchBar,
-                                        { flex: 1, fontFamily: 'WorkSans_400Regular' },
-                                        colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark
+                                        { flex: 1, fontFamily: 'WorkSans_400Regular', height: 40 },
                                     ]}
                                     placeholder="Search minerals..."
                                     placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
@@ -193,6 +197,13 @@ export default function HomeScreen() {
                                     autoCapitalize="none"
                                     autoCorrect={false}
                                     clearButtonMode="while-editing"
+                                />
+                                <ThemedIcon
+                                    Icon={Camera}
+                                    size={20}
+                                    style={{ marginRight: 8 }}
+                                    lightColor={Colors.light.text}
+                                    darkColor={Colors.dark.text}
                                 />
                             </View>
                             {/* Filter and Sort below search bar */}
