@@ -1,3 +1,4 @@
+import { Collapsible } from '@/components/Collapsible';
 import Select from '@/components/Select';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -5,9 +6,9 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Link } from 'expo-router';
-import { SlidersHorizontal } from 'lucide-react-native';
+import { Check, CheckSquare, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, FlatList, Image, Modal, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Button, FlatList, Image, Modal, Platform, Pressable, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
 
@@ -235,95 +236,126 @@ export default function HomeScreen() {
                                 <View style={styles.modalContent}>
                                     <ThemedText style={{ fontWeight: 'bold', fontSize: 18 }}>More Filters</ThemedText>
                                     {/* Hardness Range Slider */}
-                                    <View style={{ marginTop: 24 }}>
-                                        <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Hardness Range</Text>
-                                        <MultiSlider
-                                            values={hardnessRange}
-                                            min={1}
-                                            max={10}
-                                            step={1}
-                                            onValuesChange={(values) => setHardnessRange([values[0], values[1]] as [number, number])}
-                                            allowOverlap={false}
-                                            snapped
-                                            containerStyle={{ marginHorizontal: 10 }}
-                                        />
-                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
-                                            <Text>Min: {hardnessRange[0]}</Text>
-                                            <Text>Max: {hardnessRange[1]}</Text>
+                                    <Collapsible title="Hardness Range">
+                                        <View style={{ marginTop: 8 }}>
+                                            <ThemedText style={{ fontWeight: 'bold', marginBottom: 8 }}>Hardness Range</ThemedText>
+                                            <MultiSlider
+                                                values={hardnessRange}
+                                                min={1}
+                                                max={10}
+                                                step={1}
+                                                onValuesChange={(values) => setHardnessRange([values[0], values[1]] as [number, number])}
+                                                allowOverlap={false}
+                                                snapped
+                                                containerStyle={{ marginHorizontal: 10 }}
+                                            />
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+                                                <ThemedText>Min: {hardnessRange[0]}</ThemedText>
+                                                <ThemedText>Max: {hardnessRange[1]}</ThemedText>
+                                            </View>
                                         </View>
-                                    </View>
+                                    </Collapsible>
                                     {/* Luster Checkboxes */}
-                                    <View style={{ marginTop: 24 }}>
-                                        <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Lusters</Text>
-                                        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                                            {LUSTER_OPTIONS.map((luster) => (
-                                                <Pressable
-                                                    key={luster}
-                                                    onPress={() => toggleLuster(luster)}
-                                                    style={[
-                                                        styles.checkboxRow,
-                                                        lusters.includes(luster) && styles.checkboxRowSelected
-                                                    ]}
-                                                >
-                                                    <View style={[
-                                                        styles.checkbox,
-                                                        lusters.includes(luster) && styles.checkboxChecked
-                                                    ]}>
-                                                        {lusters.includes(luster) && <View style={styles.checkboxDot} />}
-                                                    </View>
-                                                    <Text style={{ marginLeft: 8 }}>{luster}</Text>
-                                                </Pressable>
-                                            ))}
+                                    <Collapsible title="Lusters">
+                                        <View style={{ marginTop: 8 }}>
+                                            <ThemedText style={{ fontWeight: 'bold', marginBottom: 8 }}>Lusters</ThemedText>
+                                            <View style={{ flexDirection: 'column' }}>
+                                                {LUSTER_OPTIONS.map((luster) => (
+                                                    <Pressable
+                                                        key={luster}
+                                                        onPress={() => toggleLuster(luster)}
+                                                        style={[
+                                                            styles.checkboxRow,
+                                                        ]}
+                                                    >
+                                                        <View
+                                                            style={[
+                                                                styles.customCheckbox,
+                                                                lusters.includes(luster) && styles.customCheckboxChecked,
+                                                            ]}
+                                                        >
+                                                            {lusters.includes(luster) && (
+                                                                <ThemedIcon
+                                                                    Icon={Check}
+                                                                    size={18}
+                                                                    color="#fff"
+                                                                    style={styles.checkmarkIcon}
+                                                                />
+                                                            )}
+                                                        </View>
+                                                        <ThemedText style={{ marginLeft: 8 }}>{luster}</ThemedText>
+                                                    </Pressable>
+                                                ))}
+                                            </View>
                                         </View>
-                                    </View>
+                                    </Collapsible>
                                     {/* Mineral Class Checkboxes */}
-                                    <View style={{ marginTop: 24 }}>
-                                        <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Mineral Class</Text>
-                                        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                                            {MINERAL_CLASS_OPTIONS.map((cls) => (
-                                                <Pressable
-                                                    key={cls}
-                                                    onPress={() => toggleMineralClass(cls)}
-                                                    style={[
-                                                        styles.checkboxRow,
-                                                        mineralClass.includes(cls) && styles.checkboxRowSelected
-                                                    ]}
-                                                >
-                                                    <View style={[
-                                                        styles.checkbox,
-                                                        mineralClass.includes(cls) && styles.checkboxChecked
-                                                    ]}>
-                                                        {mineralClass.includes(cls) && <View style={styles.checkboxDot} />}
-                                                    </View>
-                                                    <Text style={{ marginLeft: 8 }}>{cls}</Text>
-                                                </Pressable>
-                                            ))}
+                                    <Collapsible title="Mineral Class">
+                                        <View style={{ marginTop: 8 }}>
+                                            <ThemedText style={{ fontWeight: 'bold', marginBottom: 8 }}>Mineral Class</ThemedText>
+                                            <View style={{ flexDirection: 'column' }}>
+                                                {MINERAL_CLASS_OPTIONS.map((cls) => (
+                                                    <Pressable
+                                                        key={cls}
+                                                        onPress={() => toggleMineralClass(cls)}
+                                                        style={[
+                                                            styles.checkboxRow,
+                                                        ]}
+                                                    >
+                                                        <View
+                                                            style={[
+                                                                styles.customCheckbox,
+                                                                mineralClass.includes(cls) && styles.customCheckboxChecked,
+                                                            ]}
+                                                        >
+                                                            {mineralClass.includes(cls) && (
+                                                                <ThemedIcon
+                                                                    Icon={CheckSquare}
+                                                                    size={18}
+                                                                    color="#fff"
+                                                                    style={styles.checkmarkIcon}
+                                                                />
+                                                            )}
+                                                        </View>
+                                                        <ThemedText style={{ marginLeft: 8 }}>{cls}</ThemedText>
+                                                    </Pressable>
+                                                ))}
+                                            </View>
                                         </View>
-                                    </View>
+                                    </Collapsible>
                                     {/* Crystal Systems Checkboxes */}
-                                    <View style={{ marginTop: 24 }}>
-                                        <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>Crystal Systems</Text>
-                                        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                                            {CRYSTAL_SYSTEM_OPTIONS.map((sys) => (
-                                                <Pressable
-                                                    key={sys}
-                                                    onPress={() => toggleCrystalSystem(sys)}
-                                                    style={[
-                                                        styles.checkboxRow,
-                                                        crystalSystems.includes(sys) && styles.checkboxRowSelected
-                                                    ]}
-                                                >
-                                                    <View style={[
-                                                        styles.checkbox,
-                                                        crystalSystems.includes(sys) && styles.checkboxChecked
-                                                    ]}>
-                                                        {crystalSystems.includes(sys) && <View style={styles.checkboxDot} />}
-                                                    </View>
-                                                    <Text style={{ marginLeft: 8 }}>{sys}</Text>
-                                                </Pressable>
-                                            ))}
+                                    <Collapsible title="Crystal Systems">
+                                        <View style={{ marginTop: 8 }}>
+                                            <View style={{ flexDirection: 'column' }}>
+                                                {CRYSTAL_SYSTEM_OPTIONS.map((sys) => (
+                                                    <Pressable
+                                                        key={sys}
+                                                        onPress={() => toggleCrystalSystem(sys)}
+                                                        style={[
+                                                            styles.checkboxRow,
+                                                        ]}
+                                                    >
+                                                        <View
+                                                            style={[
+                                                                styles.customCheckbox,
+                                                                colorScheme === 'light' ? styles.customCheckboxLight : styles.customCheckboxDark,
+                                                                crystalSystems.includes(sys) && (colorScheme === 'light' ? styles.customCheckboxCheckedLight : styles.customCheckboxCheckedDark),
+                                                            ]}
+                                                        >
+                                                            {crystalSystems.includes(sys) && (
+                                                                <ThemedIcon
+                                                                    Icon={Check}
+                                                                    size={18}
+                                                                    style={styles.checkmarkIcon}
+                                                                />
+                                                            )}
+                                                        </View>
+                                                        <ThemedText style={{ marginLeft: 8 }}>{sys}</ThemedText>
+                                                    </Pressable>
+                                                ))}
+                                            </View>
                                         </View>
-                                    </View>
+                                    </Collapsible>
                                     <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>
                                         <Button title="Cancel" onPress={() => setModalVisible(false)} />
                                         <View style={{ width: 8 }} />
@@ -453,7 +485,6 @@ const styles = StyleSheet.create({
     },
     modalContent: {
         width: '100%',              // changed from '80%'
-        backgroundColor: '#fff',
         borderTopLeftRadius: 16,    // changed for bottom sheet effect
         borderTopRightRadius: 16,   // changed for bottom sheet effect
         borderBottomLeftRadius: 0,
@@ -461,6 +492,12 @@ const styles = StyleSheet.create({
         padding: 24,
         alignItems: 'stretch',
         minHeight: 200,             // optional: ensures some height
+    },
+    modalContentLight: {
+        backgroundColor: Colors.light.background,
+    },
+    modalContentDark: {
+        backgroundColor: Colors.dark.background,
     },
     modalInput: {
         borderWidth: 1,
@@ -476,34 +513,36 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         paddingVertical: 4,
         paddingHorizontal: 8,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        backgroundColor: '#fff',
     },
-    checkboxRowSelected: {
-        backgroundColor: '#e0f7fa',
-        borderColor: '#26c6da',
-    },
-    checkbox: {
-        width: 20,
-        height: 20,
+    customCheckbox: {
+        width: 22,
+        height: 22,
         borderRadius: 4,
-        borderWidth: 1,
-        borderColor: '#aaa',
+        borderWidth: 2,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#fff',
     },
-    checkboxChecked: {
-        borderColor: '#26c6da',
-        backgroundColor: '#b2ebf2',
+    customCheckboxLight: {
+        borderColor: Colors.light.border,
     },
-    checkboxDot: {
-        width: 12,
-        height: 12,
-        borderRadius: 2,
-        backgroundColor: '#26c6da',
+    customCheckboxDark: {
+        borderColor: Colors.dark.border,
+    },
+    customCheckboxChecked: {
+        borderWidth: 0
+    },
+    customCheckboxCheckedLight: {
+        borderColor: Colors.light.inputBackground,
+        backgroundColor: Colors.light.inputBackground,
+    },
+    customCheckboxCheckedDark: {
+        borderColor: Colors.dark.inputBackground,
+        backgroundColor: Colors.dark.inputBackground,
+    },
+    checkmarkIcon: {
+        position: 'absolute',
+        top: 1,
+        left: 1,
     },
     sortMenuTrigger: {
         height: 40,
