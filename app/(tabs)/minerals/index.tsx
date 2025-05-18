@@ -9,7 +9,7 @@ import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Link } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Modal, Platform, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Modal, Platform, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
 
@@ -233,19 +233,15 @@ export default function HomeScreen() {
                             transparent={true}
                             onRequestClose={() => setModalVisible(false)}
                         >
-                            <TouchableOpacity
-                                activeOpacity={1}
-                                style={styles.modalOverlay}
-                                onPress={() => setModalVisible(false)}
-                            >
+                            <View style={styles.modalOverlay}>
+                                <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+                                    <View style={{ flex: 1 }} />
+                                </TouchableWithoutFeedback>
                                 <View
                                     style={[
                                         styles.modalContent,
                                         colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark
                                     ]}
-                                    // Prevent clicks inside modal from closing it
-                                    onStartShouldSetResponder={() => true}
-                                    onResponderStart={e => e.stopPropagation()}
                                 >
                                     {/* Sticky Modal Header */}
                                     <View style={[
@@ -394,7 +390,7 @@ export default function HomeScreen() {
                                         </TouchableOpacity>
                                     </View>
                                 </View>
-                            </TouchableOpacity>
+                            </View>
                         </Modal>
                         <View style={{ flex: 1, paddingHorizontal: 16 }}>
                             {loading && minerals.length === 0 ? (
