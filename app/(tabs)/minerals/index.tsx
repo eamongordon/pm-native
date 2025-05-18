@@ -6,6 +6,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import * as ImagePicker from 'expo-image-picker';
 import { Link } from 'expo-router';
 import { Camera, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
@@ -173,6 +174,25 @@ export default function HomeScreen() {
         else if (value === 'name-desc') setSort({ property: 'name', sort: 'desc' });
     };
 
+    const handlePickImage = async () => {
+        // Ask for permission if needed
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Permission to access media library is required!');
+            return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            quality: 1,
+        });
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            const uri = result.assets[0].uri;
+            // setSelectedImage(uri); // If you want to store it
+            // ...do something with the image uri...
+        }
+    };
+
     return (
         <SafeAreaProvider>
             <ThemedView style={styles.container}>
@@ -198,13 +218,15 @@ export default function HomeScreen() {
                                     autoCorrect={false}
                                     clearButtonMode="while-editing"
                                 />
-                                <ThemedIcon
-                                    Icon={Camera}
-                                    size={20}
-                                    style={{ marginRight: 8 }}
-                                    lightColor={Colors.light.text}
-                                    darkColor={Colors.dark.text}
-                                />
+                                <TouchableOpacity onPress={handlePickImage}>
+                                    <ThemedIcon
+                                        Icon={Camera}
+                                        size={20}
+                                        style={{ marginRight: 8 }}
+                                        lightColor={Colors.light.text}
+                                        darkColor={Colors.dark.text}
+                                    />
+                                </TouchableOpacity>
                             </View>
                             {/* Filter and Sort below search bar */}
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
