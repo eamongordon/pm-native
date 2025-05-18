@@ -3,7 +3,6 @@ import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import PagerView from 'react-native-pager-view';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -47,13 +46,19 @@ export default function DetailsScreen() {
 
     // Use mineral photos if available, fallback to static images
     const images =
-        mineral.photos?.length > 0
+        mineral && mineral.photos?.length > 0
             ? mineral.photos.map((p: any) => p.photo?.image).filter(Boolean)
             : [
                 'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/459a90da-a3bf-4620-a324-ffddb2bba39f-nElxfP7Hr4OpAdvxC2moNoHVmpOMeL.jpg',
                 'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/965e7025-1ebd-469d-8793-cfae54c77d9e-FpEbGma6MpXAnt295UKzSUPnkoYEeZ.jpeg',
                 'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/220f2624-dcf4-46f0-b6ca-fa68f14c94c4-8Q78nYgLyTmjZmthfhrE4GoNIh3B52.jpeg',
             ];
+
+    // Handler for scroll event to update currentIndex
+    const handleScroll = (event: any) => {
+        const page = Math.round(event.nativeEvent.contentOffset.x / width);
+        if (page !== currentIndex) setCurrentIndex(page);
+    };
 
     return (
         <ThemedView style={styles.container}>
@@ -65,17 +70,20 @@ export default function DetailsScreen() {
                         </View>
                     ) : (
                         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                            <PagerView
+                            <ScrollView
+                                horizontal
+                                pagingEnabled
+                                showsHorizontalScrollIndicator={false}
                                 style={styles.gallery}
-                                initialPage={0}
-                                onPageSelected={e => setCurrentIndex(e.nativeEvent.position)}
+                                onScroll={handleScroll}
+                                scrollEventThrottle={16}
                             >
                                 {images.map((uri: string, idx: number) => (
-                                    <View key={idx}>
+                                    <View key={idx} style={{ width }}>
                                         <Image source={{ uri }} style={styles.image} />
                                     </View>
                                 ))}
-                            </PagerView>
+                            </ScrollView>
                             <View style={styles.indicatorContainer}>
                                 {images.map((_: string, idx: number) => (
                                     <View
