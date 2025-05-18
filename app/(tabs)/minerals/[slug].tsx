@@ -2,7 +2,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Image, Modal, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -12,6 +12,8 @@ export default function DetailsScreen() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [mineral, setMineral] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [galleryVisible, setGalleryVisible] = useState(false);
+    const [galleryIndex, setGalleryIndex] = useState(0);
 
     useEffect(() => {
         if (!slug) return;
@@ -55,7 +57,7 @@ export default function DetailsScreen() {
             ];
 
     // Handler for scroll event to update currentIndex
-    const handleScroll = (event: any) => {
+    const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const page = Math.round(event.nativeEvent.contentOffset.x / width);
         if (page !== currentIndex) setCurrentIndex(page);
     };
@@ -79,9 +81,18 @@ export default function DetailsScreen() {
                                 scrollEventThrottle={16}
                             >
                                 {images.map((uri: string, idx: number) => (
-                                    <View key={idx} style={{ width }}>
-                                        <Image source={{ uri }} style={styles.image} />
-                                    </View>
+                                    <TouchableOpacity
+                                        key={idx}
+                                        activeOpacity={0.8}
+                                        onPress={() => {
+                                            setGalleryIndex(idx);
+                                            setGalleryVisible(true);
+                                        }}
+                                    >
+                                        <View style={{ width }}>
+                                            <Image source={{ uri }} style={styles.image} />
+                                        </View>
+                                    </TouchableOpacity>
                                 ))}
                             </ScrollView>
                             <View style={styles.indicatorContainer}>
@@ -187,6 +198,55 @@ export default function DetailsScreen() {
                             </ThemedView>
                         </ScrollView>
                     )}
+                    {/* Fullscreen Gallery Modal */}
+                    <Modal
+                        visible={galleryVisible}
+                        transparent={true}
+                        animationType="fade"
+                        onRequestClose={() => setGalleryVisible(false)}
+                    >
+                        <View style={styles.modalBackground}>
+                            <ScrollView
+                                horizontal
+                                pagingEnabled
+                                showsHorizontalScrollIndicator={false}
+                                contentOffset={{ x: galleryIndex * width, y: 0 }}
+                                style={{ flex: 1 }}
+                                onMomentumScrollEnd={e => {
+                                    const page = Math.round(e.nativeEvent.contentOffset.x / width);
+                                    setGalleryIndex(page);
+                                }}
+                            >
+                                {images.map((uri: string, idx: number) => (
+                                    <View key={idx} style={{ width, height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                                        <Image
+                                            source={{ uri }}
+                                            style={styles.fullImage}
+                                            resizeMode="contain"
+                                        />
+                                    </View>
+                                ))}
+                            </ScrollView>
+                            {/* Modal indicator */}
+                            <View style={styles.modalIndicatorContainer}>
+                                {images.map((_: string, idx: number) => (
+                                    <View
+                                        key={idx}
+                                        style={[
+                                            styles.modalIndicator,
+                                            idx === galleryIndex && styles.activeModalIndicator,
+                                        ]}
+                                    />
+                                ))}
+                            </View>
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setGalleryVisible(false)}
+                            >
+                                <ThemedText style={{ color: '#fff', fontSize: 24 }}>✕</ThemedText>
+                            </TouchableOpacity>
+                        </View>
+                    </Modal>
                 </SafeAreaView>
             </SafeAreaProvider>
         </ThemedView>
@@ -252,5 +312,47 @@ const styles = StyleSheet.create({
     propertyValue: {
         flex: 1,
         flexWrap: 'wrap',
+    },
+    modalBackground: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    fullImage: {
+        width: width,
+        height: '100%',
+        resizeMode: 'contain',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 40,
+        right: 20,
+        zIndex: 10,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        borderRadius: 20,
+        padding: 8,
+    },
+    modalIndicatorContainer: {
+        position: 'absolute',
+        bottom: 30,
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 5,
+    },
+    modalIndicator: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: '#888',
+        margin: 5,
+        opacity: 0.6,
+    },
+    activeModalIndicator: {
+        backgroundColor: '#fff',
+        opacity: 1,
     },
 });
