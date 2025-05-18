@@ -9,7 +9,7 @@ import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Link } from 'expo-router';
 import { SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Button, FlatList, Image, Modal, Platform, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Modal, Platform, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
 
@@ -233,66 +233,140 @@ export default function HomeScreen() {
                             transparent={true}
                             onRequestClose={() => setModalVisible(false)}
                         >
-                            <View style={styles.modalOverlay}>
-                                <View style={styles.modalContent}>
-                                    <ThemedText style={{ fontWeight: 'bold', fontSize: 18 }}>More Filters</ThemedText>
-                                    {/* Hardness Range Slider */}
-                                    <Collapsible title="Hardness Range">
-                                        <View style={{ marginTop: 8 }}>
-                                            <ThemedText style={{ fontWeight: 'bold', marginBottom: 8 }}>Hardness Range</ThemedText>
-                                            <MultiSlider
-                                                values={hardnessRange}
-                                                min={1}
-                                                max={10}
-                                                step={1}
-                                                onValuesChange={(values) => setHardnessRange([values[0], values[1]] as [number, number])}
-                                                allowOverlap={false}
-                                                snapped
-                                                containerStyle={{ marginHorizontal: 10 }}
-                                            />
-                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
-                                                <ThemedText>Min: {hardnessRange[0]}</ThemedText>
-                                                <ThemedText>Max: {hardnessRange[1]}</ThemedText>
+                            <TouchableOpacity
+                                activeOpacity={1}
+                                style={styles.modalOverlay}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <View
+                                    style={[
+                                        styles.modalContent,
+                                        colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark
+                                    ]}
+                                    // Prevent clicks inside modal from closing it
+                                    onStartShouldSetResponder={() => true}
+                                    onResponderStart={e => e.stopPropagation()}
+                                >
+                                    {/* Sticky Modal Header */}
+                                    <View style={[
+                                        styles.modalHeader,
+                                        colorScheme === 'light' ? styles.modalHeaderLight : styles.modalHeaderDark
+                                    ]}>
+                                        <TouchableOpacity
+                                            onPress={() => setModalVisible(false)}
+                                            style={styles.modalHeaderButton}
+                                            accessibilityLabel="Close"
+                                        >
+                                            <ThemedText style={{ fontSize: 22, color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }}>×</ThemedText>
+                                        </TouchableOpacity>
+                                        <ThemedText style={[
+                                            styles.modalHeaderTitle,
+                                            { color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }
+                                        ]}>Filters</ThemedText>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setHardnessRange([1, 10]);
+                                                setLusters([]);
+                                                setMineralClass([]);
+                                                setCrystalSystems([]);
+                                                setSort(null);
+                                                setSearch('');
+                                            }}
+                                            style={styles.modalHeaderButton}
+                                            accessibilityLabel="Reset"
+                                        >
+                                            <ThemedText style={[
+                                                styles.modalHeaderReset,
+                                                { color: '#26c6da' }
+                                            ]}>Reset</ThemedText>
+                                        </TouchableOpacity>
+                                    </View>
+                                    {/* Scrollable Content */}
+                                    <ScrollView
+                                        contentContainerStyle={{
+                                            flexGrow: 1,
+                                            paddingBottom: 16,
+                                            paddingHorizontal: 16,
+                                            paddingTop: 16,
+                                            rowGap: 16, // add vertical spacing between collapsibles
+                                        }}
+                                        showsVerticalScrollIndicator={false}
+                                        style={{
+                                            backgroundColor: colorScheme === 'light'
+                                                ? Colors.light.background
+                                                : Colors.dark.background
+                                        }}
+                                    >
+                                        {/* Hardness Range Slider */}
+                                        <Collapsible title="Hardness Range">
+                                            <View style={{ marginTop: 8 }}>
+                                                <ThemedText style={{ fontWeight: 'bold', marginBottom: 8 }}>Hardness Range</ThemedText>
+                                                <MultiSlider
+                                                    values={hardnessRange}
+                                                    min={1}
+                                                    max={10}
+                                                    step={1}
+                                                    onValuesChange={(values) => setHardnessRange([values[0], values[1]] as [number, number])}
+                                                    allowOverlap={false}
+                                                    snapped
+                                                    containerStyle={{ marginHorizontal: 10 }}
+                                                />
+                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 4 }}>
+                                                    <ThemedText>Min: {hardnessRange[0]}</ThemedText>
+                                                    <ThemedText>Max: {hardnessRange[1]}</ThemedText>
+                                                </View>
                                             </View>
-                                        </View>
-                                    </Collapsible>
-                                    {/* Luster Checkboxes */}
-                                    <Collapsible title="Lusters">
-                                        <View style={{ marginTop: 8 }}>
-                                            <CheckboxGroup
-                                                options={LUSTER_OPTIONS}
-                                                selected={lusters}
-                                                onToggle={toggleLuster}
-                                            />
-                                        </View>
-                                    </Collapsible>
-                                    {/* Mineral Class Checkboxes */}
-                                    <Collapsible title="Mineral Class">
-                                        <View style={{ marginTop: 8 }}>
-                                            <CheckboxGroup
-                                                options={MINERAL_CLASS_OPTIONS}
-                                                selected={mineralClass}
-                                                onToggle={toggleMineralClass}
-                                            />
-                                        </View>
-                                    </Collapsible>
-                                    {/* Crystal Systems Checkboxes */}
-                                    <Collapsible title="Crystal Systems">
-                                        <View style={{ marginTop: 8 }}>
-                                            <CheckboxGroup
-                                                options={CRYSTAL_SYSTEM_OPTIONS}
-                                                selected={crystalSystems}
-                                                onToggle={toggleCrystalSystem}
-                                            />
-                                        </View>
-                                    </Collapsible>
-                                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>
-                                        <Button title="Cancel" onPress={() => setModalVisible(false)} />
-                                        <View style={{ width: 8 }} />
-                                        <Button title="Apply" onPress={() => setModalVisible(false)} />
+                                        </Collapsible>
+                                        {/* Luster Checkboxes */}
+                                        <Collapsible title="Lusters">
+                                            <View style={{ marginTop: 8 }}>
+                                                <CheckboxGroup
+                                                    options={LUSTER_OPTIONS}
+                                                    selected={lusters}
+                                                    onToggle={toggleLuster}
+                                                />
+                                            </View>
+                                        </Collapsible>
+                                        {/* Mineral Class Checkboxes */}
+                                        <Collapsible title="Mineral Class">
+                                            <View style={{ marginTop: 8 }}>
+                                                <CheckboxGroup
+                                                    options={MINERAL_CLASS_OPTIONS}
+                                                    selected={mineralClass}
+                                                    onToggle={toggleMineralClass}
+                                                />
+                                            </View>
+                                        </Collapsible>
+                                        {/* Crystal Systems Checkboxes */}
+                                        <Collapsible title="Crystal Systems">
+                                            <View style={{ marginTop: 8 }}>
+                                                <CheckboxGroup
+                                                    options={CRYSTAL_SYSTEM_OPTIONS}
+                                                    selected={crystalSystems}
+                                                    onToggle={toggleCrystalSystem}
+                                                />
+                                            </View>
+                                        </Collapsible>
+                                    </ScrollView>
+                                    {/* Sticky Modal Footer */}
+                                    <View style={[
+                                        styles.modalFooter,
+                                        colorScheme === 'light' ? styles.modalFooterLight : styles.modalFooterDark
+                                    ]}>
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.showResultsButton,
+                                                { backgroundColor: '#26c6da' }
+                                            ]}
+                                            onPress={() => setModalVisible(false)}
+                                        >
+                                            <ThemedText style={styles.showResultsButtonText}>
+                                                Show Results
+                                            </ThemedText>
+                                        </TouchableOpacity>
                                     </View>
                                 </View>
-                            </View>
+                            </TouchableOpacity>
                         </Modal>
                         <View style={{ flex: 1, paddingHorizontal: 16 }}>
                             {loading && minerals.length === 0 ? (
@@ -414,14 +488,16 @@ const styles = StyleSheet.create({
         alignItems: 'stretch',      // changed from 'center'
     },
     modalContent: {
-        width: '100%',              // changed from '80%'
-        borderTopLeftRadius: 16,    // changed for bottom sheet effect
-        borderTopRightRadius: 16,   // changed for bottom sheet effect
+        width: '100%',
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
         borderBottomLeftRadius: 0,
         borderBottomRightRadius: 0,
-        padding: 24,
+        padding: 0,
         alignItems: 'stretch',
-        minHeight: 200,             // optional: ensures some height
+        minHeight: 200,
+        maxHeight: '80%',
+        overflow: 'hidden',
     },
     modalContentLight: {
         backgroundColor: Colors.light.background,
@@ -429,11 +505,62 @@ const styles = StyleSheet.create({
     modalContentDark: {
         backgroundColor: Colors.dark.background,
     },
-    modalInput: {
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingTop: 18,
+        paddingBottom: 12,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        zIndex: 2,
+    },
+    modalHeaderLight: {
+        backgroundColor: Colors.light.background,
+        borderColor: Colors.light.border,
+    },
+    modalHeaderDark: {
+        backgroundColor: Colors.dark.background,
+        borderColor: Colors.dark.border,
+    },
+    modalHeaderButton: {
+        minWidth: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalHeaderTitle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        textAlign: 'center',
+        flex: 1,
+    },
+    modalHeaderReset: {
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    modalFooter: {
+        bottom: 0,
+        padding: 20,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        zIndex: 2,
+    },
+    modalFooterLight: {
+        backgroundColor: Colors.light.background,
+        borderColor: Colors.light.border,
+    },
+    modalFooterDark: {
+        backgroundColor: Colors.dark.background,
+        borderColor: Colors.dark.border,
+    },
+    showResultsButton: {
         borderRadius: 8,
-        padding: 8,
-        marginTop: 16,
+        paddingVertical: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    showResultsButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
 });
