@@ -13,12 +13,10 @@ export default function DetailsScreen() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [mineral, setMineral] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!slug) return;
         setLoading(true);
-        setError(null);
 
         let url = `https://www.prospectorminerals.com/api/minerals?slug=${encodeURIComponent(
             slug as string
@@ -36,16 +34,20 @@ export default function DetailsScreen() {
                     setMineral(data.results[0]);
                 } else {
                     setMineral(null);
-                    setError('Mineral not found');
                 }
             })
-            .catch(() => setError('Failed to load mineral'))
+            .catch(() => setMineral(null))
             .finally(() => setLoading(false));
     }, [slug]);
 
+    // Show Not Found screen if mineral is not found after loading
+    if (!loading && !mineral) {
+        return null;
+    }
+
     // Use mineral photos if available, fallback to static images
     const images =
-        mineral?.photos?.length > 0
+        mineral.photos?.length > 0
             ? mineral.photos.map((p: any) => p.photo?.image).filter(Boolean)
             : [
                 'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/459a90da-a3bf-4620-a324-ffddb2bba39f-nElxfP7Hr4OpAdvxC2moNoHVmpOMeL.jpg',
@@ -60,10 +62,6 @@ export default function DetailsScreen() {
                     {loading ? (
                         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                             <ActivityIndicator />
-                        </View>
-                    ) : error ? (
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                            <ThemedText>{error}</ThemedText>
                         </View>
                     ) : (
                         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -91,16 +89,16 @@ export default function DetailsScreen() {
                             </View>
                             <ThemedView style={styles.mainSection}>
                                 <ThemedText type="title">
-                                    {mineral?.name || 'Mineral Details'}
+                                    {mineral.name || 'Mineral Details'}
                                 </ThemedText>
                                 <ThemedText style={styles.section}>
-                                    {mineral?.description || `Details of user ${slug}`}
+                                    {mineral.description || `Details of user ${slug}`}
                                 </ThemedText>
-                                {mineral?.uses && (
+                                {mineral.uses && (
                                     <View style={styles.section}>
                                         <ThemedText type="subtitle">Uses</ThemedText>
                                         <ThemedText>
-                                            {mineral?.uses || `Details of user ${slug}`}
+                                            {mineral.uses || `Details of user ${slug}`}
                                         </ThemedText>
                                     </View>
                                 )}
@@ -108,21 +106,21 @@ export default function DetailsScreen() {
                                     <View style={styles.section}>
                                         <ThemedText type="subtitle">Notable Localities</ThemedText>
                                         <ThemedText>
-                                            {mineral?.localities_description || `Details of user ${slug}`}
+                                            {mineral.localities_description || `Details of user ${slug}`}
                                         </ThemedText>
                                     </View>
                                 )}
                                 {/* Properties Section */}
-                                {(mineral?.chemical_formula ||
-                                    mineral?.hardness_min ||
-                                    mineral?.hardness_max ||
-                                    mineral?.crystal_system ||
-                                    mineral?.mineral_class ||
-                                    mineral?.luster) && (
+                                {(mineral.chemical_formula ||
+                                    mineral.hardness_min ||
+                                    mineral.hardness_max ||
+                                    mineral.crystal_system ||
+                                    mineral.mineral_class ||
+                                    mineral.luster) && (
                                         <View style={styles.section}>
                                             <ThemedText type="subtitle">Properties</ThemedText>
                                             <View style={styles.propertiesTable}>
-                                                {mineral?.chemical_formula && (
+                                                {mineral.chemical_formula && (
                                                     <View style={styles.propertyRow}>
                                                         <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
                                                             Chemical Formula
@@ -132,20 +130,20 @@ export default function DetailsScreen() {
                                                         </ThemedText>
                                                     </View>
                                                 )}
-                                                {(mineral?.hardness_min || mineral?.hardness_max) && (
+                                                {(mineral.hardness_min || mineral.hardness_max) && (
                                                     <View style={styles.propertyRow}>
                                                         <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
                                                             Hardness
                                                         </ThemedText>
                                                         <ThemedText style={styles.propertyValue}>
-                                                            {mineral?.hardness_min}
-                                                            {mineral?.hardness_max && mineral?.hardness_min !== mineral?.hardness_max
+                                                            {mineral.hardness_min}
+                                                            {mineral.hardness_max && mineral.hardness_min !== mineral.hardness_max
                                                                 ? ` - ${mineral.hardness_max}`
                                                                 : ''}
                                                         </ThemedText>
                                                     </View>
                                                 )}
-                                                {mineral?.crystal_system && (
+                                                {mineral.crystal_system && (
                                                     <View style={styles.propertyRow}>
                                                         <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
                                                             Crystal System
@@ -155,7 +153,7 @@ export default function DetailsScreen() {
                                                         </ThemedText>
                                                     </View>
                                                 )}
-                                                {mineral?.mineral_class && (
+                                                {mineral.mineral_class && (
                                                     <View style={styles.propertyRow}>
                                                         <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
                                                             Mineral Class
@@ -165,7 +163,7 @@ export default function DetailsScreen() {
                                                         </ThemedText>
                                                     </View>
                                                 )}
-                                                {mineral?.luster && (
+                                                {mineral.luster && (
                                                     <View style={styles.propertyRow}>
                                                         <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
                                                             Luster
