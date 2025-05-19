@@ -25,6 +25,9 @@ export default function TabLayout() {
                     },
                     default: {},
                 }),
+                tabBarLabelStyle: {
+                    fontFamily: 'WorkSans_400Regular',
+                },
                 tabBarLabelPosition: 'below-icon', // <-- Add this line
             }}>
             <Tabs.Screen
