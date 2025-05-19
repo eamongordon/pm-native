@@ -1,8 +1,11 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useLocalSearchParams } from 'expo-router';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Image } from 'expo-image';
+import { Link, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -11,6 +14,7 @@ export default function PhotoDetailsScreen() {
     const { id } = useLocalSearchParams();
     const [photo, setPhoto] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const colorScheme = useColorScheme() ?? 'light';
 
     useEffect(() => {
         if (!id) return;
@@ -60,7 +64,10 @@ export default function PhotoDetailsScreen() {
                                 <Image
                                     source={{ uri: photo.image }}
                                     style={styles.image}
-                                    resizeMode="cover"
+                                    placeholder={photo.imageBlurhash ? { uri: photo.imageBlurhash } : undefined}
+                                    contentFit="cover"
+                                    placeholderContentFit="cover"
+                                    transition={700}
                                 />
                             </View>
                             <ThemedView style={styles.mainSection}>
@@ -84,6 +91,36 @@ export default function PhotoDetailsScreen() {
                                         <ThemedText>
                                             {photo.description}
                                         </ThemedText>
+                                    </View>
+                                )}
+                                {/* Mineral Chips */}
+                                {photo.minerals && Array.isArray(photo.minerals) && photo.minerals.length > 0 && (
+                                    <View style={styles.chipsWrapContainer}>
+                                        {photo.minerals.map(({ mineral }: any) => (
+                                            <Link
+                                                key={mineral.slug}
+                                                href={`/minerals/${mineral.slug}`}
+                                                asChild
+                                            >
+                                                <TouchableOpacity>
+                                                    <View style={[styles.chip, colorScheme === 'light' ? styles.chipLight : styles.chipDark]}>
+                                                        {mineral.photos && mineral.photos[0]?.photo?.image && (
+                                                            <Image
+                                                                source={{ uri: mineral.photos[0].photo.image }}
+                                                                placeholder={mineral.photos[0].photo.imageBlurhash ? { uri: mineral.photos[0].photo.imageBlurhash } : undefined}
+                                                                contentFit="cover"
+                                                                placeholderContentFit="cover"
+                                                                transition={700}
+                                                                style={styles.chipImage}
+                                                            />
+                                                        )}
+                                                        <ThemedText style={styles.chipText}>
+                                                            {mineral.name}
+                                                        </ThemedText>
+                                                    </View>
+                                                </TouchableOpacity>
+                                            </Link>
+                                        ))}
                                     </View>
                                 )}
                             </ThemedView>
@@ -125,5 +162,36 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         gap: 8,
+    },
+    chipsWrapContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 8,
+        marginBottom: 4,
+    },
+    chip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: 20,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+    },
+    chipLight: {
+        backgroundColor: Colors.light.primary,
+    },
+    chipDark: {
+        backgroundColor: Colors.dark.primary,
+    },
+    chipImage: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        marginRight: 8,
+    },
+    chipText: {
+        fontSize: 16,
+        fontWeight: '500',
     },
 });
