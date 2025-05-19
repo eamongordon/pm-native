@@ -37,34 +37,47 @@ const SORT_OPTIONS = [
 ];
 
 export default function HomeScreen() {
+    const [filters, setFilters] = useState({
+        search: '',
+        hardnessRange: [1, 10] as [number, number],
+        lusters: [] as string[],
+        mineralClass: [] as string[],
+        crystalSystems: [] as string[],
+        associateMinerals: [] as any[],
+        chemistry: [] as string[],
+    });
+    const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
     const [minerals, setMinerals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isFetchingMore, setIsFetchingMore] = useState(false);
-    const [search, setSearch] = useState('');
-    const [modalVisible, setModalVisible] = useState(false);
-    const [hardnessRange, setHardnessRange] = useState<[number, number]>([1, 10]);
-    const [lusters, setLusters] = useState<string[]>([]);
-    const [mineralClass, setMineralClass] = useState<string[]>([]);
-    const [crystalSystems, setCrystalSystems] = useState<string[]>([]);
     const [cursor, setCursor] = useState<string | null>(null);
-    const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
-    const [associateMinerals, setAssociateMinerals] = useState<any[]>([]);
-    const [chemistry, setChemistry] = useState<string[]>([]);
+    const [modalVisible, setModalVisible] = useState(false);
     const colorScheme = useColorScheme() ?? 'light';
     const LIMIT = 10;
 
+    // Only keep handlers that are actually needed for controlled inputs
+    const [searchInput, setSearchInput] = useState("");
+
+    // Debounce search input and update filters.search
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setFilters(f => ({ ...f, search: searchInput }));
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [searchInput]);
+
     const buildFilterObj = () => {
         let filterObj: Record<string, any> = {};
-        if (search) filterObj.name = search;
-        if (hardnessRange && (hardnessRange[0] !== 1 || hardnessRange[1] !== 10)) {
-            filterObj.minHardness = hardnessRange[0];
-            filterObj.maxHardness = hardnessRange[1];
+        if (filters.search) filterObj.name = filters.search;
+        if (filters.hardnessRange && (filters.hardnessRange[0] !== 1 || filters.hardnessRange[1] !== 10)) {
+            filterObj.minHardness = filters.hardnessRange[0];
+            filterObj.maxHardness = filters.hardnessRange[1];
         }
-        if (lusters.length > 0) filterObj.lusters = lusters;
-        if (mineralClass.length > 0) filterObj.mineralClass = mineralClass;
-        if (crystalSystems.length > 0) filterObj.crystalSystems = crystalSystems;
-        filterObj.associates = associateMinerals.map((m: any) => m.name);
-        if (chemistry.length > 0) filterObj.chemistry = chemistry;
+        if (filters.lusters.length > 0) filterObj.lusters = filters.lusters;
+        if (filters.mineralClass.length > 0) filterObj.mineralClass = filters.mineralClass;
+        if (filters.crystalSystems.length > 0) filterObj.crystalSystems = filters.crystalSystems;
+        filterObj.associates = filters.associateMinerals.map((m: any) => m.name);
+        if (filters.chemistry.length > 0) filterObj.chemistry = filters.chemistry;
 
         // Add sort if not default
         if (sort && sort.property !== 'default') {
@@ -93,6 +106,11 @@ export default function HomeScreen() {
         const params: Record<string, string> = {};
         if (cursorParam) params.cursor = cursorParam;
         if (Object.keys(filterObj).length > 0) params.filter = JSON.stringify(filterObj);
+        // Add sort as its own param, not inside filter
+        if (sort && sort.property !== 'default') {
+            params.sortBy = sort.property;
+            params.sort = sort.sort;
+        }
 
         const query = Object.entries(params)
             .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
@@ -108,6 +126,7 @@ export default function HomeScreen() {
         try {
             const res = await fetch(finalUrl, { signal });
             const data = await res.json();
+            console.log("FETCH DONE")
             if (append) {
                 setMinerals((prev) => [...prev, ...((data.results as any[]) || [])]);
             } else {
@@ -128,51 +147,24 @@ export default function HomeScreen() {
         setMinerals([]);
         setLoading(true);
         const timeout = setTimeout(() => {
-            fetchMinerals({ append: false, cursorParam: cursor, signal: controller.signal });
+            console.log("useEffect fetch minerals");
+            fetchMinerals({ append: false, cursorParam: null, signal: controller.signal });
         }, 300);
         return () => {
             controller.abort();
             clearTimeout(timeout);
         };
         // eslint-disable-next-line
-    }, [search, hardnessRange, lusters, mineralClass, crystalSystems, chemistry, associateMinerals, sort]);
-
-    // Checkbox toggle handler
-    const toggleLuster = (luster: string) => {
-        setLusters((prev: string[]) =>
-            prev.includes(luster)
-                ? prev.filter((l) => l !== luster)
-                : [...prev, luster]
-        );
-    };
-    const toggleMineralClass = (cls: string) => {
-        setMineralClass((prev: string[]) =>
-            prev.includes(cls)
-                ? prev.filter((c) => c !== cls)
-                : [...prev, cls]
-        );
-    };
-    const toggleCrystalSystem = (sys: string) => {
-        setCrystalSystems((prev: string[]) =>
-            prev.includes(sys)
-                ? prev.filter((c) => c !== sys)
-                : [...prev, sys]
-        );
-    };
+    }, [
+        filters,
+        sort
+    ]);
 
     const handleEndReached = () => {
         if (!loading && !isFetchingMore && cursor) {
             console.log('Fetching more minerals...');
             fetchMinerals({ append: true, cursorParam: cursor });
         }
-    };
-
-    // Helper for menu label
-    const getSortLabel = () => {
-        if (!sort || sort.property === 'default') return 'Sort: Default';
-        if (sort.property === 'name' && sort.sort === 'asc') return 'A-Z';
-        if (sort.property === 'name' && sort.sort === 'desc') return 'Z-A';
-        return 'Sort';
     };
 
     // Add a handler for Select value change
@@ -220,8 +212,8 @@ export default function HomeScreen() {
                                             style={[styles.searchBarInput, colorScheme === 'light' ? styles.searchBarInputLight : styles.searchBarInputDark]}
                                             placeholder="Search minerals..."
                                             placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
-                                            value={search}
-                                            onChangeText={setSearch}
+                                            value={searchInput}
+                                            onChangeText={setSearchInput}
                                             autoCapitalize="none"
                                             autoCorrect={false}
                                             clearButtonMode="while-editing"
@@ -304,14 +296,15 @@ export default function HomeScreen() {
                                         ]}>Filters</ThemedText>
                                         <TouchableOpacity
                                             onPress={() => {
-                                                setHardnessRange([1, 10]);
-                                                setLusters([]);
-                                                setMineralClass([]);
-                                                setCrystalSystems([]);
-                                                setSort(null);
-                                                setSearch('');
-                                                setAssociateMinerals([]);
-                                                setChemistry([]);
+                                                setFilters({
+                                                    search: '',
+                                                    hardnessRange: [1, 10],
+                                                    lusters: [],
+                                                    mineralClass: [],
+                                                    crystalSystems: [],
+                                                    associateMinerals: [],
+                                                    chemistry: [],
+                                                });
                                                 setModalVisible(false);
                                             }}
                                             style={styles.modalHeaderButton}
@@ -338,11 +331,7 @@ export default function HomeScreen() {
                                     >
                                         {/* Hardness Range Slider */}
                                         <Collapsible title="Hardness">
-                                            <View
-                                                style={{
-                                                    marginTop: 8
-                                                }}
-                                            >
+                                            <View style={{ marginTop: 8 }}>
                                                 <ThemedText
                                                     style={{
                                                         fontWeight: 'bold',
@@ -355,11 +344,13 @@ export default function HomeScreen() {
                                                     Hardness Range
                                                 </ThemedText>
                                                 <MultiSlider
-                                                    values={hardnessRange}
+                                                    values={filters.hardnessRange}
                                                     min={1}
                                                     max={10}
                                                     step={1}
-                                                    onValuesChange={(values) => setHardnessRange([values[0], values[1]] as [number, number])}
+                                                    onValuesChange={(values: number[]) =>
+                                                        setFilters(f => ({ ...f, hardnessRange: values as [number, number] }))
+                                                    }
                                                     allowOverlap={false}
                                                     snapped
                                                     containerStyle={{ marginHorizontal: 10 }}
@@ -383,7 +374,7 @@ export default function HomeScreen() {
                                                     }}
                                                 />
                                                 <ThemedText style={{ color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }}>
-                                                    {hardnessRange[0]} - {hardnessRange[1]}
+                                                    {filters.hardnessRange[0]} - {filters.hardnessRange[1]}
                                                 </ThemedText>
                                             </View>
                                         </Collapsible>
@@ -392,8 +383,15 @@ export default function HomeScreen() {
                                             <View style={{ marginTop: 8 }}>
                                                 <CheckboxGroup
                                                     options={LUSTER_OPTIONS}
-                                                    selected={lusters}
-                                                    onToggle={toggleLuster}
+                                                    selected={filters.lusters}
+                                                    onToggle={(luster: string) =>
+                                                        setFilters(f => ({
+                                                            ...f,
+                                                            lusters: f.lusters.includes(luster)
+                                                                ? f.lusters.filter((l: string) => l !== luster)
+                                                                : [...f.lusters, luster]
+                                                        }))
+                                                    }
                                                 />
                                             </View>
                                         </Collapsible>
@@ -402,8 +400,15 @@ export default function HomeScreen() {
                                             <View style={{ marginTop: 8 }}>
                                                 <CheckboxGroup
                                                     options={MINERAL_CLASS_OPTIONS}
-                                                    selected={mineralClass}
-                                                    onToggle={toggleMineralClass}
+                                                    selected={filters.mineralClass}
+                                                    onToggle={(cls: string) =>
+                                                        setFilters(f => ({
+                                                            ...f,
+                                                            mineralClass: f.mineralClass.includes(cls)
+                                                                ? f.mineralClass.filter((c: string) => c !== cls)
+                                                                : [...f.mineralClass, cls]
+                                                        }))
+                                                    }
                                                 />
                                             </View>
                                         </Collapsible>
@@ -412,23 +417,34 @@ export default function HomeScreen() {
                                             <View style={{ marginTop: 8 }}>
                                                 <CheckboxGroup
                                                     options={CRYSTAL_SYSTEM_OPTIONS}
-                                                    selected={crystalSystems}
-                                                    onToggle={toggleCrystalSystem}
+                                                    selected={filters.crystalSystems}
+                                                    onToggle={(sys: string) =>
+                                                        setFilters(f => ({
+                                                            ...f,
+                                                            crystalSystems: f.crystalSystems.includes(sys)
+                                                                ? f.crystalSystems.filter((c: string) => c !== sys)
+                                                                : [...f.crystalSystems, sys]
+                                                        }))
+                                                    }
                                                 />
                                             </View>
                                         </Collapsible>
                                         {/* Associates Collapsible */}
                                         <Collapsible title="Associates">
                                             <AssociatesSearch
-                                                selected={associateMinerals}
-                                                onChange={setAssociateMinerals}
+                                                selected={filters.associateMinerals}
+                                                onChange={(associateMinerals: any[]) =>
+                                                    setFilters(f => ({ ...f, associateMinerals }))
+                                                }
                                             />
                                         </Collapsible>
                                         {/* Chemistry Collapsible */}
                                         <Collapsible title="Chemistry">
                                             <ChemistryChipInput
-                                                values={chemistry}
-                                                onChange={setChemistry}
+                                                values={filters.chemistry}
+                                                onChange={(chemistry: string[]) =>
+                                                    setFilters(f => ({ ...f, chemistry }))
+                                                }
                                                 placeholder="Add formula (e.g. Cu, Fe2O3)..."
                                             />
                                         </Collapsible>
