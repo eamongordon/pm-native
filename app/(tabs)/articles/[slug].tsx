@@ -82,7 +82,13 @@ export default function ArticleDetailsScreen() {
                                     {article.title}
                                 </ThemedText>
                                 <ThemedText type="default" style={{ color: Colors[colorScheme].inputPlaceholder, fontSize: 16 }}>
-                                    {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : ''}
+                                    {article.publishedAt
+                                        ? new Date(article.publishedAt).toLocaleDateString(undefined, {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                        })
+                                        : ''}
                                 </ThemedText>
                                 {article.description && (
                                     <View style={styles.section}>
