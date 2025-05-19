@@ -54,6 +54,19 @@ export default function TabLayout() {
                     href: null,
                 }}
             />
+            <Tabs.Screen
+                name="photos/index"
+                options={{
+                    title: 'Photos',
+                    tabBarIcon: ({ color }) => <Image size={24} color={color} />,
+                }}
+            />
+            <Tabs.Screen
+                name="photos/[id]"
+                options={{
+                    href: null,
+                }}
+            />
         </Tabs>
     );
 }
