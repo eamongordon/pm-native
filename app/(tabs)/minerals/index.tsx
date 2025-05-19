@@ -1,3 +1,4 @@
+import AssociatesSearch from '@/components/AssociatesSearch';
 import { CheckboxGroup } from '@/components/CheckboxGroup';
 import { Collapsible } from '@/components/Collapsible';
 import Select from '@/components/Select';
@@ -46,6 +47,7 @@ export default function HomeScreen() {
     const [crystalSystems, setCrystalSystems] = useState<string[]>([]);
     const [cursor, setCursor] = useState<string | null>(null);
     const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
+    const [associateMinerals, setAssociateMinerals] = useState<any[]>([]);
     const colorScheme = useColorScheme() ?? 'light';
     const LIMIT = 10;
 
@@ -59,6 +61,7 @@ export default function HomeScreen() {
         if (lusters.length > 0) filterObj.lusters = lusters;
         if (mineralClass.length > 0) filterObj.mineralClass = mineralClass;
         if (crystalSystems.length > 0) filterObj.crystalSystems = crystalSystems;
+        filterObj.associates = associateMinerals.map((m: any) => m.name);
         // Add sort if not default
         if (sort && sort.property !== 'default') {
             filterObj.sort = sort;
@@ -128,7 +131,7 @@ export default function HomeScreen() {
             clearTimeout(timeout);
         };
         // eslint-disable-next-line
-    }, [search, hardnessRange, lusters, mineralClass, crystalSystems, sort]);
+    }, [search, hardnessRange, lusters, mineralClass, crystalSystems, associateMinerals, sort]);
 
     // Checkbox toggle handler
     const toggleLuster = (luster: string) => {
@@ -407,6 +410,13 @@ export default function HomeScreen() {
                                                 />
                                             </View>
                                         </Collapsible>
+                                        {/* Associates Collapsible */}
+                                        <Collapsible title="Associates">
+                                            <AssociatesSearch
+                                                selected={associateMinerals}
+                                                onChange={setAssociateMinerals}
+                                            />
+                                        </Collapsible>
                                     </ScrollView>
                                     {/* Sticky Modal Footer */}
                                     <View style={[
@@ -447,7 +457,7 @@ export default function HomeScreen() {
                                                         source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
                                                         style={styles.itemImage}
                                                         contentFit="cover"
-                                                        placeholder={ {uri: item.photos && item.photos[0]?.photo?.imageBlurhash }}
+                                                        placeholder={{ uri: item.photos && item.photos[0]?.photo?.imageBlurhash }}
                                                         placeholderContentFit="cover"
                                                         transition={700}
                                                     />
@@ -487,8 +497,8 @@ const styles = StyleSheet.create({
         borderColor: '#e0e0e0',
         borderRadius: 8,
         paddingHorizontal: 12,
-        flexDirection: 'row', 
-        alignItems: 'center', 
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     searchBarLight: {
         backgroundColor: Colors.light.inputBackground,
