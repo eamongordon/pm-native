@@ -6,6 +6,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -92,9 +93,18 @@ export default function ArticleDetailsScreen() {
                                 )}
                                 {article.content && (
                                     <View style={styles.section}>
-                                        <ThemedText style={{ fontSize: 17 }}>
+                                        <Markdown
+                                            style={{
+                                                body: { color: Colors[colorScheme].text, fontSize: 17, fontFamily: 'WorkSans_400Regular' },
+                                                heading1: { color: Colors[colorScheme].text, fontSize: 26, fontFamily: 'WorkSans_600Semibold', marginTop: 16, marginBottom: 4 },
+                                                heading2: { color: Colors[colorScheme].text, fontSize: 22, fontFamily: 'WorkSans_600Semibold', marginTop: 16, marginBottom: 4 },
+                                                heading3: { color: Colors[colorScheme].text, fontSize: 20, fontFamily: 'WorkSans_600Semibold', marginTop: 8, marginBottom: 4 },
+                                                heading4: { color: Colors[colorScheme].text, fontSize: 18, fontFamily: 'WorkSans_600Semibold', marginTop: 8, marginBottom: 4 },
+                                                heading5: { color: Colors[colorScheme].text, fontSize: 16, fontFamily: 'WorkSans_600Semibold', marginTop: 8, marginBottom: 4 },
+                                            }}
+                                        >
                                             {article.content}
-                                        </ThemedText>
+                                        </Markdown>
                                     </View>
                                 )}
                             </ThemedView>
