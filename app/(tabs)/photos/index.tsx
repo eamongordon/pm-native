@@ -4,14 +4,14 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { Search } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, Platform, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const SORT_OPTIONS = [
-    { label: 'Sort: Default', value: 'default' },
+    { label: 'Default', value: 'default' },
     { label: 'A-Z', value: 'name-asc' },
     { label: 'Z-A', value: 'name-desc' },
 ];
@@ -25,14 +25,10 @@ export default function PhotosScreen() {
     const [search, setSearch] = useState('');
     const colorScheme = useColorScheme() ?? 'light';
     const LIMIT = 20;
-    const router = useRouter();
 
     const buildFilterObj = () => {
         let filterObj: Record<string, any> = {};
         if (search) filterObj.name = search;
-        if (sort && sort.property !== 'default') {
-            filterObj.sort = sort;
-        }
         return filterObj;
     };
 
@@ -55,6 +51,10 @@ export default function PhotosScreen() {
         const params: Record<string, string> = {};
         if (cursorParam) params.cursor = cursorParam;
         if (Object.keys(filterObj).length > 0) params.filter = JSON.stringify(filterObj);
+        if (sort && sort.property !== 'default') {
+            params.sortBy = sort.property;
+            params.sort = sort.sort;
+        }
 
         const query = Object.entries(params)
             .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
@@ -149,6 +149,7 @@ export default function PhotosScreen() {
                                         }
                                         onValueChange={handleSortChange}
                                         placeholder="Sort"
+                                        prefix="Sort: "
                                     />
                                 </View>
                             </View>

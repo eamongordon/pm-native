@@ -31,7 +31,7 @@ const CRYSTAL_SYSTEM_OPTIONS = [
 ];
 
 const SORT_OPTIONS = [
-    { label: 'Sort: Default', value: 'default' },
+    { label: 'Default', value: 'default' },
     { label: 'A-Z', value: 'name-asc' },
     { label: 'Z-A', value: 'name-desc' },
 ];
@@ -78,11 +78,6 @@ export default function HomeScreen() {
         if (filters.crystalSystems.length > 0) filterObj.crystalSystems = filters.crystalSystems;
         filterObj.associates = filters.associateMinerals.map((m: any) => m.name);
         if (filters.chemistry.length > 0) filterObj.chemistry = filters.chemistry;
-
-        // Add sort if not default
-        if (sort && sort.property !== 'default') {
-            filterObj.sort = sort;
-        }
         return filterObj;
     };
 
@@ -106,7 +101,6 @@ export default function HomeScreen() {
         const params: Record<string, string> = {};
         if (cursorParam) params.cursor = cursorParam;
         if (Object.keys(filterObj).length > 0) params.filter = JSON.stringify(filterObj);
-        // Add sort as its own param, not inside filter
         if (sort && sort.property !== 'default') {
             params.sortBy = sort.property;
             params.sort = sort.sort;
@@ -257,6 +251,7 @@ export default function HomeScreen() {
                                         }
                                         onValueChange={handleSortChange}
                                         placeholder="Sort"
+                                        prefix="Sort: "
                                     />
                                 </View>
                             </View>
