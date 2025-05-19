@@ -440,18 +440,20 @@ export default function HomeScreen() {
                                     style={{ alignSelf: 'stretch', flex: 1 }}
                                     contentContainerStyle={{ paddingBottom: 16 }}
                                     renderItem={({ item }) => (
-                                        <Link href={`/minerals/${item.slug}`}>
-                                            <View style={styles.itemRow}>
-                                                <Image
-                                                    source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
-                                                    style={styles.itemImage}
-                                                    contentFit="cover"
-                                                    placeholder={ {uri: item.photos && item.photos[0]?.photo?.imageBlurhash }}
-                                                    placeholderContentFit="cover"
-                                                    transition={700}
-                                                />
-                                                <ThemedText style={styles.itemName}>{item.name}</ThemedText>
-                                            </View>
+                                        <Link href={`/minerals/${item.slug}`} asChild>
+                                            <TouchableOpacity>
+                                                <View style={styles.itemRow}>
+                                                    <Image
+                                                        source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
+                                                        style={styles.itemImage}
+                                                        contentFit="cover"
+                                                        placeholder={ {uri: item.photos && item.photos[0]?.photo?.imageBlurhash }}
+                                                        placeholderContentFit="cover"
+                                                        transition={700}
+                                                    />
+                                                    <ThemedText style={styles.itemName}>{item.name}</ThemedText>
+                                                </View>
+                                            </TouchableOpacity>
                                         </Link>
                                     )}
                                     ItemSeparatorComponent={() => <View style={[styles.divider, colorScheme === "light" ? styles.dividerLight : styles.dividerDark]} />}
