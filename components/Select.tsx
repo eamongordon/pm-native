@@ -23,6 +23,7 @@ type SelectProps = {
     selectedValue: string | null;
     onValueChange: (value: string) => void;
     placeholder?: string;
+    prefix?: string; // Optional prefix for trigger label
 };
 
 const Select: React.FC<SelectProps> = ({
@@ -30,6 +31,7 @@ const Select: React.FC<SelectProps> = ({
     selectedValue,
     onValueChange,
     placeholder = 'Select an option',
+    prefix,
 }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [dropdownTop, setDropdownTop] = useState(0);
@@ -70,7 +72,7 @@ const Select: React.FC<SelectProps> = ({
                             style={{ marginRight: 8 }}
                         />
                         <ThemedText style={{ fontSize: 14 }}>
-                            {selectedLabel}
+                            {prefix ? `${prefix}${selectedLabel}` : selectedLabel}
                         </ThemedText>
                     </View>
                 </TouchableOpacity>
