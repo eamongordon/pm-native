@@ -430,7 +430,7 @@ export default function HomeScreen() {
                                             ]}
                                             onPress={() => setModalVisible(false)}
                                         >
-                                            <ThemedText style={styles.showResultsButtonText}>
+                                            <ThemedText>
                                                 Show Results
                                             </ThemedText>
                                         </TouchableOpacity>
@@ -638,13 +638,8 @@ const styles = StyleSheet.create({
     },
     showResultsButton: {
         borderRadius: 8,
-        paddingVertical: 14,
+        height: 40,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    showResultsButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
     },
 });
