@@ -39,8 +39,10 @@ export function CheckboxGroup({
               {isChecked && (
                 <ThemedIcon
                   Icon={Check}
-                  size={18}
-                  color="#fff"
+                  size={16}
+                  color={
+                    colorScheme === 'light' ? Colors.light.text : Colors.dark.text
+                  }
                   style={styles.checkmarkIcon}
                 />
               )}
@@ -65,7 +67,7 @@ const styles = StyleSheet.create({
   customCheckbox: {
     width: 22,
     height: 22,
-    borderRadius: 4,
+    borderRadius: 8,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
@@ -77,12 +79,12 @@ const styles = StyleSheet.create({
     borderColor: Colors.dark.border,
   },
   customCheckboxCheckedLight: {
-    borderColor: Colors.light.inputBackground,
-    backgroundColor: Colors.light.inputBackground,
+    borderColor: Colors.light.primary,
+    backgroundColor: Colors.light.primary,
   },
   customCheckboxCheckedDark: {
-    borderColor: Colors.dark.inputBackground,
-    backgroundColor: Colors.dark.inputBackground,
+    borderColor: Colors.dark.primary,
+    backgroundColor: Colors.dark.primary,
   },
   checkmarkIcon: {
     position: 'absolute',
