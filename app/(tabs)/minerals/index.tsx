@@ -1,5 +1,6 @@
 import AssociatesSearch from '@/components/AssociatesSearch';
 import { CheckboxGroup } from '@/components/CheckboxGroup';
+import ChemistryChipInput from '@/components/ChemistryChipInput';
 import { Collapsible } from '@/components/Collapsible';
 import Select from '@/components/Select';
 import { ThemedText } from '@/components/ThemedText';
@@ -48,6 +49,7 @@ export default function HomeScreen() {
     const [cursor, setCursor] = useState<string | null>(null);
     const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
     const [associateMinerals, setAssociateMinerals] = useState<any[]>([]);
+    const [chemistry, setChemistry] = useState<string[]>([]);
     const colorScheme = useColorScheme() ?? 'light';
     const LIMIT = 10;
 
@@ -62,6 +64,8 @@ export default function HomeScreen() {
         if (mineralClass.length > 0) filterObj.mineralClass = mineralClass;
         if (crystalSystems.length > 0) filterObj.crystalSystems = crystalSystems;
         filterObj.associates = associateMinerals.map((m: any) => m.name);
+        if (chemistry.length > 0) filterObj.chemistry = chemistry;
+
         // Add sort if not default
         if (sort && sort.property !== 'default') {
             filterObj.sort = sort;
@@ -131,7 +135,7 @@ export default function HomeScreen() {
             clearTimeout(timeout);
         };
         // eslint-disable-next-line
-    }, [search, hardnessRange, lusters, mineralClass, crystalSystems, associateMinerals, sort]);
+    }, [search, hardnessRange, lusters, mineralClass, crystalSystems, chemistry, associateMinerals, sort]);
 
     // Checkbox toggle handler
     const toggleLuster = (luster: string) => {
@@ -306,6 +310,9 @@ export default function HomeScreen() {
                                                 setCrystalSystems([]);
                                                 setSort(null);
                                                 setSearch('');
+                                                setAssociateMinerals([]);
+                                                setChemistry([]);
+                                                setModalVisible(false);
                                             }}
                                             style={styles.modalHeaderButton}
                                             accessibilityLabel="Reset"
@@ -415,6 +422,14 @@ export default function HomeScreen() {
                                             <AssociatesSearch
                                                 selected={associateMinerals}
                                                 onChange={setAssociateMinerals}
+                                            />
+                                        </Collapsible>
+                                        {/* Chemistry Collapsible */}
+                                        <Collapsible title="Chemistry">
+                                            <ChemistryChipInput
+                                                values={chemistry}
+                                                onChange={setChemistry}
+                                                placeholder="Add formula (e.g. Cu, Fe2O3)..."
                                             />
                                         </Collapsible>
                                     </ScrollView>
