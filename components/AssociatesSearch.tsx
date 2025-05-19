@@ -88,7 +88,6 @@ export default function AssociatesSearch({ selected, onChange }: ChipInputProps)
 
     const handleAdd = (mineral: Mineral) => {
         // Add mineral first, then drop focus after state update
-        console.log('Adding mineral:', mineral);
         onChange([...selected, mineral]);
         setInput('');
         setFocused(false);
