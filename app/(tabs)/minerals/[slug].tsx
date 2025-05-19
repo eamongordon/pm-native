@@ -1,8 +1,9 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Image, Modal, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -49,7 +50,7 @@ export default function DetailsScreen() {
     // Use mineral photos if available, fallback to static images
     const images =
         mineral && mineral.photos?.length > 0
-            ? mineral.photos.map((p: any) => p.photo?.image).filter(Boolean)
+            ? mineral.photos.map((p: any) => ({ uri: p.photo?.image, blurhash: p.photo?.imageBlurhash })).filter((obj: any) => !!obj.uri)
             : [
                 'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/459a90da-a3bf-4620-a324-ffddb2bba39f-nElxfP7Hr4OpAdvxC2moNoHVmpOMeL.jpg',
                 'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/965e7025-1ebd-469d-8793-cfae54c77d9e-FpEbGma6MpXAnt295UKzSUPnkoYEeZ.jpeg',
@@ -81,7 +82,7 @@ export default function DetailsScreen() {
                                 onScroll={handleScroll}
                                 scrollEventThrottle={16}
                             >
-                                {images.map((uri: string, idx: number) => (
+                                {images.map((image: { uri: string, blurhash: string }, idx: number) => (
                                     <TouchableOpacity
                                         key={idx}
                                         activeOpacity={0.8}
@@ -91,7 +92,14 @@ export default function DetailsScreen() {
                                         }}
                                     >
                                         <View style={{ width }}>
-                                            <Image source={{ uri }} style={styles.image} />
+                                            <Image
+                                                source={{ uri: image.uri }}
+                                                style={styles.image}
+                                                placeholder={{ uri: image.blurhash }}
+                                                contentFit="cover"
+                                                placeholderContentFit="cover"
+                                                transition={700}
+                                            />
                                         </View>
                                     </TouchableOpacity>
                                 ))}
@@ -218,12 +226,15 @@ export default function DetailsScreen() {
                                     setGalleryIndex(page);
                                 }}
                             >
-                                {images.map((uri: string, idx: number) => (
+                                {images.map((image: { uri: string, blurhash: string }, idx: number) => (
                                     <View key={idx} style={{ width, height: '100%', justifyContent: 'center', alignItems: 'center' }}>
                                         <Image
-                                            source={{ uri }}
+                                            source={{ uri: image.uri }}
                                             style={styles.fullImage}
-                                            resizeMode="contain"
+                                            contentFit="contain"
+                                            placeholder={{ uri: image.blurhash }}
+                                            placeholderContentFit="contain"
+                                            transition={700}
                                         />
                                     </View>
                                 ))}

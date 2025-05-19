@@ -6,11 +6,12 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { Link } from 'expo-router';
 import { Camera, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Modal, Platform, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, Platform, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
 
@@ -444,6 +445,10 @@ export default function HomeScreen() {
                                                 <Image
                                                     source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
                                                     style={styles.itemImage}
+                                                    contentFit="cover"
+                                                    placeholder={ {uri: item.photos && item.photos[0]?.photo?.imageBlurhash }}
+                                                    placeholderContentFit="cover"
+                                                    transition={700}
                                                 />
                                                 <ThemedText style={styles.itemName}>{item.name}</ThemedText>
                                             </View>
