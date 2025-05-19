@@ -6,7 +6,7 @@ import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { House, Image, Sparkle } from 'lucide-react-native';
+import { Gem, House, Image, Sparkle } from 'lucide-react-native';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
@@ -45,7 +45,7 @@ export default function TabLayout() {
                 name="minerals/index"
                 options={{
                     title: 'Minerals',
-                    tabBarIcon: ({ color }) => <Image size={24} color={color} />,
+                    tabBarIcon: ({ color }) => <Gem size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
