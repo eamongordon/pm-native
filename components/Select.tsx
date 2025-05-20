@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
         marginLeft: 0,
         paddingVertical: 8,
         paddingHorizontal: 12,
-        borderRadius: 16,
+        borderRadius: 20,
         borderWidth: 1,
         backgroundColor: 'transparent',
         alignItems: 'center',

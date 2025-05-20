@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     searchBar: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderRadius: 16,
+        borderRadius: 24,
         paddingHorizontal: 12,
         height: 48,
         marginBottom: 8,
