@@ -3,9 +3,10 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
-import { useLocalSearchParams } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
+import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
@@ -68,6 +69,20 @@ export default function ArticleDetailsScreen() {
                     ) : (
                         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                             <View style={styles.imageContainer}>
+                                {/* Back Button */}
+                                <Link href="/articles" asChild>
+                                    <TouchableOpacity
+                                        style={styles.backButton}
+                                        activeOpacity={0.7}
+                                    >
+                                        <View style={[
+                                            styles.backButtonCircle,
+                                            colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
+                                        ]}>
+                                            <ChevronLeft color="#fff" size={28} style={styles.backButtonIcon} />
+                                        </View>
+                                    </TouchableOpacity>
+                                </Link>
                                 <Image
                                     source={{ uri: article.image }}
                                     placeholder={{ uri: article.imageBlurhash }}
@@ -135,6 +150,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#eee',
         justifyContent: 'center',
         alignItems: 'center',
+        position: 'relative',
     },
     image: {
         width: width,
@@ -152,5 +168,27 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         gap: 8,
+    },
+    backButton: {
+        position: 'absolute',
+        top: 16,
+        left: 16,
+        zIndex: 10,
+    },
+    backButtonCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    backButtonCircleLight: {
+        backgroundColor: Colors.light.primary,
+    },
+    backButtonCircleDark: {
+        backgroundColor: Colors.dark.primary,
+    },
+    backButtonIcon: {
+        marginLeft: -2,
     },
 });

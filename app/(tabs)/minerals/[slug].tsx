@@ -1,7 +1,10 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
-import { useLocalSearchParams } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
+import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +18,8 @@ export default function DetailsScreen() {
     const [loading, setLoading] = useState(true);
     const [galleryVisible, setGalleryVisible] = useState(false);
     const [galleryIndex, setGalleryIndex] = useState(0);
+
+    const colorScheme = useColorScheme() ?? 'light';
 
     useEffect(() => {
         if (!slug) return;
@@ -74,36 +79,52 @@ export default function DetailsScreen() {
                         </View>
                     ) : (
                         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                            <ScrollView
-                                horizontal
-                                pagingEnabled
-                                showsHorizontalScrollIndicator={false}
-                                style={styles.gallery}
-                                onScroll={handleScroll}
-                                scrollEventThrottle={16}
-                            >
-                                {images.map((image: { uri: string, blurhash: string }, idx: number) => (
+                            <View style={styles.galleryContainer}>
+                                {/* Back Button */}
+                                <Link href="/minerals" asChild>
                                     <TouchableOpacity
-                                        key={idx}
-                                        activeOpacity={0.8}
-                                        onPress={() => {
-                                            setGalleryIndex(idx);
-                                            setGalleryVisible(true);
-                                        }}
+                                        style={styles.backButton}
+                                        activeOpacity={0.7}
                                     >
-                                        <View style={{ width }}>
-                                            <Image
-                                                source={{ uri: image.uri }}
-                                                style={styles.image}
-                                                placeholder={{ uri: image.blurhash }}
-                                                contentFit="cover"
-                                                placeholderContentFit="cover"
-                                                transition={700}
-                                            />
+                                        <View style={[
+                                            styles.backButtonCircle,
+                                            colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
+                                        ]}>
+                                            <ChevronLeft color="#fff" size={28} style={styles.backButtonIcon} />
                                         </View>
                                     </TouchableOpacity>
-                                ))}
-                            </ScrollView>
+                                </Link>
+                                <ScrollView
+                                    horizontal
+                                    pagingEnabled
+                                    showsHorizontalScrollIndicator={false}
+                                    style={styles.gallery}
+                                    onScroll={handleScroll}
+                                    scrollEventThrottle={16}
+                                >
+                                    {images.map((image: { uri: string, blurhash: string }, idx: number) => (
+                                        <TouchableOpacity
+                                            key={idx}
+                                            activeOpacity={0.8}
+                                            onPress={() => {
+                                                setGalleryIndex(idx);
+                                                setGalleryVisible(true);
+                                            }}
+                                        >
+                                            <View style={{ width }}>
+                                                <Image
+                                                    source={{ uri: image.uri }}
+                                                    style={styles.image}
+                                                    placeholder={{ uri: image.blurhash }}
+                                                    contentFit="cover"
+                                                    placeholderContentFit="cover"
+                                                    transition={700}
+                                                />
+                                            </View>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            </View>
                             <View style={styles.indicatorContainer}>
                                 {images.map((_: string, idx: number) => (
                                     <View
@@ -272,6 +293,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    galleryContainer: {
+        width: width,
+        height: 250,
+        backgroundColor: '#eee',
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'relative',
+    },
     gallery: {
         width: width,
         height: 250,
@@ -366,5 +395,27 @@ const styles = StyleSheet.create({
     activeModalIndicator: {
         backgroundColor: '#fff',
         opacity: 1,
+    },
+    backButton: {
+        position: 'absolute',
+        top: 16,
+        left: 16,
+        zIndex: 10,
+    },
+    backButtonCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    backButtonCircleLight: {
+        backgroundColor: Colors.light.primary,
+    },
+    backButtonCircleDark: {
+        backgroundColor: Colors.dark.primary,
+    },
+    backButtonIcon: {
+        marginLeft: -2,
     },
 });
