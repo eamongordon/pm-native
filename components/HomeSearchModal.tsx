@@ -90,7 +90,7 @@ export default function HomeSearchModal() {
                 >
                     <Search size={20} style={{ marginRight: 8, opacity: 0.7 }} color={colorScheme === 'light' ? Colors.light.text : Colors.dark.text} />
                     <ThemedText style={{ color: Colors[colorScheme].inputPlaceholder }}>
-                        Search minerals, photos, articles, localities...
+                        Search...
                     </ThemedText>
                 </TouchableOpacity>
             </View>
@@ -162,8 +162,9 @@ export default function HomeSearchModal() {
 const styles = StyleSheet.create({
     searchBarContainer: {
         paddingHorizontal: 16,
-        paddingTop: 16,
+        paddingTop: 8,
         backgroundColor: 'transparent',
+        width: '100%',
     },
     searchBar: {
         flexDirection: 'row',
@@ -172,6 +173,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         height: 40,
         marginBottom: 8,
+        width: '100%',
     },
     searchBarLight: {
         backgroundColor: Colors.light.inputBackground,

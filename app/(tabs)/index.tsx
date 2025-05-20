@@ -1,13 +1,13 @@
+import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image as ExpoImage } from 'expo-image';
 import { Link } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Platform, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import HomeSearchModal from '@/components/HomeSearchModal';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
@@ -15,6 +15,7 @@ import { ThemedView } from '@/components/ThemedView';
 function TopMineralsCarousel() {
     const [minerals, setMinerals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const scrollRef = useRef<ScrollView>(null);
 
     useEffect(() => {
         let url = 'https://www.prospectorminerals.com/api/minerals?limit=10';
@@ -28,13 +29,27 @@ function TopMineralsCarousel() {
             .finally(() => setLoading(false));
     }, []);
 
+    // Scroll to the second item after data loads
+    useEffect(() => {
+        if (!loading && minerals.length > 1 && scrollRef.current) {
+            setTimeout(() => {
+                scrollRef.current?.scrollTo({ x: 120, animated: false });
+            }, 0);
+        }
+    }, [loading, minerals.length]);
+
     return (
-        <View style={{ marginVertical: 16 }}>
-            <ThemedText type="subtitle">Top Minerals</ThemedText>
+        <View style={{ marginVertical: 8 }}>
+            <ThemedText type="subtitle" style={{ marginLeft: 16 }}>Minerals</ThemedText>
             {loading ? (
                 <ActivityIndicator style={{ marginVertical: 16 }} />
             ) : (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingVertical: 8 }}>
+                <ScrollView
+                    ref={scrollRef}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={{ paddingVertical: 8 }}
+                >
                     {minerals.map(mineral => (
                         <Link
                             key={mineral.id}
@@ -77,44 +92,44 @@ function TopArticlesCarousel() {
             .finally(() => setLoading(false));
     }, []);
 
-    console.log('Articles:', articles);
-
     return (
-        <View style={{ marginVertical: 16 }}>
-            <ThemedText type="subtitle" style={{ marginLeft: 8 }}>Top Articles</ThemedText>
+        <View style={{ marginHorizontal: 16 }}>
+            <ThemedText type="subtitle" style={{ marginLeft: 8 }}>Articles</ThemedText>
             {loading ? (
                 <ActivityIndicator style={{ marginVertical: 16 }} />
             ) : (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingVertical: 8 }}>
+                <View style={{ gap: 16, paddingVertical: 8 }}>
                     {articles.map(article => (
                         <Link
                             key={article.id}
                             href={`/articles/${article.slug}`}
                             asChild
                         >
-                            <View style={{ width: 150, marginRight: 16 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 0, backgroundColor: 'transparent', borderRadius: 8 }}>
                                 <ExpoImage
                                     source={{ uri: article.image || 'https://via.placeholder.com/120x80' }}
-                                    style={{ width: 140, height: 80, borderRadius: 8, marginBottom: 6, backgroundColor: '#eee' }}
+                                    style={{ width: 100, height: 70, borderRadius: 8, marginRight: 14, backgroundColor: '#eee' }}
                                     placeholder={article.imageBlurhash ? { uri: article.imageBlurhash } : undefined}
                                     contentFit="cover"
                                     transition={400}
                                     placeholderContentFit="cover"
                                 />
-                                <ThemedText type="defaultSemiBold">{article.title}</ThemedText>
-                                <ThemedText type="default" style={{ fontSize: 14, lineHeight: 21, color: '#888' }}>
-                                    {article.createdAt
-                                        ? new Date(article.createdAt).toLocaleDateString(undefined, {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric',
-                                        })
-                                        : ''}
-                                </ThemedText>
+                                <View style={{ flex: 1 }}>
+                                    <ThemedText type="defaultSemiBold" numberOfLines={2}>{article.title}</ThemedText>
+                                    <ThemedText type="default" style={{ fontSize: 14, lineHeight: 21, color: '#888' }}>
+                                        {article.createdAt
+                                            ? new Date(article.createdAt).toLocaleDateString(undefined, {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric',
+                                            })
+                                            : ''}
+                                    </ThemedText>
+                                </View>
                             </View>
                         </Link>
                     ))}
-                </ScrollView>
+                </View>
             )}
         </View>
     );
@@ -122,26 +137,49 @@ function TopArticlesCarousel() {
 
 export default function HomeScreen() {
     const colorScheme = useColorScheme() ?? 'light';
+    const bottom = useBottomTabOverflow();
 
     return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-        >
-            <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">Welcome!</ThemedText>
-                <HelloWave />
-            </ThemedView>
-            <ThemedView>
-                <HomeSearchModal />
-            </ThemedView>
-            <TopMineralsCarousel />
-            <TopArticlesCarousel />
-        </ParallaxScrollView>
+        <ThemedView style={styles.container}>
+            <SafeAreaView style={styles.safeArea}>
+                <ScrollView
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        { paddingBottom: bottom + 32 }
+                    ]}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <ThemedView style={styles.titleContainer}>
+                        <ThemedText type="title">Welcome!</ThemedText>
+                        <HelloWave />
+                    </ThemedView>
+                    <ThemedView>
+                        <HomeSearchModal />
+                    </ThemedView>
+                    <TopMineralsCarousel />
+                    <TopArticlesCarousel />
+                </ScrollView>
+            </SafeAreaView>
+        </ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    safeArea: {
+        flex: 1,
+        // No extra padding here; SafeAreaView handles top inset
+    },
+    scrollContent: {
+        paddingTop: 16,
+        gap: 16,
+        // Remove paddingTop: 32 to avoid double spacing with SafeAreaView
+    },
     titleContainer: {
+        paddingHorizontal: 16,
+        paddingTop: 8,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
