@@ -4,7 +4,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image as ExpoImage } from 'expo-image';
 import { Link } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import HomeSearchModal from '@/components/HomeSearchModal';
@@ -56,7 +56,9 @@ function TopMineralsCarousel() {
                             href={`/minerals/${mineral.slug}`}
                             asChild
                         >
-                            <View style={{ alignItems: 'center', marginRight: 10, width: 120 }}>
+                            <TouchableOpacity
+                                style={{ alignItems: 'center', marginRight: 10, width: 120 }}
+                            >
                                 <ExpoImage
                                     source={{ uri: mineral.photos?.[0]?.photo?.image || 'https://via.placeholder.com/80' }}
                                     style={{ width: 120, height: 150, borderRadius: 12, marginBottom: 6, backgroundColor: '#eee' }}
@@ -66,7 +68,7 @@ function TopMineralsCarousel() {
                                     placeholderContentFit="cover"
                                 />
                                 <ThemedText numberOfLines={2} style={{ textAlign: 'center', fontSize: 16 }} type="default">{mineral.name}</ThemedText>
-                            </View>
+                            </TouchableOpacity>
                         </Link>
                     ))}
                 </ScrollView>
@@ -105,7 +107,9 @@ function TopArticlesCarousel() {
                             href={`/articles/${article.slug}`}
                             asChild
                         >
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 0, backgroundColor: 'transparent', borderRadius: 8 }}>
+                            <TouchableOpacity
+                                style={{ flexDirection: 'row', alignItems: 'center', marginRight: 0, backgroundColor: 'transparent', borderRadius: 8 }}
+                            >
                                 <ExpoImage
                                     source={{ uri: article.image || 'https://via.placeholder.com/120x80' }}
                                     style={{ width: 100, height: 70, borderRadius: 8, marginRight: 14, backgroundColor: '#eee' }}
@@ -126,7 +130,7 @@ function TopArticlesCarousel() {
                                             : ''}
                                     </ThemedText>
                                 </View>
-                            </View>
+                            </TouchableOpacity>
                         </Link>
                     ))}
                 </View>
