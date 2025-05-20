@@ -6,7 +6,7 @@ import { Image } from 'expo-image';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Modal, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -16,6 +16,7 @@ export default function PhotoDetailsScreen() {
     const router = useRouter(); // Add router for navigation
     const [photo, setPhoto] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [modalVisible, setModalVisible] = useState(false);
     const colorScheme = useColorScheme() ?? 'light';
 
     useEffect(() => {
@@ -53,7 +54,8 @@ export default function PhotoDetailsScreen() {
 
     return (
         <ThemedView style={styles.container}>
-            <StatusBar />
+            {/* Hide status bar when modal is open */}
+            <StatusBar hidden={modalVisible} />
             <SafeAreaProvider>
                 <SafeAreaView style={styles.safeArea}>
                     {loading ? (
@@ -64,23 +66,34 @@ export default function PhotoDetailsScreen() {
                         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                             <View style={styles.imageContainer}>
                                 {/* Back Button */}
+                                <Link href="/photos" asChild>
+                                    <TouchableOpacity
+                                        style={styles.backButton}
+                                        activeOpacity={0.7}
+                                    >
+                                        <View style={[
+                                            styles.backButtonCircle,
+                                            colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
+                                        ]}>
+                                            <ChevronLeft color="#fff" size={28} style={styles.backButtonIcon} />
+                                        </View>
+                                    </TouchableOpacity>
+                                </Link>
+                                {/* Image with modal trigger */}
                                 <TouchableOpacity
-                                    style={styles.backButton}
-                                    onPress={() => router.back()}
-                                    activeOpacity={0.7}
+                                    activeOpacity={0.9}
+                                    onPress={() => setModalVisible(true)}
+                                    style={{ zIndex: 1 }}
                                 >
-                                    <View style={[styles.backButtonCircle, colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark]}>
-                                        <ChevronLeft color="#fff" size={28} strokeWidth={2.5} />
-                                    </View>
+                                    <Image
+                                        source={{ uri: photo.image }}
+                                        style={styles.image}
+                                        placeholder={photo.imageBlurhash ? { uri: photo.imageBlurhash } : undefined}
+                                        contentFit="cover"
+                                        placeholderContentFit="cover"
+                                        transition={700}
+                                    />
                                 </TouchableOpacity>
-                                <Image
-                                    source={{ uri: photo.image }}
-                                    style={styles.image}
-                                    placeholder={photo.imageBlurhash ? { uri: photo.imageBlurhash } : undefined}
-                                    contentFit="cover"
-                                    placeholderContentFit="cover"
-                                    transition={700}
-                                />
                             </View>
                             <ThemedView style={styles.mainSection}>
                                 <ThemedText type="title">
@@ -138,6 +151,30 @@ export default function PhotoDetailsScreen() {
                             </ThemedView>
                         </ScrollView>
                     )}
+                    {/* Fullscreen Modal for Image */}
+                    <Modal
+                        visible={modalVisible}
+                        transparent={true}
+                        animationType="fade"
+                        onRequestClose={() => setModalVisible(false)}
+                    >
+                        <View style={styles.modalBackground}>
+                            <Image
+                                source={{ uri: photo?.image }}
+                                style={styles.fullImage}
+                                contentFit="contain"
+                                placeholder={photo?.imageBlurhash ? { uri: photo.imageBlurhash } : undefined}
+                                placeholderContentFit="contain"
+                                transition={700}
+                            />
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <ThemedText style={{ color: '#fff', fontSize: 28 }}>✕</ThemedText>
+                            </TouchableOpacity>
+                        </View>
+                    </Modal>
                 </SafeAreaView>
             </SafeAreaProvider>
         </ThemedView>
@@ -224,5 +261,28 @@ const styles = StyleSheet.create({
     },
     backButtonCircleDark: {
         backgroundColor: Colors.dark.primary,
+    },
+    backButtonIcon: {
+        marginLeft: -2,
+    },
+    modalBackground: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    fullImage: {
+        width: width,
+        height: '100%',
+        resizeMode: 'contain',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 40,
+        right: 20,
+        zIndex: 10,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        borderRadius: 20,
+        padding: 8,
     },
 });
