@@ -2,9 +2,9 @@ import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
-import { Search } from 'lucide-react-native';
+import { ChevronLeft, Search } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function HomeSearchModal() {
     const [searchModalVisible, setSearchModalVisible] = useState(false);
@@ -100,60 +100,71 @@ export default function HomeSearchModal() {
                 onRequestClose={() => setSearchModalVisible(false)}
                 transparent
             >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark]}>
-                        <View style={styles.modalHeader}>
-                            <TextInput
-                                style={[styles.modalSearchInput, colorScheme === 'light' ? styles.searchBarInputLight : styles.searchBarInputDark]}
-                                placeholder="Search..."
-                                placeholderTextColor={Colors[colorScheme].inputPlaceholder}
-                                value={searchQuery}
-                                onChangeText={text => {
-                                    setSearchQuery(text);
-                                    handleSearch(text);
-                                }}
-                                autoFocus
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                                clearButtonMode="while-editing"
-                            />
-                            <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.modalCloseButton}>
-                                <ThemedText style={{ fontSize: 22 }}>×</ThemedText>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            {searchLoading ? (
-                                <ActivityIndicator style={{ marginTop: 32 }} />
-                            ) : (
-                                <FlatList
-                                    data={searchResults}
-                                    keyExtractor={item => `${item.type}-${item.id}`}
-                                    renderItem={({ item }) => (
-                                        <View style={styles.resultRow}>
-                                            <Image
-                                                source={{ uri: item.image }}
-                                                style={styles.resultImage}
-                                                placeholder={{ uri: item.blurhash }}
-                                                contentFit="cover"
-                                                transition={400}
-                                                placeholderContentFit="cover"
+                <TouchableWithoutFeedback onPress={() => setSearchModalVisible(false)}>
+                    <View style={styles.modalOverlay}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                        >
+                            <TouchableWithoutFeedback>
+                                <View style={[styles.modalContent, colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark]}>
+                                    <View style={styles.modalHeader}>
+                                        <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.modalBackButton}>
+                                            <ChevronLeft size={26} color={Colors[colorScheme].text} />
+                                        </TouchableOpacity>
+                                        <TextInput
+                                            style={[
+                                                styles.modalSearchInput,
+                                                colorScheme === 'light' ? styles.searchBarInputLight : styles.searchBarInputDark
+                                            ]}
+                                            placeholder="Search..."
+                                            placeholderTextColor={Colors[colorScheme].inputPlaceholder}
+                                            value={searchQuery}
+                                            onChangeText={text => {
+                                                setSearchQuery(text);
+                                                handleSearch(text);
+                                            }}
+                                            autoFocus
+                                            autoCapitalize="none"
+                                            autoCorrect={false}
+                                            clearButtonMode="while-editing"
+                                        />
+                                    </View>
+                                    <View style={{ flex: 1 }}>
+                                        {searchLoading ? (
+                                            <ActivityIndicator style={{ marginTop: 32 }} />
+                                        ) : (
+                                            <FlatList
+                                                data={searchResults}
+                                                keyExtractor={item => `${item.type}-${item.id}`}
+                                                renderItem={({ item }) => (
+                                                    <View style={styles.resultRow}>
+                                                        <Image
+                                                            source={{ uri: item.image }}
+                                                            style={styles.resultImage}
+                                                            placeholder={{ uri: item.blurhash }}
+                                                            contentFit="cover"
+                                                            transition={400}
+                                                            placeholderContentFit="cover"
+                                                        />
+                                                        <View style={{ flex: 1, marginLeft: 12 }}>
+                                                            <ThemedText type="defaultSemiBold">{item.name}</ThemedText>
+                                                            <ThemedText style={styles.resultType}>{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</ThemedText>
+                                                        </View>
+                                                    </View>
+                                                )}
+                                                ListEmptyComponent={
+                                                    searchQuery && !searchLoading ? (
+                                                        <ThemedText style={{ textAlign: 'center', marginTop: 32 }}>No results found</ThemedText>
+                                                    ) : null
+                                                }
                                             />
-                                            <View style={{ flex: 1, marginLeft: 12 }}>
-                                                <ThemedText type="defaultSemiBold">{item.name}</ThemedText>
-                                                <ThemedText style={styles.resultType}>{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</ThemedText>
-                                            </View>
-                                        </View>
-                                    )}
-                                    ListEmptyComponent={
-                                        searchQuery && !searchLoading ? (
-                                            <ThemedText style={{ textAlign: 'center', marginTop: 32 }}>No results found</ThemedText>
-                                        ) : null
-                                    }
-                                />
-                            )}
-                        </View>
+                                        )}
+                                    </View>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </KeyboardAvoidingView>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
         </>
     );
@@ -219,17 +230,17 @@ const styles = StyleSheet.create({
         borderColor: '#e0e0e0',
         zIndex: 2,
     },
+    modalBackButton: {
+        marginRight: 8,
+        minWidth: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     modalSearchInput: {
         flex: 1,
         fontSize: 18,
         height: 40,
         fontFamily: 'WorkSans_400Regular',
-    },
-    modalCloseButton: {
-        marginLeft: 12,
-        minWidth: 32,
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     resultRow: {
         flexDirection: 'row',
