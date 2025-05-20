@@ -1,3 +1,4 @@
+import { Image as ExpoImage } from 'expo-image';
 import type { PropsWithChildren } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, {
@@ -15,11 +16,13 @@ const HEADER_HEIGHT = 250;
 
 type Props = PropsWithChildren<{
   headerBackgroundColor: { dark: string; light: string };
+  headerBackgroundImage?: string; // Add this prop
 }>;
 
 export default function ParallaxScrollView({
   children,
   headerBackgroundColor,
+  headerBackgroundImage,
 }: Props) {
   const colorScheme = useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -53,7 +56,16 @@ export default function ParallaxScrollView({
             { backgroundColor: headerBackgroundColor[colorScheme] },
             headerAnimatedStyle,
           ]}
-        />
+        >
+          {headerBackgroundImage && (
+            <ExpoImage
+              source={headerBackgroundImage}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+              transition={400}
+            />
+          )}
+        </Animated.View>
         <ThemedView style={styles.content}>{children}</ThemedView>
       </Animated.ScrollView>
     </ThemedView>
