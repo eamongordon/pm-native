@@ -1,3 +1,4 @@
+import { ThemedIcon } from '@/components/ThemedIcon';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
@@ -90,7 +91,7 @@ export default function DetailsScreen() {
                                             styles.backButtonCircle,
                                             colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
                                         ]}>
-                                            <ChevronLeft color="#fff" size={28} style={styles.backButtonIcon} />
+                                            <ThemedIcon Icon={ChevronLeft} lightColor={Colors.light.text} darkColor={Colors.dark.text} size={28} style={styles.backButtonIcon} />
                                         </View>
                                     </TouchableOpacity>
                                 </Link>
