@@ -194,8 +194,8 @@ export default function ArticlesScreen() {
                                                         {item.title}
                                                     </ThemedText>
                                                     <ThemedText type="default" style={{ color: Colors[colorScheme].inputPlaceholder, fontSize: 14 }}>
-                                                        {item.publishedAt
-                                                            ? new Date(item.publishedAt).toLocaleDateString(undefined, {
+                                                        {item.createdAt
+                                                            ? new Date(item.createdAt).toLocaleDateString(undefined, {
                                                                 year: 'numeric',
                                                                 month: 'short',
                                                                 day: 'numeric',

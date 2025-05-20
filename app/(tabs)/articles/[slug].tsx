@@ -108,7 +108,7 @@ export default function ArticleDetailsScreen() {
                                 </ThemedText>
                                 {article.description && (
                                     <View style={styles.section}>
-                                        <ThemedText style={{ fontSize: 17 }}>
+                                        <ThemedText type="defaultSemiBold" lightColor={Colors.light.icon} darkColor={Colors.dark.icon} style={{ fontSize: 17 }}>
                                             {article.description}
                                         </ThemedText>
                                     </View>
@@ -117,12 +117,12 @@ export default function ArticleDetailsScreen() {
                                     <View style={styles.section}>
                                         <Markdown
                                             style={{
-                                                body: { color: Colors[colorScheme].text, fontSize: 17, fontFamily: 'WorkSans_400Regular' },
-                                                heading1: { color: Colors[colorScheme].text, fontSize: 26, fontFamily: 'WorkSans_600Semibold', marginTop: 16, marginBottom: 4 },
-                                                heading2: { color: Colors[colorScheme].text, fontSize: 22, fontFamily: 'WorkSans_600Semibold', marginTop: 16, marginBottom: 4 },
-                                                heading3: { color: Colors[colorScheme].text, fontSize: 20, fontFamily: 'WorkSans_600Semibold', marginTop: 8, marginBottom: 4 },
-                                                heading4: { color: Colors[colorScheme].text, fontSize: 18, fontFamily: 'WorkSans_600Semibold', marginTop: 8, marginBottom: 4 },
-                                                heading5: { color: Colors[colorScheme].text, fontSize: 16, fontFamily: 'WorkSans_600Semibold', marginTop: 8, marginBottom: 4 },
+                                                body: { color: Colors[colorScheme].text, fontSize: 16, fontFamily: 'WorkSans_400Regular', lineHeight: 24 },
+                                                heading1: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 16, marginBottom: 4, lineHeight: 32 },
+                                                heading2: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 16, lineHeight: 32 },
+                                                heading3: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 8 },
+                                                heading4: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 8 },
+                                                heading5: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 8 },
                                             }}
                                         >
                                             {article.content}
