@@ -154,7 +154,7 @@ export default function PhotosScreen() {
                                 </View>
                             </View>
                         </View>
-                        <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 8 }}>
+                        <View style={{ flex: 1, paddingHorizontal: 16 }}>
                             {loading && photos.length === 0 ? (
                                 <ActivityIndicator />
                             ) : photos.length === 0 ? (
@@ -165,7 +165,7 @@ export default function PhotosScreen() {
                                     keyExtractor={(item) => item.id}
                                     numColumns={2}
                                     columnWrapperStyle={{ gap: imageMargin }}
-                                    contentContainerStyle={{ paddingBottom: 16 }}
+                                    contentContainerStyle={{ paddingBottom: 16, paddingTop: 8 }}
                                     renderItem={({ item }) => (
                                         <Link
                                             href={`/photos/${item.id}`}
@@ -176,7 +176,7 @@ export default function PhotosScreen() {
                                                     style={{
                                                         width: imageWidth,
                                                         height: imageWidth,
-                                                        borderRadius: 8,
+                                                        borderRadius: 12,
                                                         backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
                                                     }}
                                                     source={{ uri: item.image }}
@@ -214,13 +214,12 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     searchBar: {
-        height: 40,
+        height: 48,
         borderColor: '#e0e0e0',
-        borderRadius: 8,
+        borderRadius: 16,
         paddingHorizontal: 12,
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8,
     },
     searchBarInput: {
         flex: 1,
@@ -242,7 +241,7 @@ const styles = StyleSheet.create({
         color: Colors.dark.inputText,
     },
     sortDropdownContainer: {
-        flex: 1,
         overflow: 'hidden',
+        flex: 1,
     },
 });

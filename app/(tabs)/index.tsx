@@ -232,31 +232,6 @@ const styles = StyleSheet.create({
         left: 0,
         position: 'absolute',
     },
-    searchBarContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        backgroundColor: 'transparent',
-    },
-    searchBar: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        height: 40,
-        marginBottom: 8,
-    },
-    searchBarLight: {
-        backgroundColor: Colors.light.inputBackground,
-    },
-    searchBarDark: {
-        backgroundColor: Colors.dark.inputBackground,
-    },
-    searchBarInputLight: {
-        color: Colors.light.inputText,
-    },
-    searchBarInputDark: {
-        color: Colors.dark.inputText,
-    },
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.3)',

@@ -160,7 +160,7 @@ export default function ArticlesScreen() {
                                 </View>
                             </View>
                         </View>
-                        <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 8 }}>
+                        <View style={{ flex: 1, paddingHorizontal: 16 }}>
                             {loading && articles.length === 0 ? (
                                 <ActivityIndicator />
                             ) : articles.length === 0 ? (
@@ -189,7 +189,7 @@ export default function ArticlesScreen() {
                                                     transition={700}
                                                     placeholderContentFit="cover"
                                                 />
-                                                <View style={{ marginTop: 12, gap: 4 }}>
+                                                <View style={{ marginTop: 12, paddingHorizontal: 8, gap: 4 }}>
                                                     <ThemedText type="defaultSemiBold" style={{ fontSize: 18 }}>
                                                         {item.title}
                                                     </ThemedText>
@@ -213,6 +213,7 @@ export default function ArticlesScreen() {
                                     ListFooterComponent={
                                         isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
                                     }
+                                    style={{ paddingTop: 8 }}
                                 />
                             )}
                         </View>
@@ -235,13 +236,12 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     searchBar: {
-        height: 40,
+        height: 48,
         borderColor: '#e0e0e0',
-        borderRadius: 8,
+        borderRadius: 16,
         paddingHorizontal: 12,
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8,
     },
     searchBarInput: {
         flex: 1,
