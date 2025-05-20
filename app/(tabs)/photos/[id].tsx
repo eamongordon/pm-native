@@ -3,7 +3,8 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +13,7 @@ const { width } = Dimensions.get('window');
 
 export default function PhotoDetailsScreen() {
     const { id } = useLocalSearchParams();
+    const router = useRouter(); // Add router for navigation
     const [photo, setPhoto] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const colorScheme = useColorScheme() ?? 'light';
@@ -61,6 +63,16 @@ export default function PhotoDetailsScreen() {
                     ) : (
                         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                             <View style={styles.imageContainer}>
+                                {/* Back Button */}
+                                <TouchableOpacity
+                                    style={styles.backButton}
+                                    onPress={() => router.back()}
+                                    activeOpacity={0.7}
+                                >
+                                    <View style={[styles.backButtonCircle, colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark]}>
+                                        <ChevronLeft color="#fff" size={28} strokeWidth={2.5} />
+                                    </View>
+                                </TouchableOpacity>
                                 <Image
                                     source={{ uri: photo.image }}
                                     style={styles.image}
@@ -193,5 +205,24 @@ const styles = StyleSheet.create({
     chipText: {
         fontSize: 16,
         fontWeight: '500',
+    },
+    backButton: {
+        position: 'absolute',
+        top: 16,
+        left: 16,
+        zIndex: 10,
+    },
+    backButtonCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    backButtonCircleLight: {
+        backgroundColor: Colors.light.primary,
+    },
+    backButtonCircleDark: {
+        backgroundColor: Colors.dark.primary,
     },
 });
