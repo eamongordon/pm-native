@@ -4,7 +4,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
 import { ChevronLeft, Search } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { ActivityIndicator, FlatList, Modal, Platform, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
 export default function HomeSearchModal() {
     const [searchModalVisible, setSearchModalVisible] = useState(false);
@@ -101,12 +101,10 @@ export default function HomeSearchModal() {
                 transparent
             >
                 <TouchableWithoutFeedback onPress={() => setSearchModalVisible(false)}>
-                    <View style={styles.modalOverlay}>
-                        <KeyboardAvoidingView
-                            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                        >
-                            <TouchableWithoutFeedback>
-                                <View style={[styles.modalContent, colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark]}>
+                    <View style={styles.fullscreenModalOverlay}>
+                        <TouchableWithoutFeedback>
+                            <SafeAreaView style={styles.fullscreenModalContent}>
+                                <View style={[colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark, { flex: 1 }]}>
                                     <View style={styles.modalHeader}>
                                         <TouchableOpacity onPress={() => setSearchModalVisible(false)} style={styles.modalBackButton}>
                                             <ChevronLeft size={26} color={Colors[colorScheme].text} />
@@ -157,12 +155,13 @@ export default function HomeSearchModal() {
                                                         <ThemedText style={{ textAlign: 'center', marginTop: 32 }}>No results found</ThemedText>
                                                     ) : null
                                                 }
+                                                keyboardShouldPersistTaps="handled"
                                             />
                                         )}
                                     </View>
                                 </View>
-                            </TouchableWithoutFeedback>
-                        </KeyboardAvoidingView>
+                            </SafeAreaView>
+                        </TouchableWithoutFeedback>
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>
@@ -198,19 +197,21 @@ const styles = StyleSheet.create({
     searchBarInputDark: {
         color: Colors.dark.inputText,
     },
-    modalOverlay: {
+    fullscreenModalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.3)',
         justifyContent: 'flex-end',
     },
-    modalContent: {
+    fullscreenModalContent: {
+        flex: 1,
         width: '100%',
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+        borderRadius: 0,
         padding: 0,
         alignItems: 'stretch',
-        minHeight: 300,
-        maxHeight: '80%',
+        minHeight: undefined,
+        maxHeight: undefined,
         backgroundColor: 'white',
         overflow: 'hidden',
     },
