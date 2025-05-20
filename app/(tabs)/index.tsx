@@ -2,6 +2,7 @@ import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image as ExpoImage } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -57,17 +58,53 @@ function TopMineralsCarousel() {
                             asChild
                         >
                             <TouchableOpacity
-                                style={{ alignItems: 'center', marginRight: 10, width: 120 }}
+                                style={{ alignItems: 'center', marginRight: 10, width: 140 }}
                             >
-                                <ExpoImage
-                                    source={{ uri: mineral.photos?.[0]?.photo?.image || 'https://via.placeholder.com/80' }}
-                                    style={{ width: 120, height: 150, borderRadius: 12, marginBottom: 6, backgroundColor: '#eee' }}
-                                    placeholder={mineral.photos?.[0]?.photo?.imageBlurhash ? { uri: mineral.photos[0].photo.imageBlurhash } : undefined}
-                                    contentFit="cover"
-                                    transition={400}
-                                    placeholderContentFit="cover"
-                                />
-                                <ThemedText numberOfLines={2} style={{ textAlign: 'center', fontSize: 16 }} type="default">{mineral.name}</ThemedText>
+                                <View style={{ width: 140, height: 200, borderRadius: 12, overflow: 'hidden', marginBottom: 6, backgroundColor: '#eee' }}>
+                                    <ExpoImage
+                                        source={{ uri: mineral.photos?.[0]?.photo?.image || 'https://via.placeholder.com/80' }}
+                                        style={{ width: 140, height: 200 }}
+                                        placeholder={mineral.photos?.[0]?.photo?.imageBlurhash ? { uri: mineral.photos[0].photo.imageBlurhash } : undefined}
+                                        contentFit="cover"
+                                        transition={400}
+                                        placeholderContentFit="cover"
+                                    />
+                                    {/* Gradient fade overlay and title */}
+                                    <View style={{
+                                        position: 'absolute',
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        height: 64, // match the gradient height
+                                        justifyContent: 'flex-end',
+                                    }}>
+                                        <LinearGradient
+                                            colors={[
+                                                'rgba(0,0,0,0)', 
+                                                'rgba(0,0,0,0.45)', 
+                                                'rgba(0,0,0,0.7)'
+                                            ]}
+                                            locations={[0, 0.5, 1]}
+                                            style={{
+                                                ...StyleSheet.absoluteFillObject,
+                                                height: 64, // extend the gradient higher
+                                            }}
+                                            start={{ x: 0.5, y: 0 }}
+                                            end={{ x: 0.5, y: 1 }}
+                                        />
+                                        <ThemedText
+                                            style={{
+                                                textAlign: 'center',
+                                                fontSize: 16,
+                                                color: '#fff',
+                                                paddingHorizontal: 6,
+                                                paddingBottom: 10,
+                                            }}
+                                        >
+                                            {mineral.name}
+                                        </ThemedText>
+                                    </View>
+                                </View>
                             </TouchableOpacity>
                         </Link>
                     ))}
