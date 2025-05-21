@@ -477,7 +477,7 @@ export default function HomeScreen() {
                                     contentContainerStyle={{ paddingBottom: 16 }}
                                     renderItem={({ item }) => (
                                         <Link href={`/minerals/${item.slug}`} asChild>
-                                            <TouchableOpacity>
+                                            <TouchableOpacity style={styles.card}>
                                                 <View style={styles.itemRow}>
                                                     <Image
                                                         source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
@@ -492,7 +492,8 @@ export default function HomeScreen() {
                                             </TouchableOpacity>
                                         </Link>
                                     )}
-                                    ItemSeparatorComponent={() => <View style={[styles.divider, colorScheme === "light" ? styles.dividerLight : styles.dividerDark]} />}
+                                    numColumns={2}
+                                    columnWrapperStyle={{ gap: 8, paddingTop: 8 }}
                                     onEndReached={handleEndReached}
                                     ListFooterComponent={
                                         isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
@@ -545,23 +546,31 @@ const styles = StyleSheet.create({
     searchBarInputDark: {
         color: Colors.dark.inputText,
     },
+    card: {
+        flex: 1,
+        backgroundColor: 'transparent',
+        borderRadius: 12,
+    },
     itemRow: {
-        flexDirection: 'row',
+        flex: 1,
+        flexDirection: 'column',
         alignItems: 'center',
-        paddingVertical: 10,
-        borderRadius: 8,
-        marginVertical: 4,
+        borderRadius: 12,
+        marginVertical: 8,
         alignSelf: 'stretch',
+        backgroundColor: 'transparent',
     },
     itemImage: {
-        width: 100,
-        height: 66.67,
+        width: '100%',
+        aspectRatio: 1,
         borderRadius: 8,
-        marginRight: 16,
+        marginBottom: 8,
+        backgroundColor: '#eee',
     },
     itemName: {
-        fontSize: 18,
+        fontSize: 16,
         flexShrink: 1,
+        textAlign: 'center',
     },
     divider: {
         height: 1,
