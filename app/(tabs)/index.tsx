@@ -133,7 +133,7 @@ function TopArticlesCarousel() {
 
     return (
         <View style={{ marginHorizontal: 16 }}>
-            <ThemedText type="subtitle" style={{ marginLeft: 8 }}>Articles</ThemedText>
+            <ThemedText type="subtitle">Articles</ThemedText>
             {loading ? (
                 <ActivityIndicator style={{ marginVertical: 16 }} />
             ) : (
