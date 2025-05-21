@@ -157,7 +157,7 @@ function TopArticlesCarousel() {
                                 />
                                 <View style={{ flex: 1 }}>
                                     <ThemedText type="defaultSemiBold" numberOfLines={2}>{article.title}</ThemedText>
-                                    <ThemedText type="default" style={{ fontSize: 14, lineHeight: 21, color: '#888' }}>
+                                    <ThemedText type="default" lightColor={Colors.light.icon} darkColor={Colors.dark.icon} style={{ fontSize: 14, lineHeight: 21 }}>
                                         {article.createdAt
                                             ? new Date(article.createdAt).toLocaleDateString(undefined, {
                                                 year: 'numeric',
