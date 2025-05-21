@@ -487,7 +487,7 @@ export default function HomeScreen() {
                                                         placeholderContentFit="cover"
                                                         transition={700}
                                                     />
-                                                    <ThemedText style={styles.itemName}>{item.name}</ThemedText>
+                                                    <ThemedText type="defaultSemiBold" style={styles.itemName}>{item.name}</ThemedText>
                                                 </View>
                                             </TouchableOpacity>
                                         </Link>
@@ -568,7 +568,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#eee',
     },
     itemName: {
-        fontSize: 16,
         flexShrink: 1,
         textAlign: 'center',
     },
