@@ -37,3 +37,10 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# iOS
+ios/Pods/
+ios/build/
+ios/DerivedData/
+ios/*.xcodeproj/*
+ios/*.xcworkspace/*
