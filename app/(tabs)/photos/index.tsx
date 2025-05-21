@@ -3,11 +3,11 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Image } from 'expo-image';
+import { Image as ExpoImage } from 'expo-image';
 import { Link } from 'expo-router';
 import { Search } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, FlatList, Platform, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Platform, Image as RNImage, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const SORT_OPTIONS = [
@@ -23,6 +23,7 @@ export default function PhotosScreen() {
     const [cursor, setCursor] = useState<string | null>(null);
     const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
     const [search, setSearch] = useState('');
+    const [imageSizes, setImageSizes] = useState<Record<string, { width: number, height: number }>>({});
     const colorScheme = useColorScheme() ?? 'light';
     const LIMIT = 20;
 
@@ -43,6 +44,7 @@ export default function PhotosScreen() {
         cursorParam = null,
         signal
     }: FetchPhotosArgs = {}) => {
+        console.log("Fetching photos...");
         if (append) setIsFetchingMore(true);
         else setLoading(true);
 
@@ -97,6 +99,30 @@ export default function PhotosScreen() {
         // eslint-disable-next-line
     }, [sort, search]);
 
+    useEffect(() => {
+        photos.forEach(photo => {
+            if (!imageSizes[photo.id] && photo.image) {
+                RNImage.getSize(
+                    photo.image,
+                    (width, height) => {
+                        setImageSizes(sizes => ({
+                            ...sizes,
+                            [photo.id]: { width, height }
+                        }));
+                    },
+                    () => {
+                        // fallback to square if failed
+                        setImageSizes(sizes => ({
+                            ...sizes,
+                            [photo.id]: { width: 1, height: 1 }
+                        }));
+                    }
+                );
+            }
+        });
+        // eslint-disable-next-line
+    }, [photos]);
+
     const handleEndReached = () => {
         if (!loading && !isFetchingMore && cursor) {
             fetchPhotos({ append: true, cursorParam: cursor });
@@ -113,6 +139,17 @@ export default function PhotosScreen() {
     const screenWidth = Dimensions.get('window').width;
     const imageMargin = 8;
     const imageWidth = (screenWidth - 32 - imageMargin) / 2;
+
+    // Helper to split photos into two columns for masonry layout (alternate assignment)
+    const getMasonryColumns = (items: any[]) => {
+        const left: any[] = [];
+        const right: any[] = [];
+        items.forEach((item, idx) => {
+            if (idx % 2 === 0) left.push(item);
+            else right.push(item);
+        });
+        return [left, right];
+    };
 
     return (
         <SafeAreaProvider>
@@ -160,40 +197,46 @@ export default function PhotosScreen() {
                             ) : photos.length === 0 ? (
                                 <ThemedText>No photos found</ThemedText>
                             ) : (
-                                <FlatList
-                                    data={photos}
-                                    keyExtractor={(item) => item.id}
-                                    numColumns={2}
-                                    columnWrapperStyle={{ gap: imageMargin }}
-                                    contentContainerStyle={{ paddingBottom: 16, paddingTop: 8 }}
-                                    renderItem={({ item }) => (
-                                        <Link
-                                            href={`/photos/${item.id}`}
-                                            asChild
-                                        >
-                                            <TouchableOpacity style={{ flex: 1, marginBottom: imageMargin }}>
-                                                <Image
-                                                    style={{
-                                                        width: imageWidth,
-                                                        height: imageWidth,
-                                                        borderRadius: 12,
-                                                        backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
-                                                    }}
-                                                    source={{ uri: item.image }}
-                                                    placeholder={{ uri: item.imageBlurhash }}
-                                                    contentFit="cover"
-                                                    transition={700}
-                                                    placeholderContentFit="cover"
-                                                />
-                                            </TouchableOpacity>
-                                        </Link>
-                                    )}
-                                    onEndReached={handleEndReached}
-                                    ListFooterComponent={
-                                        isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
-                                    }
-                                />
+                                <ScrollView
+                                    contentContainerStyle={{ flexDirection: 'row', gap: imageMargin, paddingTop: 8, paddingBottom: 16 }}
+                                    onMomentumScrollEnd={handleEndReached}
+                                    showsVerticalScrollIndicator={false}
+                                >
+                                    {getMasonryColumns(photos).map((column, colIdx) => (
+                                        <View key={colIdx} style={{ flex: 1, gap: imageMargin }}>
+                                            {column.map((item: any) => {
+                                                const size = imageSizes[item.id];
+                                                const aspectRatio = size ? size.height / size.width : 1;
+                                                const dynamicHeight = size ? imageWidth * aspectRatio : imageWidth;
+                                                return (
+                                                    <Link
+                                                        key={item.id}
+                                                        href={`/photos/${item.id}`}
+                                                        asChild
+                                                    >
+                                                        <TouchableOpacity style={{ marginBottom: imageMargin }}>
+                                                            <ExpoImage
+                                                                style={{
+                                                                    width: imageWidth,
+                                                                    height: dynamicHeight,
+                                                                    borderRadius: 12,
+                                                                    backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
+                                                                }}
+                                                                source={{ uri: item.image }}
+                                                                placeholder={{ uri: item.imageBlurhash }}
+                                                                contentFit="cover"
+                                                                transition={700}
+                                                                placeholderContentFit="cover"
+                                                            />
+                                                        </TouchableOpacity>
+                                                    </Link>
+                                                );
+                                            })}
+                                        </View>
+                                    ))}
+                                </ScrollView>
                             )}
+                            {isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null}
                         </View>
                     </View>
                 </SafeAreaView>
