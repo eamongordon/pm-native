@@ -214,7 +214,7 @@ export default function PhotosScreen() {
                                                         href={`/photos/${item.id}`}
                                                         asChild
                                                     >
-                                                        <TouchableOpacity style={{ marginBottom: imageMargin }}>
+                                                        <TouchableOpacity>
                                                             <ExpoImage
                                                                 style={{
                                                                     width: imageWidth,
