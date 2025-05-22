@@ -39,8 +39,4 @@ yarn-error.*
 app-example
 
 # iOS
-ios/Pods/
-ios/build/
-ios/DerivedData/
-ios/*.xcodeproj/*
-ios/*.xcworkspace/*
+ios/
