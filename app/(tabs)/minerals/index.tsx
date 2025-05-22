@@ -8,6 +8,8 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import * as tf from '@tensorflow/tfjs';
+import { bundleResourceIO, decodeJpeg } from '@tensorflow/tfjs-react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { Link } from 'expo-router';
@@ -45,6 +47,7 @@ export default function HomeScreen() {
         crystalSystems: [] as string[],
         associateMinerals: [] as any[],
         chemistry: [] as string[],
+        ids: [] as string[],
     });
     const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
     const [minerals, setMinerals] = useState<any[]>([]);
@@ -52,6 +55,7 @@ export default function HomeScreen() {
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [cursor, setCursor] = useState<string | null>(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [predicting, setPredicting] = useState(false);
     const colorScheme = useColorScheme() ?? 'light';
     const LIMIT = 10;
 
@@ -78,6 +82,7 @@ export default function HomeScreen() {
         if (filters.crystalSystems.length > 0) filterObj.crystalSystems = filters.crystalSystems;
         filterObj.associates = filters.associateMinerals.map((m: any) => m.name);
         if (filters.chemistry.length > 0) filterObj.chemistry = filters.chemistry;
+        if (filters.ids.length > 0) filterObj.ids = filters.ids;
         return filterObj;
     };
 
@@ -168,6 +173,49 @@ export default function HomeScreen() {
         else if (value === 'name-desc') setSort({ property: 'name', sort: 'desc' });
     };
 
+    // Helper: preprocess image for model
+    async function preprocessImage(uri: string) {
+        // Fetch image as array buffer
+        const response = await fetch(uri);
+        const imageData = await response.arrayBuffer();
+        // Decode JPEG to tensor
+        let imageTensor = decodeJpeg(new Uint8Array(imageData));
+        // Resize/normalize as needed for your model
+        imageTensor = tf.image.resizeBilinear(imageTensor, [128, 128]).div(255.0).expandDims(0);
+        return imageTensor;
+    }
+
+    // Predict using the model (load/dispose each time)
+    async function predictWithModel(uri: string) {
+        setPredicting(true);
+        try {
+            // Load model from local assets
+            const modelJson = require('@/assets/model/model.json');
+            const modelWeights = require('@/assets/model/weights.bin');
+            const loadedModel = await tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights));
+
+            const tensor = await preprocessImage(uri);
+            // Adjust preprocessing as needed for your model
+            const predictionTensor = loadedModel.predict(tensor) as tf.Tensor;
+            const predictionArray = (await predictionTensor.array()) as number[][];
+            const uniqueMinerals = require("@/assets/model/data/minerals.json");
+            const mineralIds = predictionArray[0]
+                .map((value, index) => (value > 0.2 ? uniqueMinerals[index].id : null))
+                .filter((label) => label !== null);
+
+            console.log("Predicted mineral IDs:", mineralIds);
+            setFilters(f => ({
+                ...f,
+                ids: mineralIds,
+            }));
+
+            tf.dispose([tensor, predictionTensor]);
+            loadedModel.dispose();
+        } finally {
+            setPredicting(false);
+        }
+    }
+
     const handlePickImage = async () => {
         // Ask for permission if needed
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -182,8 +230,7 @@ export default function HomeScreen() {
         });
         if (!result.canceled && result.assets && result.assets.length > 0) {
             const uri = result.assets[0].uri;
-            // setSelectedImage(uri); // If you want to store it
-            // ...do something with the image uri...
+            await predictWithModel(uri);
         }
     };
 
@@ -212,14 +259,18 @@ export default function HomeScreen() {
                                             autoCorrect={false}
                                             clearButtonMode="while-editing"
                                         />
-                                        <TouchableOpacity onPress={handlePickImage}>
-                                            <ThemedIcon
-                                                Icon={Camera}
-                                                size={20}
-                                                style={{ marginRight: 8 }}
-                                                lightColor={Colors.light.text}
-                                                darkColor={Colors.dark.text}
-                                            />
+                                        <TouchableOpacity onPress={handlePickImage} disabled={predicting}>
+                                            {predicting ? (
+                                                <ActivityIndicator size={20} style={{ marginRight: 8 }} />
+                                            ) : (
+                                                <ThemedIcon
+                                                    Icon={Camera}
+                                                    size={20}
+                                                    style={{ marginRight: 8 }}
+                                                    lightColor={Colors.light.text}
+                                                    darkColor={Colors.dark.text}
+                                                />
+                                            )}
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -299,6 +350,7 @@ export default function HomeScreen() {
                                                     crystalSystems: [],
                                                     associateMinerals: [],
                                                     chemistry: [],
+                                                    ids: [],
                                                 });
                                                 setModalVisible(false);
                                             }}

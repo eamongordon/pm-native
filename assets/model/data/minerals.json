@@ -1,0 +1,170 @@
+[
+    {
+        "id": "b3237ce2-1eee-4399-8f14-c30a9fd5450d",
+        "name": "Chrysocolla"
+    },
+    {
+        "id": "35d0f09a-8562-47f7-b3e5-39fdb322e699",
+        "name": "Quartz"
+    },
+    {
+        "id": "360e07a1-4f8b-486b-9d24-2f0b96bd3649",
+        "name": "Cerussite"
+    },
+    {
+        "id": "b46c5281-c549-4348-bdf9-d0d418e90780",
+        "name": "Galena"
+    },
+    {
+        "id": "f7c489e3-042c-45f8-ae40-56f57d7ab733",
+        "name": "Barite"
+    },
+    {
+        "id": "c9011be1-a539-4c06-937c-1314ae34c87e",
+        "name": "Aragonite"
+    },
+    {
+        "id": "021ea018-d618-4b26-94a2-fccdccfce3ff",
+        "name": "Mica"
+    },
+    {
+        "id": "da0832d9-3f11-4300-9bba-18b3cadeeac0",
+        "name": "Corundum"
+    },
+    {
+        "id": "4f59fe04-f15b-4d8c-bafb-e71e500faf9d",
+        "name": "Pyromorphite"
+    },
+    {
+        "id": "fe1d476c-5105-43de-bb45-65c012f41e95",
+        "name": "Vanadinite"
+    },
+    {
+        "id": "fe6f502d-3e48-48b7-8dc7-94ab647ae376",
+        "name": "Cuprite"
+    },
+    {
+        "id": "0bd9586f-d741-497e-af9e-831baf25621e",
+        "name": "Azurite"
+    },
+    {
+        "id": "6be81d32-7645-4bab-8a20-89f0b5ea16c8",
+        "name": "Dioptase"
+    },
+    {
+        "id": "aaf55834-9150-460d-8828-2f727e97ca6f",
+        "name": "Hemimorphite"
+    },
+    {
+        "id": "319f845a-8d8f-438e-95f6-1495a02e4e11",
+        "name": "Pyrite"
+    },
+    {
+        "id": "6d728ee4-efea-4c77-bf40-2cfe3b573c76",
+        "name": "Calcite"
+    },
+    {
+        "id": "caf1bb52-641b-4299-b698-aed609d1a287",
+        "name": "Roselite"
+    },
+    {
+        "id": "c765dc23-a2fd-4a58-9ea0-6267ad272b50",
+        "name": "Apophyllite"
+    },
+    {
+        "id": "4790403a-fb8a-43b1-b0a4-82f500ce0581",
+        "name": "Malachite"
+    },
+    {
+        "id": "f5aa1c7a-bfb3-44ff-94e2-3003f49f98de",
+        "name": "Sulfur\n"
+    },
+    {
+        "id": "95b83a9d-248f-497f-8bfd-53ab58282b99",
+        "name": "Adamite"
+    },
+    {
+        "id": "e2699356-2e5a-46a5-ab5c-6f31b3e7407e",
+        "name": "Smithsonite"
+    },
+    {
+        "id": "f9fd1746-b568-41db-9a7c-842bcd842ab8",
+        "name": "Conichalcite"
+    },
+    {
+        "id": "6626d235-2f26-4659-9284-07070d582f82",
+        "name": "Wulfenite"
+    },
+    {
+        "id": "649ac176-4c70-4008-8c26-fbda600df6f3",
+        "name": "Linarite"
+    },
+    {
+        "id": "2e2c8b3c-6944-44ac-b8f6-f378fecbd547",
+        "name": "Krohnkite"
+    },
+    {
+        "id": "707ff57c-215a-4918-8815-eae26ba9fd31",
+        "name": "Chalcanthite"
+    },
+    {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "name": "Fluorite"
+    },
+    {
+        "id": "f27fdb9c-ca62-4949-bf0c-74ca46317a9e",
+        "name": "Salammoniac"
+    },
+    {
+        "id": "dc977afb-98d1-4c8a-abe7-5ec0314ab844",
+        "name": "Crocoite"
+    },
+    {
+        "id": "d2f65c8c-5eb2-49c6-893e-93eb1bdc4f69",
+        "name": "Hubnerite"
+    },
+    {
+        "id": "188d89de-c71a-4d9e-b847-cd21d7d2bf37",
+        "name": "Rhodochrosite"
+    },
+    {
+        "id": "7e0ae477-5eca-4eb3-a1d5-ce012333b019",
+        "name": "Kutnohorite"
+    },
+    {
+        "id": "00000000-0000-0000-0000-000000000002",
+        "name": "Aurichalcite"
+    },
+    {
+        "id": "2ebfe36a-944a-4e7d-b65d-0c965babcdce",
+        "name": "Spodumene"
+    },
+    {
+        "id": "307eb6e3-ee81-4046-ae7f-1b8960b0c8ff",
+        "name": "Tremolite"
+    },
+    {
+        "id": "00000000-0000-0000-0000-000000000003",
+        "name": "Tourmaline"
+    },
+    {
+        "id": "61b4fb01-2e26-4187-b745-74e6e431af62",
+        "name": "Kinoite"
+    },
+    {
+        "id": "b160bd6b-aa40-410e-8a33-ff59adc4fd43",
+        "name": "Garnet"
+    },
+    {
+        "id": "8a011016-e3fd-4a20-945a-9b3196784e69",
+        "name": "Feldspar"
+    },
+    {
+        "id": "134774ef-ba3e-4599-91a4-54990e67b893",
+        "name": "Beryl"
+    },
+    {
+        "id": "9768490f-f02e-468d-b787-d1eb93597820",
+        "name": "Gypsum"
+    }
+]
