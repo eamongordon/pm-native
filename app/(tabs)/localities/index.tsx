@@ -1,4 +1,5 @@
 import AssociatesSearch from '@/components/AssociatesSearch';
+import Select from '@/components/Select';
 import { ThemedIcon } from '@/components/ThemedIcon';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -14,6 +15,12 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+const SORT_OPTIONS = [
+    { label: 'Default', value: 'default' },
+    { label: 'A-Z', value: 'name-asc' },
+    { label: 'Z-A', value: 'name-desc' },
+];
+
 export default function LocalitiesScreen() {
     const colorScheme = useColorScheme() ?? 'light';
     const [localities, setLocalities] = useState<any[]>([]);
@@ -28,6 +35,7 @@ export default function LocalitiesScreen() {
         radius: '',
     });
     const [searchInput, setSearchInput] = useState('');
+    const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
 
     const [fetchingLocation, setFetchingLocation] = useState(false);
     const [selectedLocality, setSelectedLocality] = useState<any | null>(null);
@@ -54,15 +62,29 @@ export default function LocalitiesScreen() {
         return obj;
     };
 
+    // Add handler for sort dropdown
+    const handleSortChange = (value: string) => {
+        if (value === 'default') setSort(null);
+        else if (value === 'name-asc') setSort({ property: 'name', sort: 'asc' });
+        else if (value === 'name-desc') setSort({ property: 'name', sort: 'desc' });
+    };
+
     // Fetch localities from API
     const fetchLocalities = async () => {
         setLoading(true);
         setSelectedLocality(null);
         let url = 'https://www.prospectorminerals.com/api/localities?limit=100';
         const filterObj = buildFilterObj();
-        if (Object.keys(filterObj).length > 0) {
-            url += `&filter=${encodeURIComponent(JSON.stringify(filterObj))}`;
+        const params: Record<string, string> = {};
+        if (Object.keys(filterObj).length > 0) params.filter = JSON.stringify(filterObj);
+        if (sort && sort.property !== 'default') {
+            params.sortBy = sort.property;
+            params.sort = sort.sort;
         }
+        const query = Object.entries(params)
+            .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+            .join('&');
+        if (query) url += `&${query}`;
         // Only use proxy in web
         const finalUrl =
             Platform.OS === 'web'
@@ -78,11 +100,11 @@ export default function LocalitiesScreen() {
         setLoading(false);
     };
 
-    // Refetch when filters change
+    // Refetch when filters or sort change
     useEffect(() => {
         fetchLocalities();
         // eslint-disable-next-line
-    }, [filters]);
+    }, [filters, sort]);
 
     // Use current location for filter
     const handleUseCurrentLocation = async () => {
@@ -139,7 +161,25 @@ export default function LocalitiesScreen() {
                         <SlidersHorizontal size={18} style={{ marginRight: 6 }} color={Colors[colorScheme].text} />
                         <ThemedText style={{ fontSize: 14 }}>Filter</ThemedText>
                     </TouchableOpacity>
-                    <View style={{ flex: 1 }} />
+                    {viewMode === 'list' && (
+                        <View style={{ marginLeft: 8, minWidth: 120 }}>
+                            <Select
+                                options={SORT_OPTIONS}
+                                selectedValue={
+                                    !sort || sort.property === 'default'
+                                        ? 'default'
+                                        : sort.property === 'name' && sort.sort === 'asc'
+                                            ? 'name-asc'
+                                            : sort.property === 'name' && sort.sort === 'desc'
+                                                ? 'name-desc'
+                                                : 'default'
+                                }
+                                onValueChange={handleSortChange}
+                                placeholder="Sort"
+                                prefix="Sort: "
+                            />
+                        </View>
+                    )}
                 </View>
             </View>
             {/* Filter Modal */}
