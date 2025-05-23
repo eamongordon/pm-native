@@ -6,7 +6,7 @@ import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { BookText, Gem, House, Image, Sparkle } from 'lucide-react-native';
+import { BookText, Gem, House, Image, MapPin, Sparkle } from 'lucide-react-native';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
@@ -81,6 +81,13 @@ export default function TabLayout() {
                 name="articles/[slug]"
                 options={{
                     href: null,
+                }}
+            />
+            <Tabs.Screen
+                name="localities/index"
+                options={{
+                    title: 'Localities',
+                    tabBarIcon: ({ color }) => <MapPin size={24} color={color} />,
                 }}
             />
         </Tabs>

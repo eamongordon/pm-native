@@ -46,7 +46,8 @@
         {
           "photosPermission": "We use access to your photos in order to search for minerals."
         }
-      ]
+      ],
+      "expo-maps"
     ],
     "experiments": {
       "typedRoutes": true
