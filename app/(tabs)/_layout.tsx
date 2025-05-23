@@ -90,6 +90,12 @@ export default function TabLayout() {
                     tabBarIcon: ({ color }) => <MapPin size={24} color={color} />,
                 }}
             />
+            <Tabs.Screen
+                name="localities/[slug]"
+                options={{
+                    href: null,
+                }}
+            />
         </Tabs>
     );
 }

@@ -320,7 +320,7 @@ export default function LocalitiesScreen() {
                         keyExtractor={item => item.id}
                         contentContainerStyle={{ padding: 12 }}
                         renderItem={({ item }) => (
-                            <Link href={`/minerals`} asChild>
+                            <Link href={`/localities/${item.slug}`} asChild>
                                 <TouchableOpacity style={styles.listItem}>
                                     <Image
                                         source={{ uri: item.photos?.[0]?.image }}
@@ -389,38 +389,42 @@ export default function LocalitiesScreen() {
                     </TouchableOpacity>
                     {/* Marker Popup */}
                     {selectedLocality && viewMode === "map" && (
-                        <View style={[styles.popup, colorScheme === 'light' ? styles.popupLight : styles.popupDark]}>
-                            {/* Wrap content in a flex row and constrain image width */}
-                            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                                {selectedLocality.photos?.[0]?.image && (
-                                    <Image
-                                        source={{ uri: selectedLocality.photos[0].image }}
-                                        style={{
-                                            width: 80,
-                                            height: "100%",
-                                            borderTopLeftRadius: 16,
-                                            borderBottomLeftRadius: 16,
-                                            backgroundColor: '#eee',
-                                        }}
-                                        contentFit="cover"
-                                        placeholder={{ uri: selectedLocality.photos[0].imageBlurhash }}
-                                        placeholderContentFit="cover"
-                                        transition={500}
-                                    />
-                                )}
-                                <View style={{ flex: 1, padding: 16 }}>
-                                    <ThemedText type="defaultSemiBold" style={{ fontSize: 18, flexShrink: 1 }}>
-                                        {selectedLocality.name}
-                                    </ThemedText>
+                        <Link href={`/localities/${selectedLocality.slug}`} asChild>
+                            <TouchableOpacity>
+                                <View style={[styles.popup, colorScheme === 'light' ? styles.popupLight : styles.popupDark]}>
+                                    {/* Wrap content in a flex row and constrain image width */}
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                                        {selectedLocality.photos?.[0]?.image && (
+                                            <Image
+                                                source={{ uri: selectedLocality.photos[0].image }}
+                                                style={{
+                                                    width: 80,
+                                                    height: "100%",
+                                                    borderTopLeftRadius: 16,
+                                                    borderBottomLeftRadius: 16,
+                                                    backgroundColor: '#eee',
+                                                }}
+                                                contentFit="cover"
+                                                placeholder={{ uri: selectedLocality.photos[0].imageBlurhash }}
+                                                placeholderContentFit="cover"
+                                                transition={500}
+                                            />
+                                        )}
+                                        <View style={{ flex: 1, padding: 16 }}>
+                                            <ThemedText type="defaultSemiBold" style={{ fontSize: 18, flexShrink: 1 }}>
+                                                {selectedLocality.name}
+                                            </ThemedText>
+                                        </View>
+                                    </View>
+                                    <TouchableOpacity
+                                        style={styles.popupClose}
+                                        onPress={() => setSelectedLocality(null)}
+                                    >
+                                        <ThemedIcon Icon={X} />
+                                    </TouchableOpacity>
                                 </View>
-                            </View>
-                            <TouchableOpacity
-                                style={styles.popupClose}
-                                onPress={() => setSelectedLocality(null)}
-                            >
-                                <ThemedIcon Icon={X} />
                             </TouchableOpacity>
-                        </View>
+                        </Link>
                     )}
                 </View>
             </View>
