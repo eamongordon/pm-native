@@ -57,6 +57,7 @@ export default function LocalitiesScreen() {
     // Fetch localities from API
     const fetchLocalities = async () => {
         setLoading(true);
+        setSelectedLocality(null);
         let url = 'https://www.prospectorminerals.com/api/localities?limit=100';
         const filterObj = buildFilterObj();
         if (Object.keys(filterObj).length > 0) {
@@ -202,7 +203,7 @@ export default function LocalitiesScreen() {
                                 disabled={fetchingLocation}
                             >
                                 <LocateFixed size={18} color={Colors[colorScheme].text} />
-                                <ThemedText style={{ marginLeft: 4, display: 'flex' }}>Current</ThemedText>
+                                <ThemedText style={{ marginLeft: 4, display: 'flex' }}>Use Current Location</ThemedText>
                             </TouchableOpacity>
                         </View>
                     </ScrollView>
@@ -347,8 +348,8 @@ export default function LocalitiesScreen() {
                         <ThemedText style={{ marginLeft: 8, fontSize: 16 }}>List</ThemedText>
                     </TouchableOpacity>
                     {/* Marker Popup */}
-                    {selectedLocality && (
-                        <View style={styles.popup}>
+                    {selectedLocality && viewMode === "map" && (
+                        <View style={[styles.popup, colorScheme === 'light' ? styles.popupLight : styles.popupDark]}>
                             {/* Wrap content in a flex row and constrain image width */}
                             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                                 {selectedLocality.photos?.[0]?.image && (
@@ -444,14 +445,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 3,
         height: 40,
+        borderWidth: 1,
     },
     currentLocationButtonLight: {
         color: Colors.light.text,
-        backgroundColor: Colors.light.primary,
+        borderColor: Colors.light.border,
     },
     currentLocationButtonDark: {
         color: Colors.dark.text,
-        backgroundColor: Colors.dark.primary,
+        borderColor: Colors.dark.border,
     },
     toggleButton: {
         flexDirection: 'row',
@@ -503,7 +505,7 @@ const styles = StyleSheet.create({
         borderColor: '#e0e0e0',
     },
     showResultsButton: {
-        borderRadius: 8,
+        borderRadius: 12,
         height: 40,
         marginBottom: 16,
         alignItems: 'center',
@@ -543,13 +545,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16, // add horizontal padding here
     },
     popup: {
-        backgroundColor: '#fff',
         width: '100%',
         shadowColor: '#000',
         shadowOpacity: 0.15,
         borderRadius: 16,
-        marginTop: 16,
-        borderWidth: 1,
+        marginBottom: 16,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
         elevation: 5,
@@ -557,6 +557,14 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         justifyContent: 'center',
         position: 'relative',
+    },
+    popupLight: {
+        backgroundColor: Colors.light.background,
+        borderColor: Colors.light.border,
+    },
+    popupDark: {
+        backgroundColor: Colors.dark.background,
+        borderColor: Colors.dark.border,
     },
     popupClose: {
         position: 'absolute',
