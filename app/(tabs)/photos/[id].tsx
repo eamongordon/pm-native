@@ -1,6 +1,7 @@
 import { ThemedIcon } from '@/components/ThemedIcon';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image, useImage } from 'expo-image';
@@ -20,6 +21,7 @@ export default function PhotoDetailsScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const colorScheme = useColorScheme() ?? 'light';
     const { top } = useSafeAreaInsets();
+    const bottom = useBottomTabOverflow();
 
     useEffect(() => {
         if (!id) return;
@@ -109,7 +111,7 @@ export default function PhotoDetailsScreen() {
                                 />
                             </TouchableOpacity>
                         </View>
-                        <ThemedView style={styles.mainSection}>
+                        <ThemedView style={[styles.mainSection, { paddingBottom: bottom + 24 }]}>
                             <ThemedText type="title">
                                 {photo.name || 'Photo'}
                             </ThemedText>

@@ -1,6 +1,7 @@
 import { ThemedIcon } from '@/components/ThemedIcon';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
@@ -23,6 +24,7 @@ export default function DetailsScreen() {
 
     const colorScheme = useColorScheme() ?? 'light';
     const insets = useSafeAreaInsets();
+    const bottom = useBottomTabOverflow();
 
     // Header background on scroll
     const [headerSolid, setHeaderSolid] = useState(false);
@@ -188,7 +190,7 @@ export default function DetailsScreen() {
                             />
                         ))}
                     </View>
-                    <ThemedView style={styles.mainSection}>
+                    <ThemedView style={[styles.mainSection, { paddingBottom: bottom + 24 }]}>
                         <ThemedText type="title">
                             {mineral.name || 'Mineral Details'}
                         </ThemedText>
