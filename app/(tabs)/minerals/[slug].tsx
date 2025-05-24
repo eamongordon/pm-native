@@ -6,11 +6,12 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
+const GALLERY_HEIGHT = 300;
 
 export default function DetailsScreen() {
     const { slug } = useLocalSearchParams();
@@ -21,6 +22,11 @@ export default function DetailsScreen() {
     const [galleryIndex, setGalleryIndex] = useState(0);
 
     const colorScheme = useColorScheme() ?? 'light';
+    const insets = useSafeAreaInsets();
+
+    // Header background on scroll
+    const [headerSolid, setHeaderSolid] = useState(false);
+    const scrollY = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         if (!slug) return;
@@ -30,7 +36,6 @@ export default function DetailsScreen() {
             JSON.stringify({ slug })
         )}&fieldset=full&limit=1`;
 
-        // Use proxy for web
         if (Platform.OS === 'web') {
             url = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
         }
@@ -48,12 +53,19 @@ export default function DetailsScreen() {
             .finally(() => setLoading(false));
     }, [slug]);
 
+    // Listen to scroll position to set header background
+    useEffect(() => {
+        const listener = scrollY.addListener(({ value }) => {
+            setHeaderSolid(value > GALLERY_HEIGHT - (insets.top + 48));
+        });
+        return () => scrollY.removeListener(listener);
+    }, [insets.top, scrollY]);
+
     // Show Not Found screen if mineral is not found after loading
     if (!loading && !mineral) {
         return null;
     }
 
-    // Use mineral photos if available, fallback to static images
     const images =
         mineral && mineral.photos?.length > 0
             ? mineral.photos.map((p: any) => ({ uri: p.photo?.image, blurhash: p.photo?.imageBlurhash })).filter((obj: any) => !!obj.uri)
@@ -64,7 +76,7 @@ export default function DetailsScreen() {
             ];
 
     // Handler for scroll event to update currentIndex
-    const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const handleGalleryScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const page = Math.round(event.nativeEvent.contentOffset.x / width);
         if (page !== currentIndex) setCurrentIndex(page);
     };
@@ -72,231 +84,298 @@ export default function DetailsScreen() {
     return (
         <ThemedView style={styles.container}>
             <StatusBar hidden={galleryVisible} />
-            <SafeAreaProvider>
-                <SafeAreaView style={styles.safeArea}>
-                    {loading ? (
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                            <ActivityIndicator />
-                        </View>
-                    ) : (
-                        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                            <View style={styles.galleryContainer}>
-                                {/* Back Button */}
-                                <Link href="/minerals" asChild>
-                                    <TouchableOpacity
-                                        style={styles.backButton}
-                                        activeOpacity={0.7}
-                                    >
-                                        <View style={[
-                                            styles.backButtonCircle,
-                                            colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
-                                        ]}>
-                                            <ThemedIcon Icon={ChevronLeft} lightColor={Colors.light.text} darkColor={Colors.dark.text} size={28} style={styles.backButtonIcon} />
-                                        </View>
-                                    </TouchableOpacity>
-                                </Link>
-                                <ScrollView
-                                    horizontal
-                                    pagingEnabled
-                                    showsHorizontalScrollIndicator={false}
-                                    style={styles.gallery}
-                                    onScroll={handleScroll}
-                                    scrollEventThrottle={16}
-                                >
-                                    {images.map((image: { uri: string, blurhash: string }, idx: number) => (
-                                        <TouchableOpacity
-                                            key={idx}
-                                            activeOpacity={0.8}
-                                            onPress={() => {
-                                                setGalleryIndex(idx);
-                                                setGalleryVisible(true);
-                                            }}
-                                        >
-                                            <View style={{ width }}>
-                                                <Image
-                                                    source={{ uri: image.uri }}
-                                                    style={styles.image}
-                                                    placeholder={{ uri: image.blurhash }}
-                                                    contentFit="cover"
-                                                    placeholderContentFit="cover"
-                                                    transition={700}
-                                                />
-                                            </View>
-                                        </TouchableOpacity>
-                                    ))}
-                                </ScrollView>
-                            </View>
-                            <View style={styles.indicatorContainer}>
-                                {images.map((_: string, idx: number) => (
-                                    <View
-                                        key={idx}
-                                        style={[
-                                            styles.indicator,
-                                            idx === currentIndex && styles.activeIndicator,
-                                        ]}
-                                    />
-                                ))}
-                            </View>
-                            <ThemedView style={styles.mainSection}>
-                                <ThemedText type="title">
-                                    {mineral.name || 'Mineral Details'}
-                                </ThemedText>
-                                <ThemedText style={styles.section}>
-                                    {mineral.description || `Details of user ${slug}`}
-                                </ThemedText>
-                                {mineral.uses && (
-                                    <View style={styles.section}>
-                                        <ThemedText type="subtitle">Uses</ThemedText>
-                                        <ThemedText>
-                                            {mineral.uses || `Details of user ${slug}`}
-                                        </ThemedText>
-                                    </View>
-                                )}
-                                {mineral.localities_description && (
-                                    <View style={styles.section}>
-                                        <ThemedText type="subtitle">Notable Localities</ThemedText>
-                                        <ThemedText>
-                                            {mineral.localities_description || `Details of user ${slug}`}
-                                        </ThemedText>
-                                    </View>
-                                )}
-                                {/* Properties Section */}
-                                {(mineral.chemical_formula ||
-                                    mineral.hardness_min ||
-                                    mineral.hardness_max ||
-                                    mineral.crystal_system ||
-                                    mineral.mineral_class ||
-                                    mineral.luster) && (
-                                        <View style={styles.section}>
-                                            <ThemedText type="subtitle">Properties</ThemedText>
-                                            <View style={styles.propertiesTable}>
-                                                {mineral.chemical_formula && (
-                                                    <View style={styles.propertyRow}>
-                                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
-                                                            Chemical Formula
-                                                        </ThemedText>
-                                                        <ThemedText style={styles.propertyValue}>
-                                                            {mineral.chemical_formula}
-                                                        </ThemedText>
-                                                    </View>
-                                                )}
-                                                {(mineral.hardness_min || mineral.hardness_max) && (
-                                                    <View style={styles.propertyRow}>
-                                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
-                                                            Hardness
-                                                        </ThemedText>
-                                                        <ThemedText style={styles.propertyValue}>
-                                                            {mineral.hardness_min}
-                                                            {mineral.hardness_max && mineral.hardness_min !== mineral.hardness_max
-                                                                ? ` - ${mineral.hardness_max}`
-                                                                : ''}
-                                                        </ThemedText>
-                                                    </View>
-                                                )}
-                                                {mineral.crystal_system && (
-                                                    <View style={styles.propertyRow}>
-                                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
-                                                            Crystal System
-                                                        </ThemedText>
-                                                        <ThemedText style={styles.propertyValue}>
-                                                            {mineral.crystal_system}
-                                                        </ThemedText>
-                                                    </View>
-                                                )}
-                                                {mineral.mineral_class && (
-                                                    <View style={styles.propertyRow}>
-                                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
-                                                            Mineral Class
-                                                        </ThemedText>
-                                                        <ThemedText style={styles.propertyValue}>
-                                                            {mineral.mineral_class}
-                                                        </ThemedText>
-                                                    </View>
-                                                )}
-                                                {mineral.luster && (
-                                                    <View style={styles.propertyRow}>
-                                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
-                                                            Luster
-                                                        </ThemedText>
-                                                        <ThemedText style={styles.propertyValue}>
-                                                            {mineral.luster}
-                                                        </ThemedText>
-                                                    </View>
-                                                )}
-                                            </View>
-                                        </View>
-                                    )}
-                            </ThemedView>
-                        </ScrollView>
-                    )}
-                    {/* Fullscreen Gallery Modal */}
-                    <Modal
-                        visible={galleryVisible}
-                        transparent={true}
-                        animationType="fade"
-                        onRequestClose={() => setGalleryVisible(false)}
+            {/* Header overlays gallery, solid after scroll */}
+            <Animated.View
+                style={[
+                    styles.header,
+                    {
+                        paddingTop: insets.top,
+                        backgroundColor: headerSolid
+                            ? (colorScheme === 'light' ? Colors.light.background : Colors.dark.background)
+                            : 'transparent',
+                        borderBottomWidth: headerSolid ? StyleSheet.hairlineWidth : 0,
+                        borderBottomColor: colorScheme === 'light' ? Colors.light.border : Colors.dark.border,
+                    }
+                ]}
+                pointerEvents="box-none"
+            >
+                {/* Left: Back Button */}
+                <Link href="/minerals" asChild>
+                    <TouchableOpacity
+                        style={styles.headerBackButton}
+                        activeOpacity={0.7}
                     >
-                        <View style={styles.modalBackground}>
-                            <ScrollView
-                                horizontal
-                                pagingEnabled
-                                showsHorizontalScrollIndicator={false}
-                                contentOffset={{ x: galleryIndex * width, y: 0 }}
-                                style={{ flex: 1 }}
-                                onMomentumScrollEnd={e => {
-                                    const page = Math.round(e.nativeEvent.contentOffset.x / width);
-                                    setGalleryIndex(page);
-                                }}
-                            >
-                                {images.map((image: { uri: string, blurhash: string }, idx: number) => (
-                                    <View key={idx} style={{ width, height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={[
+                            styles.backButtonCircle,
+                            colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
+                        ]}>
+                            <ThemedIcon Icon={ChevronLeft} lightColor={Colors.light.text} darkColor={Colors.dark.text} size={28} style={styles.backButtonIcon} />
+                        </View>
+                    </TouchableOpacity>
+                </Link>
+                {/* Center: Title */}
+                <View style={styles.headerTitleContainer}>
+                    {headerSolid && mineral && (
+                        <ThemedText
+                            type="defaultSemiBold"
+                            numberOfLines={1}
+                            style={[
+                                styles.headerTitle,
+                                { color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }
+                            ]}
+                        >
+                            {mineral.name}
+                        </ThemedText>
+                    )}
+                </View>
+                {/* Right: Spacer for symmetry */}
+                <View style={styles.headerRightSpacer} />
+            </Animated.View>
+            {loading ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator />
+                </View>
+            ) : (
+                <Animated.ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    scrollEventThrottle={16}
+                    onScroll={Animated.event(
+                        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                        { useNativeDriver: false }
+                    )}
+                >
+                    <View style={styles.galleryContainer}>
+                        {/* Gallery extends to top, header overlays */}
+                        <ScrollView
+                            horizontal
+                            pagingEnabled
+                            showsHorizontalScrollIndicator={false}
+                            style={styles.gallery}
+                            onScroll={handleGalleryScroll}
+                            scrollEventThrottle={16}
+                        >
+                            {images.map((image: { uri: string, blurhash: string }, idx: number) => (
+                                <TouchableOpacity
+                                    key={idx}
+                                    activeOpacity={0.8}
+                                    onPress={() => {
+                                        setGalleryIndex(idx);
+                                        setGalleryVisible(true);
+                                    }}
+                                >
+                                    <View style={{ width }}>
                                         <Image
                                             source={{ uri: image.uri }}
-                                            style={styles.fullImage}
-                                            contentFit="contain"
+                                            style={styles.image}
                                             placeholder={{ uri: image.blurhash }}
-                                            placeholderContentFit="contain"
+                                            contentFit="cover"
+                                            placeholderContentFit="cover"
                                             transition={700}
                                         />
                                     </View>
-                                ))}
-                            </ScrollView>
-                            {/* Modal indicator */}
-                            <View style={styles.modalIndicatorContainer}>
-                                {images.map((_: string, idx: number) => (
-                                    <View
-                                        key={idx}
-                                        style={[
-                                            styles.modalIndicator,
-                                            idx === galleryIndex && styles.activeModalIndicator,
-                                        ]}
-                                    />
-                                ))}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                    <View style={styles.indicatorContainer}>
+                        {images.map((_: string, idx: number) => (
+                            <View
+                                key={idx}
+                                style={[
+                                    styles.indicator,
+                                    idx === currentIndex && styles.activeIndicator,
+                                ]}
+                            />
+                        ))}
+                    </View>
+                    <ThemedView style={styles.mainSection}>
+                        <ThemedText type="title">
+                            {mineral.name || 'Mineral Details'}
+                        </ThemedText>
+                        <ThemedText style={styles.section}>
+                            {mineral.description || `Details of user ${slug}`}
+                        </ThemedText>
+                        {mineral.uses && (
+                            <View style={styles.section}>
+                                <ThemedText type="subtitle">Uses</ThemedText>
+                                <ThemedText>
+                                    {mineral.uses || `Details of user ${slug}`}
+                                </ThemedText>
                             </View>
-                            <TouchableOpacity
-                                style={styles.closeButton}
-                                onPress={() => setGalleryVisible(false)}
-                            >
-                                <ThemedText style={{ color: '#fff', fontSize: 24 }}>✕</ThemedText>
-                            </TouchableOpacity>
-                        </View>
-                    </Modal>
-                </SafeAreaView>
-            </SafeAreaProvider>
+                        )}
+                        {mineral.localities_description && (
+                            <View style={styles.section}>
+                                <ThemedText type="subtitle">Notable Localities</ThemedText>
+                                <ThemedText>
+                                    {mineral.localities_description || `Details of user ${slug}`}
+                                </ThemedText>
+                            </View>
+                        )}
+                        {/* Properties Section */}
+                        {(mineral.chemical_formula ||
+                            mineral.hardness_min ||
+                            mineral.hardness_max ||
+                            mineral.crystal_system ||
+                            mineral.mineral_class ||
+                            mineral.luster) && (
+                                <View style={styles.section}>
+                                    <ThemedText type="subtitle">Properties</ThemedText>
+                                    <View style={styles.propertiesTable}>
+                                        {mineral.chemical_formula && (
+                                            <View style={styles.propertyRow}>
+                                                <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                                    Chemical Formula
+                                                </ThemedText>
+                                                <ThemedText style={styles.propertyValue}>
+                                                    {mineral.chemical_formula}
+                                                </ThemedText>
+                                            </View>
+                                        )}
+                                        {(mineral.hardness_min || mineral.hardness_max) && (
+                                            <View style={styles.propertyRow}>
+                                                <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                                    Hardness
+                                                </ThemedText>
+                                                <ThemedText style={styles.propertyValue}>
+                                                    {mineral.hardness_min}
+                                                    {mineral.hardness_max && mineral.hardness_min !== mineral.hardness_max
+                                                        ? ` - ${mineral.hardness_max}`
+                                                        : ''}
+                                                </ThemedText>
+                                            </View>
+                                        )}
+                                        {mineral.crystal_system && (
+                                            <View style={styles.propertyRow}>
+                                                <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                                    Crystal System
+                                                </ThemedText>
+                                                <ThemedText style={styles.propertyValue}>
+                                                    {mineral.crystal_system}
+                                                </ThemedText>
+                                            </View>
+                                        )}
+                                        {mineral.mineral_class && (
+                                            <View style={styles.propertyRow}>
+                                                <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                                    Mineral Class
+                                                </ThemedText>
+                                                <ThemedText style={styles.propertyValue}>
+                                                    {mineral.mineral_class}
+                                                </ThemedText>
+                                            </View>
+                                        )}
+                                        {mineral.luster && (
+                                            <View style={styles.propertyRow}>
+                                                <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                                    Luster
+                                                </ThemedText>
+                                                <ThemedText style={styles.propertyValue}>
+                                                    {mineral.luster}
+                                                </ThemedText>
+                                            </View>
+                                        )}
+                                    </View>
+                                </View>
+                            )}
+                    </ThemedView>
+                </Animated.ScrollView>
+            )}
+            {/* Fullscreen Gallery Modal */}
+            <Modal
+                visible={galleryVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setGalleryVisible(false)}
+            >
+                <View style={styles.modalBackground}>
+                    <ScrollView
+                        horizontal
+                        pagingEnabled
+                        showsHorizontalScrollIndicator={false}
+                        contentOffset={{ x: galleryIndex * width, y: 0 }}
+                        style={{ flex: 1 }}
+                        onMomentumScrollEnd={e => {
+                            const page = Math.round(e.nativeEvent.contentOffset.x / width);
+                            setGalleryIndex(page);
+                        }}
+                    >
+                        {images.map((image: { uri: string, blurhash: string }, idx: number) => (
+                            <View key={idx} style={{ width, height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                                <Image
+                                    source={{ uri: image.uri }}
+                                    style={styles.fullImage}
+                                    contentFit="contain"
+                                    placeholder={{ uri: image.blurhash }}
+                                    placeholderContentFit="contain"
+                                    transition={700}
+                                />
+                            </View>
+                        ))}
+                    </ScrollView>
+                    {/* Modal indicator */}
+                    <View style={styles.modalIndicatorContainer}>
+                        {images.map((_: string, idx: number) => (
+                            <View
+                                key={idx}
+                                style={[
+                                    styles.modalIndicator,
+                                    idx === galleryIndex && styles.activeModalIndicator,
+                                ]}
+                            />
+                        ))}
+                    </View>
+                    <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={() => setGalleryVisible(false)}
+                    >
+                        <ThemedText style={{ color: '#fff', fontSize: 24 }}>✕</ThemedText>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
         </ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-    },
     container: {
         flex: 1,
     },
+    header: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        zIndex: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        // backgroundColor set dynamically
+    },
+    headerBackButton: {
+        marginLeft: 8,
+        marginTop: 0,
+        height: 48,
+        width: 48,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    headerTitleContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 48,
+    },
+    headerTitle: {
+        fontSize: 18,
+        textAlign: 'center',
+        includeFontPadding: false,
+    },
+    headerRightSpacer: {
+        width: 56, // match back button + margin for symmetry
+        height: 48,
+    },
     galleryContainer: {
         width: width,
-        height: 250,
+        height: GALLERY_HEIGHT,
         backgroundColor: '#eee',
         justifyContent: 'center',
         alignItems: 'center',
@@ -304,11 +383,11 @@ const styles = StyleSheet.create({
     },
     gallery: {
         width: width,
-        height: 250,
+        height: GALLERY_HEIGHT,
     },
     image: {
         width: width,
-        height: 250,
+        height: GALLERY_HEIGHT,
         resizeMode: 'cover',
     },
     indicatorContainer: {
@@ -396,12 +475,6 @@ const styles = StyleSheet.create({
     activeModalIndicator: {
         backgroundColor: '#fff',
         opacity: 1,
-    },
-    backButton: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        zIndex: 10,
     },
     backButtonCircle: {
         width: 40,

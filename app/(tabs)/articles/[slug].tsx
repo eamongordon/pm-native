@@ -6,18 +6,24 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
+const IMAGE_HEIGHT = 300;
 
 export default function ArticleDetailsScreen() {
     const { slug } = useLocalSearchParams();
     const [article, setArticle] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const colorScheme = useColorScheme() ?? 'light';
+    const insets = useSafeAreaInsets();
+
+    // Header background on scroll
+    const [headerSolid, setHeaderSolid] = useState(false);
+    const scrollY = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         if (!slug) return;
@@ -44,96 +50,134 @@ export default function ArticleDetailsScreen() {
             .finally(() => setLoading(false));
     }, [slug]);
 
+    useEffect(() => {
+        const listener = scrollY.addListener(({ value }) => {
+            setHeaderSolid(value > IMAGE_HEIGHT - (insets.top + 48));
+        });
+        return () => scrollY.removeListener(listener);
+    }, [insets.top, scrollY]);
+
     if (!loading && !article) {
         return (
             <ThemedView style={styles.container}>
-                <SafeAreaProvider>
-                    <SafeAreaView style={styles.safeArea}>
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                            <ThemedText>Article not found</ThemedText>
-                        </View>
-                    </SafeAreaView>
-                </SafeAreaProvider>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ThemedText>Article not found</ThemedText>
+                </View>
             </ThemedView>
         );
     }
 
     return (
         <ThemedView style={styles.container}>
-            <StatusBar />
-            <SafeAreaProvider>
-                <SafeAreaView style={styles.safeArea}>
-                    {loading ? (
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                            <ActivityIndicator />
+            {/* Header */}
+            <Animated.View
+                style={[
+                    styles.header,
+                    {
+                        paddingTop: insets.top,
+                        backgroundColor: headerSolid
+                            ? (colorScheme === 'light' ? Colors.light.background : Colors.dark.background)
+                            : 'transparent',
+                        borderBottomWidth: headerSolid ? StyleSheet.hairlineWidth : 0,
+                        borderBottomColor: colorScheme === 'light' ? Colors.light.border : Colors.dark.border,
+                    }
+                ]}
+            >
+                {/* Left: Back Button */}
+                <Link href="/articles" asChild>
+                    <TouchableOpacity
+                        style={styles.headerBackButton}
+                        activeOpacity={0.7}
+                    >
+                        <View style={[
+                            styles.backButtonCircle,
+                            colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
+                        ]}>
+                            <ThemedIcon Icon={ChevronLeft} lightColor={Colors.light.text} darkColor={Colors.dark.text} size={28} style={styles.backButtonIcon} />
                         </View>
-                    ) : (
-                        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                            <View style={styles.imageContainer}>
-                                {/* Back Button */}
-                                <Link href="/articles" asChild>
-                                    <TouchableOpacity
-                                        style={styles.backButton}
-                                        activeOpacity={0.7}
-                                    >
-                                        <View style={[
-                                            styles.backButtonCircle,
-                                            colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
-                                        ]}>
-                                            <ThemedIcon Icon={ChevronLeft} lightColor={Colors.light.text} darkColor={Colors.dark.text} size={28} style={styles.backButtonIcon} />
-                                        </View>
-                                    </TouchableOpacity>
-                                </Link>
-                                <Image
-                                    source={{ uri: article.image }}
-                                    placeholder={{ uri: article.imageBlurhash }}
-                                    style={styles.image}
-                                    contentFit="cover"
-                                    transition={700}
-                                    placeholderContentFit="cover"
-                                />
-                            </View>
-                            <ThemedView style={styles.mainSection}>
-                                <ThemedText type="title" style={{ fontSize: 26 }}>
-                                    {article.title}
-                                </ThemedText>
-                                <ThemedText type="default" style={{ color: Colors[colorScheme].inputPlaceholder, fontSize: 16 }}>
-                                    {article.publishedAt
-                                        ? new Date(article.publishedAt).toLocaleDateString(undefined, {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric',
-                                        })
-                                        : ''}
-                                </ThemedText>
-                                {article.description && (
-                                    <View style={styles.section}>
-                                        <ThemedText type="defaultSemiBold" lightColor={Colors.light.icon} darkColor={Colors.dark.icon} style={{ fontSize: 17 }}>
-                                            {article.description}
-                                        </ThemedText>
-                                    </View>
-                                )}
-                                {article.content && (
-                                    <View style={styles.section}>
-                                        <Markdown
-                                            style={{
-                                                body: { color: Colors[colorScheme].text, fontSize: 16, fontFamily: 'WorkSans_400Regular', lineHeight: 24 },
-                                                heading1: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 16, marginBottom: 4, lineHeight: 32 },
-                                                heading2: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 16, lineHeight: 32 },
-                                                heading3: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 8 },
-                                                heading4: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 8 },
-                                                heading5: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 8 },
-                                            }}
-                                        >
-                                            {article.content}
-                                        </Markdown>
-                                    </View>
-                                )}
-                            </ThemedView>
-                        </ScrollView>
+                    </TouchableOpacity>
+                </Link>
+                {/* Center: Title */}
+                <View style={styles.headerTitleContainer}>
+                    {headerSolid && (
+                        <ThemedText
+                            type="defaultSemiBold"
+                            numberOfLines={1}
+                            style={[
+                                styles.headerTitle,
+                                { color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }
+                            ]}
+                        >
+                            Article
+                        </ThemedText>
                     )}
-                </SafeAreaView>
-            </SafeAreaProvider>
+                </View>
+                {/* Right: Spacer for symmetry */}
+                <View style={styles.headerRightSpacer} />
+            </Animated.View>
+            {loading ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator />
+                </View>
+            ) : (
+                <Animated.ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    scrollEventThrottle={16}
+                    onScroll={Animated.event(
+                        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                        { useNativeDriver: false }
+                    )}
+                >
+                    {/* Article Image inside the scroll view */}
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={{ uri: article.image }}
+                            placeholder={{ uri: article.imageBlurhash }}
+                            style={styles.image}
+                            contentFit="cover"
+                            transition={700}
+                            placeholderContentFit="cover"
+                        />
+                    </View>
+                    <ThemedView style={styles.mainSection}>
+                        <ThemedText type="title" style={{ fontSize: 26 }}>
+                            {article.title}
+                        </ThemedText>
+                        <ThemedText type="default" style={{ color: Colors[colorScheme].inputPlaceholder, fontSize: 16 }}>
+                            {article.publishedAt
+                                ? new Date(article.publishedAt).toLocaleDateString(undefined, {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                })
+                                : ''}
+                        </ThemedText>
+                        {article.description && (
+                            <View style={styles.section}>
+                                <ThemedText type="defaultSemiBold" lightColor={Colors.light.icon} darkColor={Colors.dark.icon} style={{ fontSize: 17 }}>
+                                    {article.description}
+                                </ThemedText>
+                            </View>
+                        )}
+                        {article.content && (
+                            <View style={styles.section}>
+                                <Markdown
+                                    style={{
+                                        body: { color: Colors[colorScheme].text, fontSize: 16, fontFamily: 'WorkSans_400Regular', lineHeight: 24 },
+                                        heading1: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 16, marginBottom: 4, lineHeight: 32 },
+                                        heading2: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 16, lineHeight: 32 },
+                                        heading3: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 8 },
+                                        heading4: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 8 },
+                                        heading5: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 8 },
+                                    }}
+                                >
+                                    {article.content}
+                                </Markdown>
+                            </View>
+                        )}
+                    </ThemedView>
+                </Animated.ScrollView>
+            )}
         </ThemedView>
     );
 }
@@ -147,7 +191,7 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         width: width,
-        height: 260,
+        height: IMAGE_HEIGHT,
         backgroundColor: '#eee',
         justifyContent: 'center',
         alignItems: 'center',
@@ -155,7 +199,7 @@ const styles = StyleSheet.create({
     },
     image: {
         width: width,
-        height: 260,
+        height: IMAGE_HEIGHT,
         resizeMode: 'cover',
     },
     mainSection: {
@@ -170,11 +214,37 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         gap: 8,
     },
-    backButton: {
+    header: {
         position: 'absolute',
-        top: 16,
-        left: 16,
-        zIndex: 10,
+        left: 0,
+        right: 0,
+        top: 0,
+        zIndex: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    headerBackButton: {
+        marginLeft: 8,
+        marginTop: 0,
+        height: 48,
+        width: 48,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    headerTitleContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 48,
+    },
+    headerTitle: {
+        fontSize: 18,
+        textAlign: 'center',
+        includeFontPadding: false,
+    },
+    headerRightSpacer: {
+        width: 56, // match back button + margin for symmetry
+        height: 48,
     },
     backButtonCircle: {
         width: 40,

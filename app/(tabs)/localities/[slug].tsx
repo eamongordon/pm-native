@@ -6,8 +6,13 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
 import { AppleMaps, GoogleMaps } from 'expo-maps';
 import { Link, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ChevronLeft } from 'lucide-react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const MAP_HEIGHT = 300;
+const HEADER_HEIGHT = 48;
 
 export default function LocalitySlugScreen() {
     const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -15,6 +20,11 @@ export default function LocalitySlugScreen() {
     const [locality, setLocality] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const bottom = useBottomTabOverflow();
+    const insets = useSafeAreaInsets();
+
+    // Header background on scroll
+    const [headerSolid, setHeaderSolid] = useState(false);
+    const scrollY = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         let cancelled = false;
@@ -33,6 +43,13 @@ export default function LocalitySlugScreen() {
         if (slug) fetchLocality();
         return () => { cancelled = true; };
     }, [slug]);
+
+    useEffect(() => {
+        const listener = scrollY.addListener(({ value }) => {
+            setHeaderSolid(value > MAP_HEIGHT - (insets.top + HEADER_HEIGHT));
+        });
+        return () => scrollY.removeListener(listener);
+    }, [insets.top, scrollY]);
 
     if (loading) {
         return (
@@ -54,9 +71,63 @@ export default function LocalitySlugScreen() {
 
     return (
         <ThemedView style={{ flex: 1 }}>
+            {/* Header overlays map */}
+            <Animated.View
+                style={[
+                    styles.header,
+                    {
+                        paddingTop: insets.top,
+                        height: HEADER_HEIGHT + insets.top,
+                        backgroundColor: headerSolid
+                            ? (colorScheme === 'light' ? Colors.light.background : Colors.dark.background)
+                            : 'transparent',
+                        borderBottomWidth: headerSolid ? StyleSheet.hairlineWidth : 0,
+                        borderBottomColor: colorScheme === 'light' ? Colors.light.border : Colors.dark.border,
+                    }
+                ]}
+            >
+                {/* Back Button */}
+                <Link href="/localities" asChild>
+                    <TouchableOpacity
+                        style={styles.headerBackButton}
+                        activeOpacity={0.7}
+                    >
+                        <View style={[
+                            styles.backButtonCircle,
+                            colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
+                        ]}>
+                            <ChevronLeft color={colorScheme === 'light' ? Colors.light.text : Colors.dark.text} size={28} style={styles.backButtonIcon} />
+                        </View>
+                    </TouchableOpacity>
+                </Link>
+                {/* Title */}
+                <View style={styles.headerTitleContainer}>
+                    {headerSolid && (
+                        <ThemedText
+                            type="defaultSemiBold"
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                            style={[
+                                styles.headerTitle,
+                                { color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }
+                            ]}
+                        >
+                            {(locality.name?.split(',')[0] || locality.name)}
+                        </ThemedText>
+                    )}
+                </View>
+                {/* Spacer for symmetry */}
+                <View style={styles.headerRightSpacer} />
+            </Animated.View>
             {/* Map at the top, extends into the status bar */}
-            <ScrollView>
-                <View style={{ width: '100%', height: 300, position: 'relative' }}>
+            <Animated.ScrollView
+                scrollEventThrottle={16}
+                onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                    { useNativeDriver: false }
+                )}
+            >
+                <View style={{ width: '100%', height: MAP_HEIGHT, position: 'relative' }}>
                     {hasCoords ? (
                         Platform.OS === 'ios' ? (
                             <AppleMaps.View
@@ -170,7 +241,7 @@ export default function LocalitySlugScreen() {
                         </View>
                     </View>
                 </View>
-            </ScrollView>
+            </Animated.ScrollView>
         </ThemedView>
     );
 }
@@ -236,5 +307,55 @@ const styles = StyleSheet.create({
     chipText: {
         fontSize: 16,
         fontWeight: '500',
+    },
+    header: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        zIndex: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        // height and paddingTop set dynamically
+    },
+    headerBackButton: {
+        marginLeft: 8,
+        marginTop: 0,
+        height: 48,
+        width: 48,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    headerTitleContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 48,
+    },
+    headerTitle: {
+        fontSize: 18,
+        textAlign: 'center',
+        includeFontPadding: false,
+        maxWidth: 220,
+    },
+    headerRightSpacer: {
+        width: 56, // match back button + margin for symmetry
+        height: 48,
+    },
+    backButtonCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    backButtonCircleLight: {
+        backgroundColor: Colors.light.primary,
+    },
+    backButtonCircleDark: {
+        backgroundColor: Colors.dark.primary,
+    },
+    backButtonIcon: {
+        marginLeft: -2,
     },
 });

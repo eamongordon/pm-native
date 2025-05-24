@@ -3,12 +3,12 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Image } from 'expo-image';
+import { Image, useImage } from 'expo-image';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Modal, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -19,6 +19,7 @@ export default function PhotoDetailsScreen() {
     const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
     const colorScheme = useColorScheme() ?? 'light';
+    const { top } = useSafeAreaInsets();
 
     useEffect(() => {
         if (!id) return;
@@ -46,6 +47,9 @@ export default function PhotoDetailsScreen() {
             .finally(() => setLoading(false));
     }, [id]);
 
+    // Use expo-image's useImage hook to get dimensions
+    const image = useImage(photo?.image ?? '');
+
     // Show Not Found screen if photo is not found after loading
     if (!loading && !photo) {
         return null;
@@ -57,127 +61,135 @@ export default function PhotoDetailsScreen() {
         <ThemedView style={styles.container}>
             {/* Hide status bar when modal is open */}
             <StatusBar hidden={modalVisible} />
-            <SafeAreaProvider>
-                <SafeAreaView style={styles.safeArea}>
-                    {loading ? (
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                            <ActivityIndicator />
-                        </View>
-                    ) : (
-                        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                            <View style={styles.imageContainer}>
-                                {/* Back Button */}
-                                <Link href="/photos" asChild>
-                                    <TouchableOpacity
-                                        style={styles.backButton}
-                                        activeOpacity={0.7}
-                                    >
-                                        <View style={[
-                                            styles.backButtonCircle,
-                                            colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
-                                        ]}>
-                                            <ThemedIcon Icon={ChevronLeft} lightColor={Colors.light.text} darkColor={Colors.dark.text} size={28} style={styles.backButtonIcon} />
-                                        </View>
-                                    </TouchableOpacity>
-                                </Link>
-                                {/* Image with modal trigger */}
-                                <TouchableOpacity
-                                    activeOpacity={0.9}
-                                    onPress={() => setModalVisible(true)}
-                                    style={{ zIndex: 1 }}
-                                >
-                                    <Image
-                                        source={{ uri: photo.image }}
-                                        style={styles.image}
-                                        placeholder={photo.imageBlurhash ? { uri: photo.imageBlurhash } : undefined}
-                                        contentFit="cover"
-                                        placeholderContentFit="cover"
-                                        transition={700}
-                                    />
-                                </TouchableOpacity>
+            {/* Removed SafeAreaProvider and SafeAreaView */}
+            <View style={{ flex: 1, position: 'relative' }}>
+                {/* Overlay for Back Button */}
+                <View style={[styles.backButtonOverlay, { top: top + 16 }]} pointerEvents="box-none">
+                    <Link href="/photos" asChild>
+                        <TouchableOpacity
+                            activeOpacity={0.7}
+                        >
+                            <View style={[
+                                styles.backButtonCircle,
+                                colorScheme === 'light' ? styles.backButtonCircleLight : styles.backButtonCircleDark
+                            ]}>
+                                <ThemedIcon Icon={ChevronLeft} lightColor={Colors.light.text} darkColor={Colors.dark.text} size={28} style={styles.backButtonIcon} />
                             </View>
-                            <ThemedView style={styles.mainSection}>
-                                <ThemedText type="title">
-                                    {photo.name || 'Photo'}
-                                </ThemedText>
-                                {(photo.locality?.name || photo.locality_fallback) && (
-                                    <ThemedText type="defaultSemiBold" style={{ fontSize: 18 }}>
-                                        {photo.locality?.name ?? photo.locality_fallback}
-                                    </ThemedText>
-                                )}
-                                {(photo.specimen_height || photo.specimen_length || photo.specimen_width) && (
-                                    <View style={styles.section}>
-                                        <ThemedText>
-                                            {`${photo.specimen_length} x ${photo.specimen_width} x ${photo.specimen_height} cm`}
-                                        </ThemedText>
-                                    </View>
-                                )}
-                                {photo.description && (
-                                    <View style={styles.section}>
-                                        <ThemedText>
-                                            {photo.description}
-                                        </ThemedText>
-                                    </View>
-                                )}
-                                {/* Mineral Chips */}
-                                {photo.minerals && Array.isArray(photo.minerals) && photo.minerals.length > 0 && (
-                                    <View style={styles.chipsWrapContainer}>
-                                        {photo.minerals.map(({ mineral }: any) => (
-                                            <Link
-                                                key={mineral.slug}
-                                                href={`/minerals/${mineral.slug}`}
-                                                asChild
-                                            >
-                                                <TouchableOpacity>
-                                                    <View style={[styles.chip, colorScheme === 'light' ? styles.chipLight : styles.chipDark]}>
-                                                        {mineral.photos && mineral.photos[0]?.photo?.image && (
-                                                            <Image
-                                                                source={{ uri: mineral.photos[0].photo.image }}
-                                                                placeholder={mineral.photos[0].photo.imageBlurhash ? { uri: mineral.photos[0].photo.imageBlurhash } : undefined}
-                                                                contentFit="cover"
-                                                                placeholderContentFit="cover"
-                                                                transition={700}
-                                                                style={styles.chipImage}
-                                                            />
-                                                        )}
-                                                        <ThemedText style={styles.chipText}>
-                                                            {mineral.name}
-                                                        </ThemedText>
-                                                    </View>
-                                                </TouchableOpacity>
-                                            </Link>
-                                        ))}
-                                    </View>
-                                )}
-                            </ThemedView>
-                        </ScrollView>
-                    )}
-                    {/* Fullscreen Modal for Image */}
-                    <Modal
-                        visible={modalVisible}
-                        transparent={true}
-                        animationType="fade"
-                        onRequestClose={() => setModalVisible(false)}
-                    >
-                        <View style={styles.modalBackground}>
-                            <Image
-                                source={{ uri: photo?.image }}
-                                style={styles.fullImage}
-                                contentFit="contain"
-                                placeholder={photo?.imageBlurhash ? { uri: photo.imageBlurhash } : undefined}
-                                placeholderContentFit="contain"
-                                transition={700}
-                            />
+                        </TouchableOpacity>
+                    </Link>
+                </View>
+                {loading ? (
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <ActivityIndicator />
+                    </View>
+                ) : (
+                    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                        <View style={styles.imageContainer}>
+                            {/* Image with modal trigger */}
                             <TouchableOpacity
-                                style={styles.closeButton}
-                                onPress={() => setModalVisible(false)}
+                                activeOpacity={0.9}
+                                onPress={() => setModalVisible(true)}
+                                style={{ zIndex: 1 }}
                             >
-                                <ThemedText style={{ color: '#fff', fontSize: 28 }}>✕</ThemedText>
+                                <Image
+                                    source={image}
+                                    style={[
+                                        styles.image,
+                                        {
+                                            height:
+                                                image && image.width && image.height
+                                                    ? width * (image.height / image.width)
+                                                    : 300
+                                        }
+                                    ]}
+                                    placeholder={photo.imageBlurhash ? { uri: photo.imageBlurhash } : undefined}
+                                    contentFit="cover"
+                                    placeholderContentFit="cover"
+                                    transition={700}
+                                />
                             </TouchableOpacity>
                         </View>
-                    </Modal>
-                </SafeAreaView>
-            </SafeAreaProvider>
+                        <ThemedView style={styles.mainSection}>
+                            <ThemedText type="title">
+                                {photo.name || 'Photo'}
+                            </ThemedText>
+                            {(photo.locality?.name || photo.locality_fallback) && (
+                                <ThemedText type="defaultSemiBold" style={{ fontSize: 18 }}>
+                                    {photo.locality?.name ?? photo.locality_fallback}
+                                </ThemedText>
+                            )}
+                            {(photo.specimen_height || photo.specimen_length || photo.specimen_width) && (
+                                <View style={styles.section}>
+                                    <ThemedText>
+                                        {`${photo.specimen_length} x ${photo.specimen_width} x ${photo.specimen_height} cm`}
+                                    </ThemedText>
+                                </View>
+                            )}
+                            {photo.description && (
+                                <View style={styles.section}>
+                                    <ThemedText>
+                                        {photo.description}
+                                    </ThemedText>
+                                </View>
+                            )}
+                            {/* Mineral Chips */}
+                            {photo.minerals && Array.isArray(photo.minerals) && photo.minerals.length > 0 && (
+                                <View style={styles.chipsWrapContainer}>
+                                    {photo.minerals.map(({ mineral }: any) => (
+                                        <Link
+                                            key={mineral.slug}
+                                            href={`/minerals/${mineral.slug}`}
+                                            asChild
+                                        >
+                                            <TouchableOpacity>
+                                                <View style={[styles.chip, colorScheme === 'light' ? styles.chipLight : styles.chipDark]}>
+                                                    {mineral.photos && mineral.photos[0]?.photo?.image && (
+                                                        <Image
+                                                            source={{ uri: mineral.photos[0].photo.image }}
+                                                            placeholder={mineral.photos[0].photo.imageBlurhash ? { uri: mineral.photos[0].photo.imageBlurhash } : undefined}
+                                                            contentFit="cover"
+                                                            placeholderContentFit="cover"
+                                                            transition={700}
+                                                            style={styles.chipImage}
+                                                        />
+                                                    )}
+                                                    <ThemedText style={styles.chipText}>
+                                                        {mineral.name}
+                                                    </ThemedText>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </Link>
+                                    ))}
+                                </View>
+                            )}
+                        </ThemedView>
+                    </ScrollView>
+                )}
+            </View>
+            {/* Fullscreen Modal for Image */}
+            <Modal
+                visible={modalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalBackground}>
+                    <Image
+                        source={{ uri: photo?.image }}
+                        style={styles.fullImage}
+                        contentFit="contain"
+                        placeholder={photo?.imageBlurhash ? { uri: photo.imageBlurhash } : undefined}
+                        placeholderContentFit="contain"
+                        transition={700}
+                    />
+                    <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={() => setModalVisible(false)}
+                    >
+                        <ThemedText style={{ color: '#fff', fontSize: 28 }}>✕</ThemedText>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
         </ThemedView>
     );
 }
@@ -191,14 +203,13 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         width: width,
-        height: 300,
         backgroundColor: '#eee',
         justifyContent: 'center',
         alignItems: 'center',
     },
     image: {
         width: width,
-        height: 300,
+        // height is set dynamically
         resizeMode: 'cover',
     },
     mainSection: {
@@ -244,11 +255,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '500',
     },
-    backButton: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        zIndex: 10,
+    backButtonOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        zIndex: 100,
+        pointerEvents: 'box-none',
+        left: 16
     },
     backButtonCircle: {
         width: 40,
