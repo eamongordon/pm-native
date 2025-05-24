@@ -6,7 +6,7 @@ import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { BookText, Gem, House, Image, MapPin, Sparkle } from 'lucide-react-native';
+import { BookText, Gem, House, Image, MapPin } from 'lucide-react-native';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
@@ -40,8 +40,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="explore"
                 options={{
-                    title: 'Explore',
-                    tabBarIcon: ({ color }) => <Sparkle size={24} color={color} />,
+                    href: null,
                 }}
             />
             <Tabs.Screen
@@ -58,14 +57,14 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="photos/index"
+                name="localities/index"
                 options={{
-                    title: 'Photos',
-                    tabBarIcon: ({ color }) => <Image size={24} color={color} />,
+                    title: 'Localities',
+                    tabBarIcon: ({ color }) => <MapPin size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
-                name="photos/[id]"
+                name="localities/[slug]"
                 options={{
                     href: null,
                 }}
@@ -84,14 +83,14 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="localities/index"
+                name="photos/index"
                 options={{
-                    title: 'Localities',
-                    tabBarIcon: ({ color }) => <MapPin size={24} color={color} />,
+                    title: 'Photos',
+                    tabBarIcon: ({ color }) => <Image size={24} color={color} />,
                 }}
             />
             <Tabs.Screen
-                name="localities/[slug]"
+                name="photos/[id]"
                 options={{
                     href: null,
                 }}
