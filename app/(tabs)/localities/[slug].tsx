@@ -187,21 +187,44 @@ export default function LocalitySlugScreen() {
                             {locality.description}
                         </ThemedText>
                     ) : null}
-                    {/* Properties Table */}
-                    <View style={[styles.table, { borderColor: Colors[colorScheme].border }]}>
-                        <View style={styles.tableRow}>
-                            <ThemedText style={styles.tableLabel}>Latitude</ThemedText>
-                            <ThemedText style={styles.tableValue}>{locality.latitude ?? '-'}</ThemedText>
+                    {/* Properties List */}
+                    {(locality.latitude || locality.longitude || locality.type) && (
+                        <View style={styles.section}>
+                            <ThemedText type="subtitle">Properties</ThemedText>
+                            <View style={styles.propertiesTable}>
+                                {locality.latitude && (
+                                    <View style={styles.propertyRow}>
+                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                            Latitude
+                                        </ThemedText>
+                                        <ThemedText style={styles.propertyValue}>
+                                            {locality.latitude}
+                                        </ThemedText>
+                                    </View>
+                                )}
+                                {locality.longitude && (
+                                    <View style={styles.propertyRow}>
+                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                            Longitude
+                                        </ThemedText>
+                                        <ThemedText style={styles.propertyValue}>
+                                            {locality.longitude}
+                                        </ThemedText>
+                                    </View>
+                                )}
+                                {locality.type && (
+                                    <View style={styles.propertyRow}>
+                                        <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
+                                            Type
+                                        </ThemedText>
+                                        <ThemedText style={styles.propertyValue}>
+                                            {locality.type}
+                                        </ThemedText>
+                                    </View>
+                                )}
+                            </View>
                         </View>
-                        <View style={styles.tableRow}>
-                            <ThemedText style={styles.tableLabel}>Longitude</ThemedText>
-                            <ThemedText style={styles.tableValue}>{locality.longitude ?? '-'}</ThemedText>
-                        </View>
-                        <View style={styles.tableRow}>
-                            <ThemedText style={styles.tableLabel}>Type</ThemedText>
-                            <ThemedText style={styles.tableValue}>{locality.type ?? '-'}</ThemedText>
-                        </View>
-                    </View>
+                    )}
                     {/* Minerals Chips */}
                     <View style={{ marginTop: 24 }}>
                         <ThemedText type="defaultSemiBold" style={{ marginBottom: 8 }}>Minerals</ThemedText>
@@ -357,5 +380,28 @@ const styles = StyleSheet.create({
     },
     backButtonIcon: {
         marginLeft: -2,
+    },
+    // Add styles for properties list (copied from minerals)
+    section: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+    },
+    propertiesTable: {
+        marginTop: 4,
+        marginBottom: 4,
+    },
+    propertyRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: 4,
+    },
+    propertyLabel: {
+        minWidth: 120,
+        marginRight: 0,
+    },
+    propertyValue: {
+        flex: 1,
+        flexWrap: 'wrap',
     },
 });
