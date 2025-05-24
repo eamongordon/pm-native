@@ -3,11 +3,11 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Image as ExpoImage } from 'expo-image';
+import { Image as ExpoImage, useImage } from 'expo-image';
 import { Link } from 'expo-router';
 import { Search } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Platform, Image as RNImage, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Platform, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const SORT_OPTIONS = [
@@ -23,7 +23,6 @@ export default function PhotosScreen() {
     const [cursor, setCursor] = useState<string | null>(null);
     const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
     const [search, setSearch] = useState('');
-    const [imageSizes, setImageSizes] = useState<Record<string, { width: number, height: number }>>({});
     const colorScheme = useColorScheme() ?? 'light';
     const LIMIT = 20;
 
@@ -98,30 +97,6 @@ export default function PhotosScreen() {
         };
         // eslint-disable-next-line
     }, [sort, search]);
-
-    useEffect(() => {
-        photos.forEach(photo => {
-            if (!imageSizes[photo.id] && photo.image) {
-                RNImage.getSize(
-                    photo.image,
-                    (width, height) => {
-                        setImageSizes(sizes => ({
-                            ...sizes,
-                            [photo.id]: { width, height }
-                        }));
-                    },
-                    () => {
-                        // fallback to square if failed
-                        setImageSizes(sizes => ({
-                            ...sizes,
-                            [photo.id]: { width: 1, height: 1 }
-                        }));
-                    }
-                );
-            }
-        });
-        // eslint-disable-next-line
-    }, [photos]);
 
     const handleEndReached = () => {
         if (!loading && !isFetchingMore && cursor) {
@@ -204,34 +179,14 @@ export default function PhotosScreen() {
                                 >
                                     {getMasonryColumns(photos).map((column, colIdx) => (
                                         <View key={colIdx} style={{ flex: 1, gap: imageMargin }}>
-                                            {column.map((item: any) => {
-                                                const size = imageSizes[item.id];
-                                                const aspectRatio = size ? size.height / size.width : 1;
-                                                const dynamicHeight = size ? imageWidth * aspectRatio : imageWidth;
-                                                return (
-                                                    <Link
-                                                        key={item.id}
-                                                        href={`/photos/${item.id}`}
-                                                        asChild
-                                                    >
-                                                        <TouchableOpacity>
-                                                            <ExpoImage
-                                                                style={{
-                                                                    width: imageWidth,
-                                                                    height: dynamicHeight,
-                                                                    borderRadius: 12,
-                                                                    backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
-                                                                }}
-                                                                source={{ uri: item.image }}
-                                                                placeholder={{ uri: item.imageBlurhash }}
-                                                                contentFit="cover"
-                                                                transition={700}
-                                                                placeholderContentFit="cover"
-                                                            />
-                                                        </TouchableOpacity>
-                                                    </Link>
-                                                );
-                                            })}
+                                            {column.map((item: any) => (
+                                                <PhotoItem
+                                                    key={item.id}
+                                                    item={item}
+                                                    imageWidth={imageWidth}
+                                                    colorScheme={colorScheme}
+                                                />
+                                            ))}
                                         </View>
                                     ))}
                                 </ScrollView>
@@ -288,3 +243,40 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 });
+
+type PhotoItemProps = {
+    item: any;
+    imageWidth: number;
+    colorScheme: string;
+};
+
+function PhotoItem({ item, imageWidth, colorScheme }: PhotoItemProps) {
+    const image = useImage(item.image ?? '');
+    let dynamicHeight = imageWidth;
+    if (image && image.width && image.height) {
+        dynamicHeight = imageWidth * (image.height / image.width);
+    }
+
+    return (
+        <Link
+            href={`/photos/${item.id}`}
+            asChild
+        >
+            <TouchableOpacity>
+                <ExpoImage
+                    style={{
+                        width: imageWidth,
+                        height: dynamicHeight,
+                        borderRadius: 12,
+                        backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
+                    }}
+                    source={{ uri: item.image }}
+                    placeholder={item.imageBlurhash ? { uri: item.imageBlurhash } : undefined}
+                    contentFit="cover"
+                    transition={700}
+                    placeholderContentFit="cover"
+                />
+            </TouchableOpacity>
+        </Link>
+    );
+}
