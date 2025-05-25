@@ -12,6 +12,7 @@ import { Glimmer } from '@/components/Glimmer';
 import HomeSearchModal from '@/components/HomeSearchModal';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Sparkles } from 'lucide-react-native';
 
 // MineralSkeletonCard for homepage minerals carousel
 function MineralSkeletonCard() {
@@ -291,17 +292,31 @@ export default function HomeScreen() {
                     ]}
                     showsVerticalScrollIndicator={false}
                 >
-                    <ThemedView style={styles.titleContainer}>
-                        <ThemedText type="title">{getGreeting()}!</ThemedText>
-                    </ThemedView>
-                    <View style={{ paddingHorizontal: 16, marginTop: -8, marginBottom: 8 }}>
-                        <ThemedText style={{ fontSize: 15, color: Colors[colorScheme].inputPlaceholder }}>
-                            {funFact}
-                        </ThemedText>
-                    </View>
                     <ThemedView>
                         <HomeSearchModal />
                     </ThemedView>
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            backgroundColor: Colors[colorScheme].inputBackground,
+                            borderRadius: 12,
+                            paddingVertical: 16,
+                            paddingHorizontal: 14,
+                            marginHorizontal: 16,
+                            marginTop: 0,
+                            marginBottom: 8,
+                        }}
+                    >
+                        <Sparkles
+                            size={22}
+                            color={Colors[colorScheme].icon}
+                            style={{ marginRight: 16 }}
+                        />
+                        <ThemedText type="defaultSemiBold" style={{ fontSize: 15, color: Colors[colorScheme].icon, flex: 1, lineHeight: 20 }}>
+                            {funFact}
+                        </ThemedText>
+                    </View>
                     <TopMineralsCarousel />
                     <TopArticlesList />
                 </ScrollView>
