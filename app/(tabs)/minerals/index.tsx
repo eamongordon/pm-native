@@ -655,7 +655,6 @@ const styles = StyleSheet.create({
         aspectRatio: 1,
         borderRadius: 8,
         marginBottom: 8,
-        backgroundColor: '#eee',
     },
     itemName: {
         flexShrink: 1,

@@ -361,49 +361,51 @@ export default function LocalitiesScreen() {
                         contentContainerStyle={{ padding: 12 }}
                         renderItem={({ item }) => (
                             <Link href={`/localities/${item.slug}`} asChild>
-                                <TouchableOpacity style={styles.listItem}>
-                                    <Image
-                                        source={{ uri: item.photos?.[0]?.image }}
-                                        style={{ width: 80, height: "100%", borderTopLeftRadius: 12, borderBottomLeftRadius: 12, marginRight: 12 }}
-                                        contentFit="cover"
-                                        placeholder={{ uri: item.photos?.[0]?.imageBlurhash }}
-                                        placeholderContentFit="cover"
-                                        transition={700}
-                                    />
-                                    <View style={{ flex: 1, flexDirection: 'column', padding: 12 }}>
-                                        <ThemedText type="defaultSemiBold">{item.name}</ThemedText>
-                                        {item.latitude && item.longitude && (
-                                            <View
-                                                style={{
-                                                    flexDirection: 'row',
-                                                    alignItems: 'center',
-                                                    marginTop: 4,
-                                                }}
-                                            >
-                                                <Image
-                                                    source={
-                                                        item.type === "Single"
-                                                            ? item.coordinates_known
-                                                                ? require('@/assets/images/localities/PM-Single-Locality-Pin_Light.png')
-                                                                : require('@/assets/images/localities/PM-Single-Locality-Pin_Dark.png')
-                                                            : item.coordinates_known
-                                                                ? require('@/assets/images/localities/PM-Group-Locality-Pin_Light.png')
-                                                                : require('@/assets/images/localities/PM-Group-Locality-Pin_Dark.png')
-                                                    }
-                                                    style={{ width: 24, height: 24, marginBottom: 0, marginRight: 6 }}
-                                                    contentFit="contain"
-                                                    transition={1000}
-                                                />
-                                                <ThemedText style={{
-                                                    fontSize: 12,
-                                                    color: Colors[colorScheme].text,
-                                                    opacity: 0.5,
-                                                    lineHeight: 24,
-                                                }}>
-                                                    {item.latitude}, {item.longitude}
-                                                </ThemedText>
-                                            </View>
-                                        )}
+                                <TouchableOpacity>
+                                    <View style={[styles.listItem, { backgroundColor: colorScheme === 'light' ? "#f8f8f8" : "#222" }]}>
+                                        <Image
+                                            source={{ uri: item.photos?.[0]?.image }}
+                                            style={{ width: 80, height: "100%", borderTopLeftRadius: 12, borderBottomLeftRadius: 12, marginRight: 12 }}
+                                            contentFit="cover"
+                                            placeholder={{ uri: item.photos?.[0]?.imageBlurhash }}
+                                            placeholderContentFit="cover"
+                                            transition={700}
+                                        />
+                                        <View style={{ flex: 1, flexDirection: 'column', padding: 12 }}>
+                                            <ThemedText type="defaultSemiBold">{item.name}</ThemedText>
+                                            {item.latitude && item.longitude && (
+                                                <View
+                                                    style={{
+                                                        flexDirection: 'row',
+                                                        alignItems: 'center',
+                                                        marginTop: 4,
+                                                    }}
+                                                >
+                                                    <Image
+                                                        source={
+                                                            item.type === "Single"
+                                                                ? item.coordinates_known
+                                                                    ? require('@/assets/images/localities/PM-Single-Locality-Pin_Light.png')
+                                                                    : require('@/assets/images/localities/PM-Single-Locality-Pin_Dark.png')
+                                                                : item.coordinates_known
+                                                                    ? require('@/assets/images/localities/PM-Group-Locality-Pin_Light.png')
+                                                                    : require('@/assets/images/localities/PM-Group-Locality-Pin_Dark.png')
+                                                        }
+                                                        style={{ width: 24, height: 24, marginBottom: 0, marginRight: 6 }}
+                                                        contentFit="contain"
+                                                        transition={1000}
+                                                    />
+                                                    <ThemedText style={{
+                                                        fontSize: 12,
+                                                        color: Colors[colorScheme].text,
+                                                        opacity: 0.5,
+                                                        lineHeight: 24,
+                                                    }}>
+                                                        {item.latitude}, {item.longitude}
+                                                    </ThemedText>
+                                                </View>
+                                            )}
+                                        </View>
                                     </View>
                                 </TouchableOpacity>
                             </Link>
@@ -644,12 +646,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
     },
     listItem: {
-        borderRadius: 10,
-        backgroundColor: '#f8f8f8',
+        flex: 1,
+        borderRadius: 12,
         marginBottom: 10,
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'center'
     },
     popupContainer: {
         position: 'absolute',
