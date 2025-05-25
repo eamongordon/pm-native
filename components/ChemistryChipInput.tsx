@@ -82,7 +82,7 @@ export default function ChemistryChipInput({ values, onChange, placeholder }: Ch
 
 const styles = StyleSheet.create({
     container: {
-        borderRadius: 8,
+        borderRadius: 12,
         marginBottom: 2,
     },
     containerLight: {
@@ -92,9 +92,9 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.dark.inputBackground,
     },
     searchBar: {
-        height: 40,
+        height: 44,
         borderColor: '#e0e0e0',
-        borderRadius: 8,
+        borderRadius: 12,
         paddingHorizontal: 12,
         flexDirection: 'row',
         alignItems: 'center',

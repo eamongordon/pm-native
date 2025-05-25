@@ -761,8 +761,8 @@ const styles = StyleSheet.create({
         borderColor: Colors.dark.border,
     },
     showResultsButton: {
-        borderRadius: 8,
-        height: 40,
+        borderRadius: 12,
+        height: 44,
         marginBottom: 16,
         alignItems: 'center',
         justifyContent: 'center',
