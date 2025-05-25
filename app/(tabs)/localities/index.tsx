@@ -125,10 +125,10 @@ export default function LocalitiesScreen() {
     };
 
     // Preload marker images for Apple Maps
-    const singleKnown = useImage(require('@/assets/images/localities/PM-Single-Locality-Pin_Light.png'));
-    const singleEstimated = useImage(require('@/assets/images/localities/PM-Single-Locality-Pin_Dark.png'));
-    const groupKnown = useImage(require('@/assets/images/localities/PM-Group-Locality-Pin_Light.png'));
-    const groupEstimated = useImage(require('@/assets/images/localities/PM-Group-Locality-Pin_Dark.png'));
+    const singleKnown = useImage(require('@/assets/images/localities/PM-Single-Locality-Pin_Light.png'), { maxHeight: 128, maxWidth: 128 });
+    const singleEstimated = useImage(require('@/assets/images/localities/PM-Single-Locality-Pin_Dark.png'), { maxHeight: 128, maxWidth: 128 });
+    const groupKnown = useImage(require('@/assets/images/localities/PM-Group-Locality-Pin_Light.png'), { maxHeight: 128, maxWidth: 128 });
+    const groupEstimated = useImage(require('@/assets/images/localities/PM-Group-Locality-Pin_Dark.png'), { maxHeight: 128, maxWidth: 128 });
 
     const { top } = useSafeAreaInsets();
     return (
@@ -289,11 +289,14 @@ export default function LocalitiesScreen() {
                     ) : (
                         <GoogleMaps.View
                             style={{ flex: 1 }}
+                            cameraPosition={{
+                                zoom: 2
+                            }}
                             markers={localities
                                 .filter(loc => loc.latitude && loc.longitude)
                                 .map(loc => ({
                                     id: loc.id,
-                                    coordinate: {
+                                    coordinates: {
                                         latitude: Number(loc.latitude),
                                         longitude: Number(loc.longitude),
                                     },
@@ -304,8 +307,6 @@ export default function LocalitiesScreen() {
                                         : loc.coordinates_known
                                             ? groupKnown ?? undefined
                                             : groupEstimated ?? undefined,
-                                    title: loc.name,
-                                    description: loc.country,
                                 }))
                             }
                             onMarkerClick={(marker) => {
