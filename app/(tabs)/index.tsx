@@ -5,9 +5,10 @@ import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Glimmer } from '@/components/Glimmer';
 import { HelloWave } from '@/components/HelloWave';
 import HomeSearchModal from '@/components/HomeSearchModal';
 import { ThemedText } from '@/components/ThemedText';
@@ -81,8 +82,8 @@ function TopMineralsCarousel() {
                                     }}>
                                         <LinearGradient
                                             colors={[
-                                                'rgba(0,0,0,0)', 
-                                                'rgba(0,0,0,0.45)', 
+                                                'rgba(0,0,0,0)',
+                                                'rgba(0,0,0,0.45)',
                                                 'rgba(0,0,0,0.7)'
                                             ]}
                                             locations={[0, 0.5, 1]}
@@ -115,13 +116,47 @@ function TopMineralsCarousel() {
     );
 }
 
-// TopArticlesCarousel with real data
-function TopArticlesCarousel() {
+// ArticleSkeletonCard for homepage (reuse from articles page)
+function ArticleSkeletonCard({ imageWidth }: { imageWidth: number }) {
+    const colorScheme = useColorScheme() ?? 'light';
+    const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
+    return (
+        <View style={[styles.articleCard, { marginBottom: 20 }]}>
+            <View style={{ width: imageWidth, height: 180, borderRadius: 8, backgroundColor: baseColor, overflow: 'hidden' }}>
+                <Glimmer />
+            </View>
+            <View style={{ marginTop: 12, paddingHorizontal: 8, gap: 4 }}>
+                <View style={{ width: '80%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={{ width: '40%', height: 14, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={{ width: '100%', height: 15, borderRadius: 4, backgroundColor: baseColor, marginBottom: 4, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={{ width: '90%', height: 15, borderRadius: 4, backgroundColor: baseColor, marginBottom: 4, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={{ width: '70%', height: 15, borderRadius: 4, backgroundColor: baseColor, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+            </View>
+        </View>
+    );
+}
+
+// TopArticlesList with FlatList and same card layout as articles page
+function TopArticlesList() {
     const [articles, setArticles] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const colorScheme = useColorScheme() ?? 'light';
+    // Use same width logic as articles page
+    const screenWidth = require('react-native').Dimensions.get('window').width;
+    const imageWidth = screenWidth - 32;
 
     useEffect(() => {
-        let url = 'https://www.prospectorminerals.com/api/articles?fieldset=display&limit=10';
+        let url = 'https://www.prospectorminerals.com/api/articles?fieldset=display&limit=5';
         if (Platform.OS === 'web') {
             url = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
         }
@@ -136,42 +171,59 @@ function TopArticlesCarousel() {
         <View style={{ marginHorizontal: 16 }}>
             <ThemedText type="subtitle">Articles</ThemedText>
             {loading ? (
-                <ActivityIndicator style={{ marginVertical: 16 }} />
+                <FlatList
+                    data={Array.from({ length: 3 })}
+                    keyExtractor={(_, i) => `skeleton-article-${i}`}
+                    renderItem={() => <ArticleSkeletonCard imageWidth={imageWidth} />}
+                    contentContainerStyle={{ paddingBottom: 16, paddingTop: 8 }}
+                />
+            ) : articles.length === 0 ? (
+                <ThemedText>No articles found</ThemedText>
             ) : (
-                <View style={{ gap: 16, paddingVertical: 8 }}>
-                    {articles.map(article => (
+                <FlatList
+                    data={articles}
+                    keyExtractor={(item) => item.slug}
+                    contentContainerStyle={{ paddingBottom: 16, paddingTop: 8 }}
+                    renderItem={({ item }) => (
                         <Link
-                            key={article.id}
-                            href={`/articles/${article.slug}`}
+                            href={`/articles/${item.slug}`}
                             asChild
                         >
-                            <TouchableOpacity
-                                style={{ flexDirection: 'row', alignItems: 'center', marginRight: 0, backgroundColor: 'transparent', borderRadius: 8 }}
-                            >
+                            <TouchableOpacity style={styles.articleCard}>
                                 <ExpoImage
-                                    source={{ uri: article.image || 'https://via.placeholder.com/120x80' }}
-                                    style={{ width: 100, height: 70, borderRadius: 8, marginRight: 14, backgroundColor: '#eee' }}
-                                    placeholder={article.imageBlurhash ? { uri: article.imageBlurhash } : undefined}
+                                    style={{
+                                        width: imageWidth,
+                                        height: 180,
+                                        borderRadius: 12,
+                                        backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
+                                    }}
+                                    source={{ uri: item.image }}
+                                    placeholder={item.imageBlurhash ? { uri: item.imageBlurhash } : undefined}
                                     contentFit="cover"
-                                    transition={400}
+                                    transition={700}
                                     placeholderContentFit="cover"
                                 />
-                                <View style={{ flex: 1 }}>
-                                    <ThemedText type="defaultSemiBold" numberOfLines={2}>{article.title}</ThemedText>
-                                    <ThemedText type="default" lightColor={Colors.light.icon} darkColor={Colors.dark.icon} style={{ fontSize: 14, lineHeight: 21 }}>
-                                        {article.createdAt
-                                            ? new Date(article.createdAt).toLocaleDateString(undefined, {
+                                <View style={{ marginTop: 12, paddingHorizontal: 8, gap: 4 }}>
+                                    <ThemedText type="defaultSemiBold" style={{ fontSize: 18 }}>
+                                        {item.title}
+                                    </ThemedText>
+                                    <ThemedText type="default" style={{ color: Colors[colorScheme].inputPlaceholder, fontSize: 14 }}>
+                                        {item.createdAt
+                                            ? new Date(item.createdAt).toLocaleDateString(undefined, {
                                                 year: 'numeric',
                                                 month: 'short',
                                                 day: 'numeric',
                                             })
                                             : ''}
                                     </ThemedText>
+                                    <ThemedText numberOfLines={3} style={{ fontSize: 15 }}>
+                                        {item.description}
+                                    </ThemedText>
                                 </View>
                             </TouchableOpacity>
                         </Link>
-                    ))}
-                </View>
+                    )}
+                />
             )}
         </View>
     );
@@ -199,7 +251,7 @@ export default function HomeScreen() {
                         <HomeSearchModal />
                     </ThemedView>
                     <TopMineralsCarousel />
-                    <TopArticlesCarousel />
+                    <TopArticlesList />
                 </ScrollView>
             </SafeAreaView>
         </ThemedView>
@@ -295,5 +347,11 @@ const styles = StyleSheet.create({
         color: '#888',
         fontSize: 13,
         marginTop: 2,
+    },
+    articleCard: {
+        marginBottom: 20,
+        borderRadius: 8,
+        overflow: 'hidden',
+        backgroundColor: 'transparent',
     },
 });
