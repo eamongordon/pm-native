@@ -550,27 +550,35 @@ export default function HomeScreen() {
                             <ThemedText>No minerals found</ThemedText>
                         ) : (
                             <FlatList
-                                data={minerals}
-                                keyExtractor={(item) => item.id}
+                                data={
+                                    minerals.length === 1
+                                        ? [minerals[0], { id: '__empty__' }]
+                                        : minerals
+                                }
+                                keyExtractor={(item) => item.id || item.slug || '__empty__'}
                                 style={{ alignSelf: 'stretch', flex: 1 }}
                                 contentContainerStyle={{ paddingBottom: 16 }}
-                                renderItem={({ item }) => (
-                                    <Link href={`/minerals/${item.slug}`} asChild>
-                                        <TouchableOpacity style={styles.card}>
-                                            <View style={styles.itemRow}>
-                                                <Image
-                                                    source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
-                                                    style={styles.itemImage}
-                                                    contentFit="cover"
-                                                    placeholder={{ uri: item.photos && item.photos[0]?.photo?.imageBlurhash }}
-                                                    placeholderContentFit="cover"
-                                                    transition={700}
-                                                />
-                                                <ThemedText type="defaultSemiBold" style={styles.itemName}>{item.name}</ThemedText>
-                                            </View>
-                                        </TouchableOpacity>
-                                    </Link>
-                                )}
+                                renderItem={({ item }) =>
+                                    item.id === '__empty__' ? (
+                                        <View style={[styles.card, { backgroundColor: 'transparent' }]} />
+                                    ) : (
+                                        <Link href={`/minerals/${item.slug}`} asChild>
+                                            <TouchableOpacity style={styles.card}>
+                                                <View style={styles.itemRow}>
+                                                    <Image
+                                                        source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
+                                                        style={styles.itemImage}
+                                                        contentFit="cover"
+                                                        placeholder={{ uri: item.photos && item.photos[0]?.photo?.imageBlurhash }}
+                                                        placeholderContentFit="cover"
+                                                        transition={700}
+                                                    />
+                                                    <ThemedText type="defaultSemiBold" style={styles.itemName}>{item.name}</ThemedText>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </Link>
+                                    )
+                                }
                                 numColumns={2}
                                 columnWrapperStyle={{ gap: 8, paddingTop: 8 }}
                                 onEndReached={handleEndReached}
