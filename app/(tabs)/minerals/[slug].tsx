@@ -1,3 +1,4 @@
+import { Glimmer } from '@/components/Glimmer';
 import { ThemedIcon } from '@/components/ThemedIcon';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -8,7 +9,7 @@ import { Image } from 'expo-image';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Modal, NativeScrollEvent, NativeSyntheticEvent, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -62,6 +63,33 @@ export default function DetailsScreen() {
         });
         return () => scrollY.removeListener(listener);
     }, [insets.top, scrollY]);
+
+    // Skeleton for loading state
+    function MineralDetailSkeleton() {
+        const colorScheme = useColorScheme() ?? 'light';
+        const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
+        return (
+            <View style={{ flex: 1 }}>
+                <View style={{ width, height: GALLERY_HEIGHT, backgroundColor: baseColor, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={[styles.mainSection]}>
+                    <View style={{ width: '60%', height: 28, borderRadius: 6, backgroundColor: baseColor, marginBottom: 16, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '100%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '90%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '80%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                </View>
+            </View>
+        );
+    }
 
     // Show Not Found screen if mineral is not found after loading
     if (!loading && !mineral) {
@@ -134,9 +162,7 @@ export default function DetailsScreen() {
                 <View style={styles.headerRightSpacer} />
             </Animated.View>
             {loading ? (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator />
-                </View>
+                <MineralDetailSkeleton />
             ) : (
                 <Animated.ScrollView
                     contentContainerStyle={{ flexGrow: 1 }}

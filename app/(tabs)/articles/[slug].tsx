@@ -1,3 +1,4 @@
+import { Glimmer } from '@/components/Glimmer';
 import { ThemedIcon } from '@/components/ThemedIcon';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -8,7 +9,7 @@ import { Image } from 'expo-image';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -58,6 +59,38 @@ export default function ArticleDetailsScreen() {
         });
         return () => scrollY.removeListener(listener);
     }, [insets.top, scrollY]);
+
+    // Skeleton for loading state
+    function ArticleDetailSkeleton() {
+        const colorScheme = useColorScheme() ?? 'light';
+        const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
+        return (
+            <View style={{ flex: 1 }}>
+                <View style={styles.imageContainer}>
+                    <View style={[styles.image, { backgroundColor: baseColor, overflow: 'hidden' }]}>
+                        <Glimmer />
+                    </View>
+                </View>
+                <View style={[styles.mainSection]}>
+                    <View style={{ width: '70%', height: 28, borderRadius: 6, backgroundColor: baseColor, marginBottom: 16, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '40%', height: 16, borderRadius: 4, backgroundColor: baseColor, marginBottom: 16, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '100%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '90%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '80%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                </View>
+            </View>
+        );
+    }
 
     if (!loading && !article) {
         return (
@@ -118,8 +151,8 @@ export default function ArticleDetailsScreen() {
                 <View style={styles.headerRightSpacer} />
             </Animated.View>
             {loading ? (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator />
+                <View style={{ flex: 1 }}>
+                    <ArticleDetailSkeleton />
                 </View>
             ) : (
                 <Animated.ScrollView

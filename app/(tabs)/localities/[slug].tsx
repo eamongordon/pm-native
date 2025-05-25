@@ -1,3 +1,4 @@
+import { Glimmer } from '@/components/Glimmer';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
@@ -8,7 +9,7 @@ import { AppleMaps, GoogleMaps } from 'expo-maps';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const MAP_HEIGHT = 300;
@@ -57,10 +58,37 @@ export default function LocalitySlugScreen() {
         return () => scrollY.removeListener(listener);
     }, [insets.top, scrollY]);
 
+    // Skeleton for loading state
+    function LocalityDetailSkeleton() {
+        const colorScheme = useColorScheme() ?? 'light';
+        const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
+        return (
+            <View style={{ flex: 1 }}>
+                <View style={{ width: '100%', height: MAP_HEIGHT, backgroundColor: baseColor, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={[styles.contentContainer, { paddingBottom: 24 }]}>
+                    <View style={{ width: '60%', height: 28, borderRadius: 6, backgroundColor: baseColor, marginBottom: 16, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '100%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '90%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '80%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                </View>
+            </View>
+        );
+    }
+
     if (loading) {
         return (
-            <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator />
+            <ThemedView style={{ flex: 1 }}>
+                <LocalityDetailSkeleton />
             </ThemedView>
         );
     }

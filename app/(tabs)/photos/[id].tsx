@@ -1,3 +1,4 @@
+import { Glimmer } from '@/components/Glimmer';
 import { ThemedIcon } from '@/components/ThemedIcon';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -8,7 +9,7 @@ import { Image, useImage } from 'expo-image';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Modal, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Modal, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -59,6 +60,35 @@ export default function PhotoDetailsScreen() {
 
     console.log('Photo:', photo);
 
+    // Skeleton for loading state
+    function PhotoDetailSkeleton() {
+        const colorScheme = useColorScheme() ?? 'light';
+        const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
+        return (
+            <View style={{ flex: 1 }}>
+                <View style={[styles.imageContainer, { backgroundColor: baseColor, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }]}>
+                    <View style={[styles.image, { backgroundColor: baseColor, overflow: 'hidden' }]}>
+                        <Glimmer />
+                    </View>
+                </View>
+                <View style={[styles.mainSection]}>
+                    <View style={{ width: '60%', height: 28, borderRadius: 6, backgroundColor: baseColor, marginBottom: 16, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '40%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 12, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '100%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '90%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
+                </View>
+            </View>
+        );
+    }
+
     return (
         <ThemedView style={styles.container}>
             {/* Hide status bar when modal is open */}
@@ -81,9 +111,7 @@ export default function PhotoDetailsScreen() {
                     </Link>
                 </View>
                 {loading ? (
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <ActivityIndicator />
-                    </View>
+                    <PhotoDetailSkeleton />
                 ) : (
                     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                         <View style={styles.imageContainer}>
