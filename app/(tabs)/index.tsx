@@ -9,7 +9,6 @@ import { FlatList, Platform, ScrollView, StyleSheet, TouchableOpacity, View } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Glimmer } from '@/components/Glimmer';
-import { HelloWave } from '@/components/HelloWave';
 import HomeSearchModal from '@/components/HomeSearchModal';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -257,6 +256,31 @@ export default function HomeScreen() {
     const colorScheme = useColorScheme() ?? 'light';
     const bottom = useBottomTabOverflow();
 
+    // Dynamic greeting based on time of day
+    function getGreeting() {
+        const hour = new Date().getHours();
+        if (hour < 5) return "Hey there, night owl";
+        if (hour < 12) return "Good morning";
+        if (hour < 18) return "Good afternoon";
+        return "Good evening";
+    }
+
+    // Fun facts array
+    const funFacts = [
+        "Did you know? Painite was once the rarest mineral on Earth.",
+        "Fun fact: Keep Dioptase out of heat or light—it loses its color.",
+        "Did you know? The mineral with the longest name is potassic-magnesio-fluoro-arfvedsonite.",
+        "Fun fact: Zircon is the oldest mineral on Earth, dating back over 4 billion years.",
+        "Did you know? Chrysocolla isn't actually a mineral.",
+        "Fun fact: Topaz cleaves perfectly in one direction.",
+        "Did you know? Pyrite can decay into sulfuric acid.",
+        "Fun fact: You can tell Microcline and Orthoclase apart by twinning.",
+        "Did you know? Morganite is named after banker J.P. Morgan.",
+        "Fun fact: Langban, Sweden is the type locality of over 70 species."
+    ];
+    // Pick a random fun fact on each render
+    const funFact = funFacts[Math.floor(Math.random() * funFacts.length)];
+
     return (
         <ThemedView style={styles.container}>
             <SafeAreaView style={styles.safeArea}>
@@ -268,9 +292,13 @@ export default function HomeScreen() {
                     showsVerticalScrollIndicator={false}
                 >
                     <ThemedView style={styles.titleContainer}>
-                        <ThemedText type="title">Welcome!</ThemedText>
-                        <HelloWave />
+                        <ThemedText type="title">{getGreeting()}!</ThemedText>
                     </ThemedView>
+                    <View style={{ paddingHorizontal: 16, marginTop: -8, marginBottom: 8 }}>
+                        <ThemedText style={{ fontSize: 15, color: Colors[colorScheme].inputPlaceholder }}>
+                            {funFact}
+                        </ThemedText>
+                    </View>
                     <ThemedView>
                         <HomeSearchModal />
                     </ThemedView>
