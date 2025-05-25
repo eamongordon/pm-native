@@ -1,3 +1,4 @@
+import { Glimmer } from '@/components/Glimmer';
 import Select from '@/components/Select';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -15,6 +16,16 @@ const SORT_OPTIONS = [
     { label: 'A-Z', value: 'name-asc' },
     { label: 'Z-A', value: 'name-desc' },
 ];
+
+function PhotoSkeletonCard({ imageWidth }: { imageWidth: number }) {
+    const colorScheme = useColorScheme() ?? 'light';
+    const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
+    return (
+        <View style={{ width: imageWidth, height: imageWidth, borderRadius: 12, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+            <Glimmer />
+        </View>
+    );
+}
 
 export default function PhotosScreen() {
     const [photos, setPhotos] = useState<any[]>([]);
@@ -167,7 +178,15 @@ export default function PhotosScreen() {
                     </View>
                     <View style={{ flex: 1, paddingHorizontal: 16 }}>
                         {loading && photos.length === 0 ? (
-                            <ActivityIndicator />
+                            <View style={{ flexDirection: 'row', gap: imageMargin, paddingTop: 8, paddingBottom: 16 }}>
+                                {[0, 1].map((colIdx) => (
+                                    <View key={colIdx} style={{ flex: 1, gap: imageMargin }}>
+                                        {Array.from({ length: 6 }).map((_, i) => (
+                                            <PhotoSkeletonCard key={`skeleton-photo-${colIdx}-${i}`} imageWidth={imageWidth} />
+                                        ))}
+                                    </View>
+                                ))}
+                            </View>
                         ) : photos.length === 0 ? (
                             <ThemedText>No photos found</ThemedText>
                         ) : (

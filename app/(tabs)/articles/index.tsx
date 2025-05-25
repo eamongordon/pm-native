@@ -1,3 +1,4 @@
+import { Glimmer } from '@/components/Glimmer';
 import Select from '@/components/Select';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -17,6 +18,35 @@ const SORT_OPTIONS = [
     { label: 'Newest', value: 'date-desc' },
     { label: 'Oldest', value: 'date-asc' },
 ];
+
+function ArticleSkeletonCard({ imageWidth }: { imageWidth: number }) {
+    const colorScheme = useColorScheme() ?? 'light';
+    const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
+    return (
+        <View style={[styles.articleCard, { marginBottom: 20 }]}>
+            <View style={{ width: imageWidth, height: 180, borderRadius: 8, backgroundColor: baseColor, overflow: 'hidden' }}>
+                <Glimmer />
+            </View>
+            <View style={{ marginTop: 12, paddingHorizontal: 8, gap: 4 }}>
+                <View style={{ width: '80%', height: 18, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={{ width: '40%', height: 14, borderRadius: 4, backgroundColor: baseColor, marginBottom: 8, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={{ width: '100%', height: 15, borderRadius: 4, backgroundColor: baseColor, marginBottom: 4, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={{ width: '90%', height: 15, borderRadius: 4, backgroundColor: baseColor, marginBottom: 4, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={{ width: '70%', height: 15, borderRadius: 4, backgroundColor: baseColor, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+            </View>
+        </View>
+    );
+}
 
 export default function ArticlesScreen() {
     const [articles, setArticles] = useState<any[]>([]);
@@ -161,7 +191,12 @@ export default function ArticlesScreen() {
                     </View>
                     <View style={{ flex: 1, paddingHorizontal: 16 }}>
                         {loading && articles.length === 0 ? (
-                            <ActivityIndicator />
+                            <FlatList
+                                data={Array.from({ length: 5 })}
+                                keyExtractor={(_, i) => `skeleton-article-${i}`}
+                                renderItem={() => <ArticleSkeletonCard imageWidth={imageWidth} />}
+                                contentContainerStyle={{ paddingBottom: 16, paddingTop: 8 }}
+                            />
                         ) : articles.length === 0 ? (
                             <ThemedText>No articles found</ThemedText>
                         ) : (
