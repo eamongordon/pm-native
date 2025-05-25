@@ -15,8 +15,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { Link } from 'expo-router';
 import { Camera, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Platform, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ActivityIndicator, FlatList, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
 
 const LUSTER_OPTIONS = [
@@ -235,328 +235,326 @@ export default function HomeScreen() {
     };
 
     return (
-        <SafeAreaProvider>
-            <ThemedView style={styles.container}>
-                <SafeAreaView style={styles.safeArea}>
-                    <View style={styles.content}>
-                        <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: colorScheme === "light" ? Colors.light.border : Colors.dark.border, display: 'flex', gap: 8 }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <View style={{ flex: 1 }}>
-                                    <View style={[styles.searchBar, colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark]}>
-                                        {/* Magnifying Glass Icon */}
-                                        <ThemedIcon
-                                            Icon={Search}
-                                            size={20}
-                                            style={{ marginRight: 8, opacity: 0.7 }}
-                                        />
-                                        <TextInput
-                                            style={[styles.searchBarInput, colorScheme === 'light' ? styles.searchBarInputLight : styles.searchBarInputDark]}
-                                            placeholder="Search minerals..."
-                                            placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
-                                            value={searchInput}
-                                            onChangeText={setSearchInput}
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                            clearButtonMode="while-editing"
-                                        />
-                                        <TouchableOpacity onPress={handlePickImage} disabled={predicting}>
-                                            {predicting ? (
-                                                <ActivityIndicator size={20} style={{ marginRight: 8 }} />
-                                            ) : (
-                                                <ThemedIcon
-                                                    Icon={Camera}
-                                                    size={20}
-                                                    style={{ marginRight: 8 }}
-                                                    lightColor={Colors.light.text}
-                                                    darkColor={Colors.dark.text}
-                                                />
-                                            )}
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </View>
-                            {/* Filter and Sort below search bar */}
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                                <TouchableOpacity
-                                    onPress={() => setModalVisible(true)}
-                                    style={[styles.filterButton, colorScheme === 'light' ? styles.filterButtonLight : styles.filterButtonDark]}
-                                >
+        <ThemedView style={styles.container}>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.content}>
+                    <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: colorScheme === "light" ? Colors.light.border : Colors.dark.border, display: 'flex', gap: 8 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={{ flex: 1 }}>
+                                <View style={[styles.searchBar, colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark]}>
+                                    {/* Magnifying Glass Icon */}
                                     <ThemedIcon
-                                        Icon={SlidersHorizontal}
-                                        size={18}
-                                        style={{ marginRight: 6 }}
+                                        Icon={Search}
+                                        size={20}
+                                        style={{ marginRight: 8, opacity: 0.7 }}
                                     />
-                                    <ThemedText style={{ fontSize: 14 }}>Filter</ThemedText>
-                                </TouchableOpacity>
-                                <View style={styles.sortDropdownContainer}>
-                                    <Select
-                                        options={SORT_OPTIONS}
-                                        selectedValue={
-                                            !sort || sort.property === 'default'
-                                                ? 'default'
-                                                : sort.property === 'name' && sort.sort === 'asc'
-                                                    ? 'name-asc'
-                                                    : sort.property === 'name' && sort.sort === 'desc'
-                                                        ? 'name-desc'
-                                                        : 'default'
-                                        }
-                                        onValueChange={handleSortChange}
-                                        placeholder="Sort"
-                                        prefix="Sort: "
+                                    <TextInput
+                                        style={[styles.searchBarInput, colorScheme === 'light' ? styles.searchBarInputLight : styles.searchBarInputDark]}
+                                        placeholder="Search minerals..."
+                                        placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
+                                        value={searchInput}
+                                        onChangeText={setSearchInput}
+                                        autoCapitalize="none"
+                                        autoCorrect={false}
+                                        clearButtonMode="while-editing"
                                     />
+                                    <TouchableOpacity onPress={handlePickImage} disabled={predicting}>
+                                        {predicting ? (
+                                            <ActivityIndicator size={20} style={{ marginRight: 8 }} />
+                                        ) : (
+                                            <ThemedIcon
+                                                Icon={Camera}
+                                                size={20}
+                                                style={{ marginRight: 8 }}
+                                                lightColor={Colors.light.text}
+                                                darkColor={Colors.dark.text}
+                                            />
+                                        )}
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
-                        {/* Modal for filters */}
-                        <Modal
-                            visible={modalVisible}
-                            animationType="slide"
-                            transparent={true}
-                            onRequestClose={() => setModalVisible(false)}
-                        >
-                            <View style={styles.modalOverlay}>
-                                <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-                                    <View style={{ flex: 1 }} />
-                                </TouchableWithoutFeedback>
-                                <View
-                                    style={[
-                                        styles.modalContent,
-                                        colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark
-                                    ]}
-                                >
-                                    {/* Sticky Modal Header */}
-                                    <View style={[
-                                        styles.modalHeader,
-                                        colorScheme === 'light' ? styles.modalHeaderLight : styles.modalHeaderDark
-                                    ]}>
-                                        <TouchableOpacity
-                                            onPress={() => setModalVisible(false)}
-                                            style={styles.modalHeaderButton}
-                                            accessibilityLabel="Close"
-                                        >
-                                            <ThemedText style={{ fontSize: 22, color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }}>×</ThemedText>
-                                        </TouchableOpacity>
-                                        <ThemedText style={[
-                                            styles.modalHeaderTitle,
-                                            { color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }
-                                        ]}>Filters</ThemedText>
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                setFilters({
-                                                    search: '',
-                                                    hardnessRange: [1, 10],
-                                                    lusters: [],
-                                                    mineralClass: [],
-                                                    crystalSystems: [],
-                                                    associateMinerals: [],
-                                                    chemistry: [],
-                                                    ids: [],
-                                                });
-                                                setModalVisible(false);
-                                            }}
-                                            style={styles.modalHeaderButton}
-                                            accessibilityLabel="Reset"
-                                        >
-                                            <ThemedText type="defaultSemiBold">Reset</ThemedText>
-                                        </TouchableOpacity>
-                                    </View>
-                                    {/* Scrollable Content */}
-                                    <ScrollView
-                                        contentContainerStyle={{
-                                            flexGrow: 1,
-                                            paddingBottom: 16,
-                                            paddingHorizontal: 16,
-                                            paddingTop: 16,
-                                            rowGap: 16, // add vertical spacing between collapsibles
-                                        }}
-                                        showsVerticalScrollIndicator={false}
-                                        style={{
-                                            backgroundColor: colorScheme === 'light'
-                                                ? Colors.light.background
-                                                : Colors.dark.background
-                                        }}
-                                    >
-                                        {/* Hardness Range Slider */}
-                                        <Collapsible title="Hardness">
-                                            <View style={{ marginTop: 8 }}>
-                                                <ThemedText
-                                                    style={{
-                                                        fontWeight: 'bold',
-                                                        marginBottom: 8,
-                                                        color: colorScheme === 'light'
-                                                            ? Colors.light.text
-                                                            : Colors.dark.text,
-                                                    }}
-                                                >
-                                                    Hardness Range
-                                                </ThemedText>
-                                                <MultiSlider
-                                                    values={filters.hardnessRange}
-                                                    min={1}
-                                                    max={10}
-                                                    step={1}
-                                                    onValuesChange={(values: number[]) =>
-                                                        setFilters(f => ({ ...f, hardnessRange: values as [number, number] }))
-                                                    }
-                                                    allowOverlap={false}
-                                                    snapped
-                                                    containerStyle={{ marginHorizontal: 10 }}
-                                                    selectedStyle={{
-                                                        backgroundColor: Colors[colorScheme].text,
-                                                    }}
-                                                    unselectedStyle={{
-                                                        backgroundColor: colorScheme === 'light'
-                                                            ? Colors.light.border
-                                                            : Colors.dark.border,
-                                                    }}
-                                                    markerStyle={{
-                                                        backgroundColor: colorScheme === 'light'
-                                                            ? Colors.light.background
-                                                            : Colors.dark.background,
-                                                        borderColor: Colors[colorScheme].text,
-                                                        borderWidth: 2,
-                                                        width: 24,
-                                                        height: 24,
-                                                        shadowColor: 'transparent',
-                                                    }}
-                                                />
-                                                <ThemedText style={{ color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }}>
-                                                    {filters.hardnessRange[0]} - {filters.hardnessRange[1]}
-                                                </ThemedText>
-                                            </View>
-                                        </Collapsible>
-                                        {/* Luster Checkboxes */}
-                                        <Collapsible title="Lusters">
-                                            <View style={{ marginTop: 8 }}>
-                                                <CheckboxGroup
-                                                    options={LUSTER_OPTIONS}
-                                                    selected={filters.lusters}
-                                                    onToggle={(luster: string) =>
-                                                        setFilters(f => ({
-                                                            ...f,
-                                                            lusters: f.lusters.includes(luster)
-                                                                ? f.lusters.filter((l: string) => l !== luster)
-                                                                : [...f.lusters, luster]
-                                                        }))
-                                                    }
-                                                />
-                                            </View>
-                                        </Collapsible>
-                                        {/* Mineral Class Checkboxes */}
-                                        <Collapsible title="Mineral Class">
-                                            <View style={{ marginTop: 8 }}>
-                                                <CheckboxGroup
-                                                    options={MINERAL_CLASS_OPTIONS}
-                                                    selected={filters.mineralClass}
-                                                    onToggle={(cls: string) =>
-                                                        setFilters(f => ({
-                                                            ...f,
-                                                            mineralClass: f.mineralClass.includes(cls)
-                                                                ? f.mineralClass.filter((c: string) => c !== cls)
-                                                                : [...f.mineralClass, cls]
-                                                        }))
-                                                    }
-                                                />
-                                            </View>
-                                        </Collapsible>
-                                        {/* Crystal Systems Checkboxes */}
-                                        <Collapsible title="Crystal Systems">
-                                            <View style={{ marginTop: 8 }}>
-                                                <CheckboxGroup
-                                                    options={CRYSTAL_SYSTEM_OPTIONS}
-                                                    selected={filters.crystalSystems}
-                                                    onToggle={(sys: string) =>
-                                                        setFilters(f => ({
-                                                            ...f,
-                                                            crystalSystems: f.crystalSystems.includes(sys)
-                                                                ? f.crystalSystems.filter((c: string) => c !== sys)
-                                                                : [...f.crystalSystems, sys]
-                                                        }))
-                                                    }
-                                                />
-                                            </View>
-                                        </Collapsible>
-                                        {/* Associates Collapsible */}
-                                        <Collapsible title="Associates">
-                                            <AssociatesSearch
-                                                selected={filters.associateMinerals}
-                                                onChange={(associateMinerals: any[]) =>
-                                                    setFilters(f => ({ ...f, associateMinerals }))
-                                                }
-                                            />
-                                        </Collapsible>
-                                        {/* Chemistry Collapsible */}
-                                        <Collapsible title="Chemistry">
-                                            <ChemistryChipInput
-                                                values={filters.chemistry}
-                                                onChange={(chemistry: string[]) =>
-                                                    setFilters(f => ({ ...f, chemistry }))
-                                                }
-                                                placeholder="Add formula (e.g. Cu, Fe2O3)..."
-                                            />
-                                        </Collapsible>
-                                    </ScrollView>
-                                    {/* Sticky Modal Footer */}
-                                    <View style={[
-                                        styles.modalFooter,
-                                        colorScheme === 'light' ? styles.modalFooterLight : styles.modalFooterDark
-                                    ]}>
-                                        <TouchableOpacity
-                                            style={[
-                                                styles.showResultsButton,
-                                                { backgroundColor: Colors[colorScheme].primary }
-                                            ]}
-                                            onPress={() => setModalVisible(false)}
-                                        >
-                                            <ThemedText>
-                                                Show Results
-                                            </ThemedText>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </View>
-                        </Modal>
-                        <View style={{ flex: 1, paddingHorizontal: 16 }}>
-                            {loading && minerals.length === 0 ? (
-                                <ActivityIndicator />
-                            ) : minerals.length === 0 ? (
-                                <ThemedText>No minerals found</ThemedText>
-                            ) : (
-                                <FlatList
-                                    data={minerals}
-                                    keyExtractor={(item) => item.id}
-                                    style={{ alignSelf: 'stretch', flex: 1 }}
-                                    contentContainerStyle={{ paddingBottom: 16 }}
-                                    renderItem={({ item }) => (
-                                        <Link href={`/minerals/${item.slug}`} asChild>
-                                            <TouchableOpacity style={styles.card}>
-                                                <View style={styles.itemRow}>
-                                                    <Image
-                                                        source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
-                                                        style={styles.itemImage}
-                                                        contentFit="cover"
-                                                        placeholder={{ uri: item.photos && item.photos[0]?.photo?.imageBlurhash }}
-                                                        placeholderContentFit="cover"
-                                                        transition={700}
-                                                    />
-                                                    <ThemedText type="defaultSemiBold" style={styles.itemName}>{item.name}</ThemedText>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Link>
-                                    )}
-                                    numColumns={2}
-                                    columnWrapperStyle={{ gap: 8, paddingTop: 8 }}
-                                    onEndReached={handleEndReached}
-                                    ListFooterComponent={
-                                        isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
-                                    }
+                        {/* Filter and Sort below search bar */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <TouchableOpacity
+                                onPress={() => setModalVisible(true)}
+                                style={[styles.filterButton, colorScheme === 'light' ? styles.filterButtonLight : styles.filterButtonDark]}
+                            >
+                                <ThemedIcon
+                                    Icon={SlidersHorizontal}
+                                    size={18}
+                                    style={{ marginRight: 6 }}
                                 />
-                            )}
+                                <ThemedText style={{ fontSize: 14 }}>Filter</ThemedText>
+                            </TouchableOpacity>
+                            <View style={styles.sortDropdownContainer}>
+                                <Select
+                                    options={SORT_OPTIONS}
+                                    selectedValue={
+                                        !sort || sort.property === 'default'
+                                            ? 'default'
+                                            : sort.property === 'name' && sort.sort === 'asc'
+                                                ? 'name-asc'
+                                                : sort.property === 'name' && sort.sort === 'desc'
+                                                    ? 'name-desc'
+                                                    : 'default'
+                                    }
+                                    onValueChange={handleSortChange}
+                                    placeholder="Sort"
+                                    prefix="Sort: "
+                                />
+                            </View>
                         </View>
                     </View>
-                </SafeAreaView>
-            </ThemedView>
-        </SafeAreaProvider>
+                    {/* Modal for filters */}
+                    <Modal
+                        visible={modalVisible}
+                        animationType="slide"
+                        transparent={true}
+                        onRequestClose={() => setModalVisible(false)}
+                    >
+                        <View style={styles.modalOverlay}>
+                            <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+                                <View style={{ flex: 1 }} />
+                            </TouchableWithoutFeedback>
+                            <View
+                                style={[
+                                    styles.modalContent,
+                                    colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark
+                                ]}
+                            >
+                                {/* Sticky Modal Header */}
+                                <View style={[
+                                    styles.modalHeader,
+                                    colorScheme === 'light' ? styles.modalHeaderLight : styles.modalHeaderDark
+                                ]}>
+                                    <TouchableOpacity
+                                        onPress={() => setModalVisible(false)}
+                                        style={styles.modalHeaderButton}
+                                        accessibilityLabel="Close"
+                                    >
+                                        <ThemedText style={{ fontSize: 22, color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }}>×</ThemedText>
+                                    </TouchableOpacity>
+                                    <ThemedText style={[
+                                        styles.modalHeaderTitle,
+                                        { color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }
+                                    ]}>Filters</ThemedText>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setFilters({
+                                                search: '',
+                                                hardnessRange: [1, 10],
+                                                lusters: [],
+                                                mineralClass: [],
+                                                crystalSystems: [],
+                                                associateMinerals: [],
+                                                chemistry: [],
+                                                ids: [],
+                                            });
+                                            setModalVisible(false);
+                                        }}
+                                        style={styles.modalHeaderButton}
+                                        accessibilityLabel="Reset"
+                                    >
+                                        <ThemedText type="defaultSemiBold">Reset</ThemedText>
+                                    </TouchableOpacity>
+                                </View>
+                                {/* Scrollable Content */}
+                                <ScrollView
+                                    contentContainerStyle={{
+                                        flexGrow: 1,
+                                        paddingBottom: 16,
+                                        paddingHorizontal: 16,
+                                        paddingTop: 16,
+                                        rowGap: 16, // add vertical spacing between collapsibles
+                                    }}
+                                    showsVerticalScrollIndicator={false}
+                                    style={{
+                                        backgroundColor: colorScheme === 'light'
+                                            ? Colors.light.background
+                                            : Colors.dark.background
+                                    }}
+                                >
+                                    {/* Hardness Range Slider */}
+                                    <Collapsible title="Hardness">
+                                        <View style={{ marginTop: 8 }}>
+                                            <ThemedText
+                                                style={{
+                                                    fontWeight: 'bold',
+                                                    marginBottom: 8,
+                                                    color: colorScheme === 'light'
+                                                        ? Colors.light.text
+                                                        : Colors.dark.text,
+                                                }}
+                                            >
+                                                Hardness Range
+                                            </ThemedText>
+                                            <MultiSlider
+                                                values={filters.hardnessRange}
+                                                min={1}
+                                                max={10}
+                                                step={1}
+                                                onValuesChange={(values: number[]) =>
+                                                    setFilters(f => ({ ...f, hardnessRange: values as [number, number] }))
+                                                }
+                                                allowOverlap={false}
+                                                snapped
+                                                containerStyle={{ marginHorizontal: 10 }}
+                                                selectedStyle={{
+                                                    backgroundColor: Colors[colorScheme].text,
+                                                }}
+                                                unselectedStyle={{
+                                                    backgroundColor: colorScheme === 'light'
+                                                        ? Colors.light.border
+                                                        : Colors.dark.border,
+                                                }}
+                                                markerStyle={{
+                                                    backgroundColor: colorScheme === 'light'
+                                                        ? Colors.light.background
+                                                        : Colors.dark.background,
+                                                    borderColor: Colors[colorScheme].text,
+                                                    borderWidth: 2,
+                                                    width: 24,
+                                                    height: 24,
+                                                    shadowColor: 'transparent',
+                                                }}
+                                            />
+                                            <ThemedText style={{ color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }}>
+                                                {filters.hardnessRange[0]} - {filters.hardnessRange[1]}
+                                            </ThemedText>
+                                        </View>
+                                    </Collapsible>
+                                    {/* Luster Checkboxes */}
+                                    <Collapsible title="Lusters">
+                                        <View style={{ marginTop: 8 }}>
+                                            <CheckboxGroup
+                                                options={LUSTER_OPTIONS}
+                                                selected={filters.lusters}
+                                                onToggle={(luster: string) =>
+                                                    setFilters(f => ({
+                                                        ...f,
+                                                        lusters: f.lusters.includes(luster)
+                                                            ? f.lusters.filter((l: string) => l !== luster)
+                                                            : [...f.lusters, luster]
+                                                    }))
+                                                }
+                                            />
+                                        </View>
+                                    </Collapsible>
+                                    {/* Mineral Class Checkboxes */}
+                                    <Collapsible title="Mineral Class">
+                                        <View style={{ marginTop: 8 }}>
+                                            <CheckboxGroup
+                                                options={MINERAL_CLASS_OPTIONS}
+                                                selected={filters.mineralClass}
+                                                onToggle={(cls: string) =>
+                                                    setFilters(f => ({
+                                                        ...f,
+                                                        mineralClass: f.mineralClass.includes(cls)
+                                                            ? f.mineralClass.filter((c: string) => c !== cls)
+                                                            : [...f.mineralClass, cls]
+                                                    }))
+                                                }
+                                            />
+                                        </View>
+                                    </Collapsible>
+                                    {/* Crystal Systems Checkboxes */}
+                                    <Collapsible title="Crystal Systems">
+                                        <View style={{ marginTop: 8 }}>
+                                            <CheckboxGroup
+                                                options={CRYSTAL_SYSTEM_OPTIONS}
+                                                selected={filters.crystalSystems}
+                                                onToggle={(sys: string) =>
+                                                    setFilters(f => ({
+                                                        ...f,
+                                                        crystalSystems: f.crystalSystems.includes(sys)
+                                                            ? f.crystalSystems.filter((c: string) => c !== sys)
+                                                            : [...f.crystalSystems, sys]
+                                                    }))
+                                                }
+                                            />
+                                        </View>
+                                    </Collapsible>
+                                    {/* Associates Collapsible */}
+                                    <Collapsible title="Associates">
+                                        <AssociatesSearch
+                                            selected={filters.associateMinerals}
+                                            onChange={(associateMinerals: any[]) =>
+                                                setFilters(f => ({ ...f, associateMinerals }))
+                                            }
+                                        />
+                                    </Collapsible>
+                                    {/* Chemistry Collapsible */}
+                                    <Collapsible title="Chemistry">
+                                        <ChemistryChipInput
+                                            values={filters.chemistry}
+                                            onChange={(chemistry: string[]) =>
+                                                setFilters(f => ({ ...f, chemistry }))
+                                            }
+                                            placeholder="Add formula (e.g. Cu, Fe2O3)..."
+                                        />
+                                    </Collapsible>
+                                </ScrollView>
+                                {/* Sticky Modal Footer */}
+                                <View style={[
+                                    styles.modalFooter,
+                                    colorScheme === 'light' ? styles.modalFooterLight : styles.modalFooterDark
+                                ]}>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.showResultsButton,
+                                            { backgroundColor: Colors[colorScheme].primary }
+                                        ]}
+                                        onPress={() => setModalVisible(false)}
+                                    >
+                                        <ThemedText>
+                                            Show Results
+                                        </ThemedText>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    </Modal>
+                    <View style={{ flex: 1, paddingHorizontal: 16 }}>
+                        {loading && minerals.length === 0 ? (
+                            <ActivityIndicator />
+                        ) : minerals.length === 0 ? (
+                            <ThemedText>No minerals found</ThemedText>
+                        ) : (
+                            <FlatList
+                                data={minerals}
+                                keyExtractor={(item) => item.id}
+                                style={{ alignSelf: 'stretch', flex: 1 }}
+                                contentContainerStyle={{ paddingBottom: 16 }}
+                                renderItem={({ item }) => (
+                                    <Link href={`/minerals/${item.slug}`} asChild>
+                                        <TouchableOpacity style={styles.card}>
+                                            <View style={styles.itemRow}>
+                                                <Image
+                                                    source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
+                                                    style={styles.itemImage}
+                                                    contentFit="cover"
+                                                    placeholder={{ uri: item.photos && item.photos[0]?.photo?.imageBlurhash }}
+                                                    placeholderContentFit="cover"
+                                                    transition={700}
+                                                />
+                                                <ThemedText type="defaultSemiBold" style={styles.itemName}>{item.name}</ThemedText>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </Link>
+                                )}
+                                numColumns={2}
+                                columnWrapperStyle={{ gap: 8, paddingTop: 8 }}
+                                onEndReached={handleEndReached}
+                                ListFooterComponent={
+                                    isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
+                                }
+                            />
+                        )}
+                    </View>
+                </View>
+            </SafeAreaView>
+        </ThemedView>
     );
 }
 

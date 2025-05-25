@@ -7,8 +7,8 @@ import { Image as ExpoImage, useImage } from 'expo-image';
 import { Link } from 'expo-router';
 import { Search } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Platform, SafeAreaView, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ActivityIndicator, Dimensions, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SORT_OPTIONS = [
     { label: 'Default', value: 'default' },
@@ -127,76 +127,74 @@ export default function PhotosScreen() {
     };
 
     return (
-        <SafeAreaProvider>
-            <ThemedView style={styles.container}>
-                <SafeAreaView style={styles.safeArea}>
-                    <View style={styles.content}>
-                        <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: colorScheme === "light" ? Colors.light.border : Colors.dark.border, gap: 8 }}>
-                            <View style={[styles.searchBar, colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark]}>
-                                {/* Magnifying Glass Icon */}
-                                <Search size={20} style={{ marginRight: 8, opacity: 0.7 }} color={colorScheme === 'light' ? Colors.light.text : Colors.dark.text} />
-                                <TextInput
-                                    style={[styles.searchBarInput, colorScheme === 'light' ? styles.searchBarInputLight : styles.searchBarInputDark]}
-                                    placeholder="Search photos..."
-                                    placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
-                                    value={search}
-                                    onChangeText={setSearch}
-                                    autoCapitalize="none"
-                                    autoCorrect={false}
-                                    clearButtonMode="while-editing"
+        <ThemedView style={styles.container}>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.content}>
+                    <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: colorScheme === "light" ? Colors.light.border : Colors.dark.border, gap: 8 }}>
+                        <View style={[styles.searchBar, colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark]}>
+                            {/* Magnifying Glass Icon */}
+                            <Search size={20} style={{ marginRight: 8, opacity: 0.7 }} color={colorScheme === 'light' ? Colors.light.text : Colors.dark.text} />
+                            <TextInput
+                                style={[styles.searchBarInput, colorScheme === 'light' ? styles.searchBarInputLight : styles.searchBarInputDark]}
+                                placeholder="Search photos..."
+                                placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
+                                value={search}
+                                onChangeText={setSearch}
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                clearButtonMode="while-editing"
+                            />
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <View style={styles.sortDropdownContainer}>
+                                <Select
+                                    options={SORT_OPTIONS}
+                                    selectedValue={
+                                        !sort || sort.property === 'default'
+                                            ? 'default'
+                                            : sort.property === 'name' && sort.sort === 'asc'
+                                                ? 'name-asc'
+                                                : sort.property === 'name' && sort.sort === 'desc'
+                                                    ? 'name-desc'
+                                                    : 'default'
+                                    }
+                                    onValueChange={handleSortChange}
+                                    placeholder="Sort"
+                                    prefix="Sort: "
                                 />
                             </View>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                                <View style={styles.sortDropdownContainer}>
-                                    <Select
-                                        options={SORT_OPTIONS}
-                                        selectedValue={
-                                            !sort || sort.property === 'default'
-                                                ? 'default'
-                                                : sort.property === 'name' && sort.sort === 'asc'
-                                                    ? 'name-asc'
-                                                    : sort.property === 'name' && sort.sort === 'desc'
-                                                        ? 'name-desc'
-                                                        : 'default'
-                                        }
-                                        onValueChange={handleSortChange}
-                                        placeholder="Sort"
-                                        prefix="Sort: "
-                                    />
-                                </View>
-                            </View>
-                        </View>
-                        <View style={{ flex: 1, paddingHorizontal: 16 }}>
-                            {loading && photos.length === 0 ? (
-                                <ActivityIndicator />
-                            ) : photos.length === 0 ? (
-                                <ThemedText>No photos found</ThemedText>
-                            ) : (
-                                <ScrollView
-                                    contentContainerStyle={{ flexDirection: 'row', gap: imageMargin, paddingTop: 8, paddingBottom: 16 }}
-                                    onMomentumScrollEnd={handleEndReached}
-                                    showsVerticalScrollIndicator={false}
-                                >
-                                    {getMasonryColumns(photos).map((column, colIdx) => (
-                                        <View key={colIdx} style={{ flex: 1, gap: imageMargin }}>
-                                            {column.map((item: any) => (
-                                                <PhotoItem
-                                                    key={item.id}
-                                                    item={item}
-                                                    imageWidth={imageWidth}
-                                                    colorScheme={colorScheme}
-                                                />
-                                            ))}
-                                        </View>
-                                    ))}
-                                </ScrollView>
-                            )}
-                            {isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null}
                         </View>
                     </View>
-                </SafeAreaView>
-            </ThemedView>
-        </SafeAreaProvider>
+                    <View style={{ flex: 1, paddingHorizontal: 16 }}>
+                        {loading && photos.length === 0 ? (
+                            <ActivityIndicator />
+                        ) : photos.length === 0 ? (
+                            <ThemedText>No photos found</ThemedText>
+                        ) : (
+                            <ScrollView
+                                contentContainerStyle={{ flexDirection: 'row', gap: imageMargin, paddingTop: 8, paddingBottom: 16 }}
+                                onMomentumScrollEnd={handleEndReached}
+                                showsVerticalScrollIndicator={false}
+                            >
+                                {getMasonryColumns(photos).map((column, colIdx) => (
+                                    <View key={colIdx} style={{ flex: 1, gap: imageMargin }}>
+                                        {column.map((item: any) => (
+                                            <PhotoItem
+                                                key={item.id}
+                                                item={item}
+                                                imageWidth={imageWidth}
+                                                colorScheme={colorScheme}
+                                            />
+                                        ))}
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        )}
+                        {isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null}
+                    </View>
+                </View>
+            </SafeAreaView>
+        </ThemedView>
     );
 }
 

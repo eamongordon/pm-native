@@ -7,8 +7,8 @@ import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Search } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, FlatList, Platform, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ActivityIndicator, Dimensions, FlatList, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SORT_OPTIONS = [
     { label: 'Default', value: 'default' },
@@ -118,109 +118,107 @@ export default function ArticlesScreen() {
     const imageWidth = screenWidth - 32;
 
     return (
-        <SafeAreaProvider>
-            <ThemedView style={styles.container}>
-                <SafeAreaView style={styles.safeArea}>
-                    <View style={styles.content}>
-                        <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: colorScheme === "light" ? Colors.light.border : Colors.dark.border, gap: 8 }}>
-                            <View style={[styles.searchBar, colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark]}>
-                                <Search size={20} style={{ marginRight: 8, opacity: 0.7 }} color={colorScheme === 'light' ? Colors.light.text : Colors.dark.text} />
-                                <TextInput
-                                    style={[styles.searchBarInput, colorScheme === 'light' ? styles.searchBarInputLight : styles.searchBarInputDark]}
-                                    placeholder="Search articles..."
-                                    placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
-                                    value={search}
-                                    onChangeText={setSearch}
-                                    autoCapitalize="none"
-                                    autoCorrect={false}
-                                    clearButtonMode="while-editing"
-                                />
-                            </View>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                                <View style={styles.sortDropdownContainer}>
-                                    <Select
-                                        options={SORT_OPTIONS}
-                                        selectedValue={
-                                            !sort || sort.property === 'default'
-                                                ? 'default'
-                                                : sort.property === 'title' && sort.sort === 'asc'
-                                                    ? 'title-asc'
-                                                    : sort.property === 'title' && sort.sort === 'desc'
-                                                        ? 'title-desc'
-                                                        : sort.property === 'publishedAt' && sort.sort === 'asc'
-                                                            ? 'date-asc'
-                                                            : sort.property === 'publishedAt' && sort.sort === 'desc'
-                                                                ? 'date-desc'
-                                                                : 'default'
-                                        }
-                                        onValueChange={handleSortChange}
-                                        placeholder="Sort"
-                                        prefix="Sort: "
-                                    />
-                                </View>
-                            </View>
+        <ThemedView style={styles.container}>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.content}>
+                    <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderColor: colorScheme === "light" ? Colors.light.border : Colors.dark.border, gap: 8 }}>
+                        <View style={[styles.searchBar, colorScheme === 'light' ? styles.searchBarLight : styles.searchBarDark]}>
+                            <Search size={20} style={{ marginRight: 8, opacity: 0.7 }} color={colorScheme === 'light' ? Colors.light.text : Colors.dark.text} />
+                            <TextInput
+                                style={[styles.searchBarInput, colorScheme === 'light' ? styles.searchBarInputLight : styles.searchBarInputDark]}
+                                placeholder="Search articles..."
+                                placeholderTextColor={colorScheme === 'light' ? Colors.light.inputPlaceholder : Colors.dark.inputPlaceholder}
+                                value={search}
+                                onChangeText={setSearch}
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                clearButtonMode="while-editing"
+                            />
                         </View>
-                        <View style={{ flex: 1, paddingHorizontal: 16 }}>
-                            {loading && articles.length === 0 ? (
-                                <ActivityIndicator />
-                            ) : articles.length === 0 ? (
-                                <ThemedText>No articles found</ThemedText>
-                            ) : (
-                                <FlatList
-                                    data={articles}
-                                    keyExtractor={(item) => item.slug}
-                                    contentContainerStyle={{ paddingBottom: 16 }}
-                                    renderItem={({ item }) => (
-                                        <Link
-                                            href={`/articles/${item.slug}`}
-                                            asChild
-                                        >
-                                            <TouchableOpacity style={styles.articleCard}>
-                                                <Image
-                                                    style={{
-                                                        width: imageWidth,
-                                                        height: 180,
-                                                        borderRadius: 8,
-                                                        backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
-                                                    }}
-                                                    source={{ uri: item.image }}
-                                                    placeholder={{ uri: item.imageBlurhash }}
-                                                    contentFit="cover"
-                                                    transition={700}
-                                                    placeholderContentFit="cover"
-                                                />
-                                                <View style={{ marginTop: 12, paddingHorizontal: 8, gap: 4 }}>
-                                                    <ThemedText type="defaultSemiBold" style={{ fontSize: 18 }}>
-                                                        {item.title}
-                                                    </ThemedText>
-                                                    <ThemedText type="default" style={{ color: Colors[colorScheme].inputPlaceholder, fontSize: 14 }}>
-                                                        {item.createdAt
-                                                            ? new Date(item.createdAt).toLocaleDateString(undefined, {
-                                                                year: 'numeric',
-                                                                month: 'short',
-                                                                day: 'numeric',
-                                                            })
-                                                            : ''}
-                                                    </ThemedText>
-                                                    <ThemedText numberOfLines={3} style={{ fontSize: 15 }}>
-                                                        {item.description}
-                                                    </ThemedText>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </Link>
-                                    )}
-                                    onEndReached={handleEndReached}
-                                    ListFooterComponent={
-                                        isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <View style={styles.sortDropdownContainer}>
+                                <Select
+                                    options={SORT_OPTIONS}
+                                    selectedValue={
+                                        !sort || sort.property === 'default'
+                                            ? 'default'
+                                            : sort.property === 'title' && sort.sort === 'asc'
+                                                ? 'title-asc'
+                                                : sort.property === 'title' && sort.sort === 'desc'
+                                                    ? 'title-desc'
+                                                    : sort.property === 'publishedAt' && sort.sort === 'asc'
+                                                        ? 'date-asc'
+                                                        : sort.property === 'publishedAt' && sort.sort === 'desc'
+                                                            ? 'date-desc'
+                                                            : 'default'
                                     }
-                                    style={{ paddingTop: 8 }}
+                                    onValueChange={handleSortChange}
+                                    placeholder="Sort"
+                                    prefix="Sort: "
                                 />
-                            )}
+                            </View>
                         </View>
                     </View>
-                </SafeAreaView>
-            </ThemedView>
-        </SafeAreaProvider>
+                    <View style={{ flex: 1, paddingHorizontal: 16 }}>
+                        {loading && articles.length === 0 ? (
+                            <ActivityIndicator />
+                        ) : articles.length === 0 ? (
+                            <ThemedText>No articles found</ThemedText>
+                        ) : (
+                            <FlatList
+                                data={articles}
+                                keyExtractor={(item) => item.slug}
+                                contentContainerStyle={{ paddingBottom: 16 }}
+                                renderItem={({ item }) => (
+                                    <Link
+                                        href={`/articles/${item.slug}`}
+                                        asChild
+                                    >
+                                        <TouchableOpacity style={styles.articleCard}>
+                                            <Image
+                                                style={{
+                                                    width: imageWidth,
+                                                    height: 180,
+                                                    borderRadius: 8,
+                                                    backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
+                                                }}
+                                                source={{ uri: item.image }}
+                                                placeholder={{ uri: item.imageBlurhash }}
+                                                contentFit="cover"
+                                                transition={700}
+                                                placeholderContentFit="cover"
+                                            />
+                                            <View style={{ marginTop: 12, paddingHorizontal: 8, gap: 4 }}>
+                                                <ThemedText type="defaultSemiBold" style={{ fontSize: 18 }}>
+                                                    {item.title}
+                                                </ThemedText>
+                                                <ThemedText type="default" style={{ color: Colors[colorScheme].inputPlaceholder, fontSize: 14 }}>
+                                                    {item.createdAt
+                                                        ? new Date(item.createdAt).toLocaleDateString(undefined, {
+                                                            year: 'numeric',
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                        })
+                                                        : ''}
+                                                </ThemedText>
+                                                <ThemedText numberOfLines={3} style={{ fontSize: 15 }}>
+                                                    {item.description}
+                                                </ThemedText>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </Link>
+                                )}
+                                onEndReached={handleEndReached}
+                                ListFooterComponent={
+                                    isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
+                                }
+                                style={{ paddingTop: 8 }}
+                            />
+                        )}
+                    </View>
+                </View>
+            </SafeAreaView>
+        </ThemedView>
     );
 }
 
