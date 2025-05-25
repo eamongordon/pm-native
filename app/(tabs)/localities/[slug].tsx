@@ -3,7 +3,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { Image } from 'expo-image';
+import { Image, useImage } from 'expo-image';
 import { AppleMaps, GoogleMaps } from 'expo-maps';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -21,6 +21,12 @@ export default function LocalitySlugScreen() {
     const [loading, setLoading] = useState(true);
     const bottom = useBottomTabOverflow();
     const insets = useSafeAreaInsets();
+
+    // Preload images for locality pins 
+    const singleKnown = useImage(require('@/assets/images/localities/PM-Single-Locality-Pin_Light.png'), { maxHeight: 128, maxWidth: 128 });
+    const singleEstimated = useImage(require('@/assets/images/localities/PM-Single-Locality-Pin_Dark.png'), { maxHeight: 128, maxWidth: 128 });
+    const groupKnown = useImage(require('@/assets/images/localities/PM-Group-Locality-Pin_Light.png'), { maxHeight: 128, maxWidth: 128 });
+    const groupEstimated = useImage(require('@/assets/images/localities/PM-Group-Locality-Pin_Dark.png'), { maxHeight: 128, maxWidth: 128 });
 
     // Header background on scroll
     const [headerSolid, setHeaderSolid] = useState(false);
@@ -156,6 +162,13 @@ export default function LocalitySlugScreen() {
                         ) : (
                             <GoogleMaps.View
                                 style={[StyleSheet.absoluteFill, { top: 0 }]}
+                                cameraPosition={{
+                                    coordinates: {
+                                        latitude: Number(locality.latitude),
+                                        longitude: Number(locality.longitude),
+                                    },
+                                    zoom: 6,
+                                }}
                                 markers={[
                                     {
                                         id: locality.id,
@@ -163,7 +176,13 @@ export default function LocalitySlugScreen() {
                                             latitude: Number(locality.latitude),
                                             longitude: Number(locality.longitude),
                                         },
-                                        title: locality.name,
+                                        icon: locality.type === 'Single'
+                                            ? locality.coordinates_known
+                                                ? singleKnown ?? undefined
+                                                : singleEstimated ?? undefined
+                                            : locality.coordinates_known
+                                                ? groupKnown ?? undefined
+                                                : groupEstimated ?? undefined,
                                     }
                                 ]}
                             />

@@ -124,7 +124,7 @@ export default function LocalitiesScreen() {
         setFetchingLocation(false);
     };
 
-    // Preload marker images for Apple Maps
+    // Preload marker images for locality pins
     const singleKnown = useImage(require('@/assets/images/localities/PM-Single-Locality-Pin_Light.png'), { maxHeight: 128, maxWidth: 128 });
     const singleEstimated = useImage(require('@/assets/images/localities/PM-Single-Locality-Pin_Dark.png'), { maxHeight: 128, maxWidth: 128 });
     const groupKnown = useImage(require('@/assets/images/localities/PM-Group-Locality-Pin_Light.png'), { maxHeight: 128, maxWidth: 128 });
