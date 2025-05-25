@@ -23,9 +23,6 @@ function MineralSkeletonCard() {
             <View style={{ width: 140, height: 200, borderRadius: 12, backgroundColor: baseColor, overflow: 'hidden', marginBottom: 6 }}>
                 <Glimmer />
             </View>
-            <View style={{ width: 100, height: 18, borderRadius: 4, backgroundColor: baseColor, overflow: 'hidden' }}>
-                <Glimmer />
-            </View>
         </View>
     );
 }
