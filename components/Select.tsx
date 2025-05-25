@@ -1,17 +1,17 @@
 import { Colors } from '@/constants/Colors';
-import { ArrowUpDown } from 'lucide-react-native';
-import React, { useRef, useState } from 'react';
+import { ArrowUpDown, X } from 'lucide-react-native';
+import React, { useState } from 'react';
 import {
-    FlatList,
     Modal,
+    ScrollView,
     StyleSheet,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     View,
-    useColorScheme
+    useColorScheme,
 } from 'react-native';
 import { ThemedIcon } from './ThemedIcon';
 import { ThemedText } from './ThemedText';
-import { ThemedView } from './ThemedView';
 
 type Option = {
     label: string;
@@ -23,7 +23,7 @@ type SelectProps = {
     selectedValue: string | null;
     onValueChange: (value: string) => void;
     placeholder?: string;
-    prefix?: string; // Optional prefix for trigger label
+    prefix?: string;
 };
 
 const Select: React.FC<SelectProps> = ({
@@ -34,90 +34,126 @@ const Select: React.FC<SelectProps> = ({
     prefix,
 }) => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [dropdownTop, setDropdownTop] = useState(0);
-    const [dropdownLeft, setDropdownLeft] = useState(0);
-    const [dropdownWidth, setDropdownWidth] = useState(0);
-    const selectBoxRef = useRef<View>(null);
-
     const colorScheme = useColorScheme() ?? 'light';
-
-    const openDropdown = () => {
-        if (selectBoxRef.current) {
-            selectBoxRef.current.measureInWindow((x, y, width, height) => {
-                setDropdownTop(y + height);
-                setDropdownLeft(x);
-                setDropdownWidth(width);
-                setModalVisible(true);
-            });
-        } else {
-            setModalVisible(true);
-        }
-    };
 
     const selectedLabel =
         options.find((opt) => opt.value === selectedValue)?.label || placeholder;
 
     return (
         <View>
-            <View ref={selectBoxRef}>
-                <TouchableOpacity
-                    style={[styles.selectBox, colorScheme === 'light' ? styles.selectBoxLight : styles.selectBoxDark]}
-                    onPress={openDropdown}
-                    activeOpacity={0.8}
-                >
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <ThemedIcon
-                            Icon={ArrowUpDown}
-                            size={18}
-                            style={{ marginRight: 8 }}
-                        />
-                        <ThemedText style={{ fontSize: 14 }}>
-                            {prefix ? `${prefix}${selectedLabel}` : selectedLabel}
-                        </ThemedText>
-                    </View>
-                </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+                style={[
+                    styles.selectBox,
+                    colorScheme === 'light' ? styles.selectBoxLight : styles.selectBoxDark,
+                ]}
+                onPress={() => setModalVisible(true)}
+                activeOpacity={0.8}
+            >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <ThemedIcon
+                        Icon={ArrowUpDown}
+                        size={18}
+                        style={{ marginRight: 8 }}
+                    />
+                    <ThemedText style={{ fontSize: 14 }}>
+                        {prefix ? `${prefix}${selectedLabel}` : selectedLabel}
+                    </ThemedText>
+                </View>
+            </TouchableOpacity>
             <Modal
                 visible={modalVisible}
-                transparent
-                animationType="none"
+                animationType="slide"
+                transparent={true}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPressOut={() => setModalVisible(false)}
-                >
-                    <ThemedView
+                <View style={styles.modalOverlay}>
+                    <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+                        <View style={{ flex: 1 }} />
+                    </TouchableWithoutFeedback>
+                    <View
                         style={[
-                            styles.dropdownMenu,
-                            colorScheme === 'light' ? styles.dropdownMenuLight : styles.dropdownMenuDark,
-                            {
-                                position: 'absolute',
-                                top: dropdownTop,
-                                left: dropdownLeft,
-                                width: dropdownWidth,
-                                maxHeight: 300,
-                            },
+                            styles.modalContent,
+                            colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark,
                         ]}
                     >
-                        <FlatList
-                            data={options}
-                            keyExtractor={(item) => item.value}
-                            renderItem={({ item }) => (
+                        <View style={styles.modalHeader}>
+                            <ThemedText
+                                type="defaultMedium"
+                                style={[
+                                    styles.modalHeaderTitle,
+                                    { color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text, textAlign: 'left', flex: 1 }
+                                ]}
+                            >
+                                Sort
+                            </ThemedText>
+                            <TouchableOpacity
+                                onPress={() => setModalVisible(false)}
+                                style={styles.modalHeaderButton}
+                                accessibilityLabel="Close"
+                            >
+                                <ThemedIcon
+                                    Icon={X}
+                                    size={22}
+                                    lightColor={colorScheme === 'light' ? Colors.light.text : Colors.dark.text}
+                                    darkColor={colorScheme === 'light' ? Colors.light.text : Colors.dark.text}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView
+                            contentContainerStyle={{
+                                paddingVertical: 8,
+                                paddingHorizontal: 0,
+                            }}
+                            showsVerticalScrollIndicator={false}
+                        >
+                            {options.map((item) => (
                                 <TouchableOpacity
-                                    style={styles.option}
-                                    onPress={() => {
-                                        onValueChange(item.value);
-                                        setModalVisible(false);
-                                    }}
+                                    key={item.value}
+                                    style={styles.optionRow}
+                                    onPress={() => onValueChange(item.value)}
                                 >
+                                    <View
+                                        style={[
+                                            styles.radioCircle,
+                                            {
+                                                borderColor: colorScheme === 'light'
+                                                    ? Colors.light.inputText
+                                                    : Colors.dark.inputText,
+                                            },
+                                        ]}
+                                    >
+                                        {selectedValue === item.value && (
+                                            <View
+                                                style={[
+                                                    styles.radioCircleFilled,
+                                                    {
+                                                        backgroundColor: colorScheme === 'light'
+                                                            ? Colors.light.inputText
+                                                            : Colors.dark.inputText,
+                                                    },
+                                                ]}
+                                            />
+                                        )}
+                                    </View>
                                     <ThemedText style={styles.optionText}>{item.label}</ThemedText>
                                 </TouchableOpacity>
-                            )}
-                        />
-                    </ThemedView>
-                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                        <View style={styles.modalFooter}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.showResultsButton,
+                                    { backgroundColor: Colors[colorScheme].primary }
+                                ]}
+                                onPress={() => setModalVisible(false)}
+                            >
+                                <ThemedText type="defaultMedium">
+                                    Show Results
+                                </ThemedText>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </Modal>
         </View>
     );
@@ -145,33 +181,85 @@ const styles = StyleSheet.create({
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.0)',
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        justifyContent: 'flex-end',
+        alignItems: 'stretch',
     },
-    dropdownMenu: {
-        borderRadius: 8,
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 2 },
-        borderWidth: 1,
-        zIndex: 1000,
-        paddingVertical: 4,
+    modalContent: {
+        width: '100%',
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        padding: 0,
+        alignItems: 'stretch',
+        minHeight: 120,
+        maxHeight: '60%',
+        overflow: 'hidden',
+        backgroundColor: 'white', // fallback
     },
-    dropdownMenuLight: {
-        borderColor: Colors.light.border,
+    modalContentLight: {
         backgroundColor: Colors.light.background,
     },
-    dropdownMenuDark: {
-        backgroundColor: Colors.dark.inputBackground,
+    modalContentDark: {
+        backgroundColor: Colors.dark.background,
     },
-    option: {
-        paddingHorizontal: 16,
-        paddingVertical: 4,
+    modalHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingTop: 18,
+        paddingBottom: 12,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        zIndex: 2,
+    },
+    modalHeaderTitle: {
+        fontSize: 18,
+        textAlign: 'center',
+        flex: 1,
+    },
+    modalHeaderButton: {
+        minWidth: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    optionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+    },
+    radioCircle: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        borderWidth: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+    },
+    radioCircleFilled: {
+        width: 14,
+        height: 14,
+        borderRadius: 7,
     },
     optionText: {
-        fontSize: 14
-    }
+        fontSize: 16,
+    },
+    modalFooter: {
+        padding: 20,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderColor: '#e0e0e0',
+        backgroundColor: 'transparent',
+    },
+    showResultsButton: {
+        borderRadius: 12,
+        marginBottom: 16,
+        height: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });
 
 export default Select;
