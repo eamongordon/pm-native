@@ -12,10 +12,11 @@ import * as tf from '@tensorflow/tfjs';
 import { bundleResourceIO, decodeJpeg } from '@tensorflow/tfjs-react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { Camera, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { ActivityIndicator, Animated, FlatList, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
 
@@ -37,6 +38,58 @@ const SORT_OPTIONS = [
     { label: 'A-Z', value: 'name-asc' },
     { label: 'Z-A', value: 'name-desc' },
 ];
+
+// Glimmer shimmer effect component
+function Glimmer({ baseColor, highlightColor, style }: { baseColor: string, highlightColor: string, style?: any }) {
+    const translateX = useState(new Animated.Value(-150))[0];
+    useEffect(() => {
+        Animated.loop(
+            Animated.timing(translateX, {
+                toValue: 150,
+                duration: 1200,
+                useNativeDriver: true,
+            })
+        ).start();
+    }, []);
+    return (
+        <Animated.View
+            pointerEvents="none"
+            style={[
+                {
+                    ...StyleSheet.absoluteFillObject,
+                    transform: [{ translateX }],
+                },
+                style,
+            ]}
+        >
+            <LinearGradient
+                colors={[baseColor, highlightColor, baseColor]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={{ flex: 1 }}
+            />
+        </Animated.View>
+    );
+}
+
+function MineralSkeletonCard() {
+    // Use colorScheme from hook
+    const colorScheme = useColorScheme() ?? 'light';
+    const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
+    const highlightColor = colorScheme === 'dark' ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.4)';
+    return (
+        <View style={styles.card}>
+            <View style={styles.itemRow}>
+                <View style={[styles.itemImage, { backgroundColor: baseColor, overflow: 'hidden' }]}>
+                    <Glimmer baseColor={baseColor} highlightColor={highlightColor} />
+                </View>
+                <View style={{ width: '60%', height: 16, borderRadius: 8, backgroundColor: baseColor, marginBottom: 4, overflow: 'hidden' }}>
+                    <Glimmer baseColor={baseColor} highlightColor={highlightColor} />
+                </View>
+            </View>
+        </View>
+    );
+}
 
 export default function HomeScreen() {
     const [filters, setFilters] = useState({
@@ -517,7 +570,15 @@ export default function HomeScreen() {
                     </Modal>
                     <View style={{ flex: 1, paddingHorizontal: 16 }}>
                         {loading && minerals.length === 0 ? (
-                            <ActivityIndicator />
+                            // Show skeletons instead of ActivityIndicator
+                            <FlatList
+                                data={Array.from({ length: 6 })}
+                                keyExtractor={(_, i) => `skeleton-${i}`}
+                                renderItem={() => <MineralSkeletonCard />}
+                                numColumns={2}
+                                columnWrapperStyle={{ gap: 8, paddingTop: 8 }}
+                                contentContainerStyle={{ paddingBottom: 16 }}
+                            />
                         ) : minerals.length === 0 ? (
                             <ThemedText>No minerals found</ThemedText>
                         ) : (
