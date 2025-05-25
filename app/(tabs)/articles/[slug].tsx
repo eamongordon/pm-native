@@ -1,3 +1,4 @@
+import CustomMarkdown from '@/components/CustomMarkdown';
 import { Glimmer } from '@/components/Glimmer';
 import { ThemedIcon } from '@/components/ThemedIcon';
 import { ThemedText } from '@/components/ThemedText';
@@ -10,7 +11,6 @@ import { Link, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
-import Markdown from 'react-native-markdown-display';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -196,7 +196,7 @@ export default function ArticleDetailsScreen() {
                         )}
                         {article.content && (
                             <View style={styles.section}>
-                                <Markdown
+                                <CustomMarkdown
                                     style={{
                                         body: { color: Colors[colorScheme].text, fontSize: 16, fontFamily: 'WorkSans_400Regular', lineHeight: 24 },
                                         heading1: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 16, marginBottom: 4, lineHeight: 32 },
@@ -207,7 +207,7 @@ export default function ArticleDetailsScreen() {
                                     }}
                                 >
                                     {article.content}
-                                </Markdown>
+                                </CustomMarkdown>
                             </View>
                         )}
                     </ThemedView>
