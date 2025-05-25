@@ -1,4 +1,4 @@
-import { useFonts, WorkSans_400Regular, WorkSans_600SemiBold } from '@expo-google-fonts/work-sans';
+import { useFonts, WorkSans_400Regular, WorkSans_500Medium, WorkSans_600SemiBold } from '@expo-google-fonts/work-sans';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import 'react-native-reanimated';
@@ -10,6 +10,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [fontsLoaded] = useFonts({
     WorkSans_400Regular,
+    WorkSans_500Medium,
     WorkSans_600SemiBold,
   });
 

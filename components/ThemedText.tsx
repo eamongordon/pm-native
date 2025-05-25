@@ -4,7 +4,7 @@ import { StyleSheet, Text, type TextProps } from 'react-native';
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+  type?: 'default' | 'title' | 'defaultSemiBold' | 'defaultMedium' | 'subtitle' | 'link';
 };
 
 export function ThemedText({
@@ -21,6 +21,7 @@ export function ThemedText({
       style={[
         { color },
         type === 'default' ? styles.default : undefined,
+        type === 'defaultMedium' ? styles.defaultMedium : undefined,
         type === 'title' ? styles.title : undefined,
         type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
         type === 'subtitle' ? styles.subtitle : undefined,
@@ -37,6 +38,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     fontFamily: 'WorkSans_400Regular',
+  },
+  defaultMedium: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontFamily: 'WorkSans_500Medium',
   },
   defaultSemiBold: {
     fontSize: 16,
