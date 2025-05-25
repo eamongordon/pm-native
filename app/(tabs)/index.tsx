@@ -5,7 +5,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FlatList, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Glimmer } from '@/components/Glimmer';
@@ -13,6 +13,22 @@ import { HelloWave } from '@/components/HelloWave';
 import HomeSearchModal from '@/components/HomeSearchModal';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+
+// MineralSkeletonCard for homepage minerals carousel
+function MineralSkeletonCard() {
+    const colorScheme = useColorScheme() ?? 'light';
+    const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
+    return (
+        <View style={{ alignItems: 'center', marginRight: 10, width: 140 }}>
+            <View style={{ width: 140, height: 200, borderRadius: 12, backgroundColor: baseColor, overflow: 'hidden', marginBottom: 6 }}>
+                <Glimmer />
+            </View>
+            <View style={{ width: 100, height: 18, borderRadius: 4, backgroundColor: baseColor, overflow: 'hidden' }}>
+                <Glimmer />
+            </View>
+        </View>
+    );
+}
 
 // TopMineralsCarousel with real data
 function TopMineralsCarousel() {
@@ -45,7 +61,15 @@ function TopMineralsCarousel() {
         <View style={{ marginVertical: 8 }}>
             <ThemedText type="subtitle" style={{ marginLeft: 16 }}>Minerals</ThemedText>
             {loading ? (
-                <ActivityIndicator style={{ marginVertical: 16 }} />
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={{ paddingVertical: 8 }}
+                >
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <MineralSkeletonCard key={`mineral-skeleton-${i}`} />
+                    ))}
+                </ScrollView>
             ) : (
                 <ScrollView
                     ref={scrollRef}
