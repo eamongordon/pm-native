@@ -119,6 +119,7 @@ function TopMineralsCarousel() {
                                             end={{ x: 0.5, y: 1 }}
                                         />
                                         <ThemedText
+                                            type="defaultMedium"
                                             style={{
                                                 textAlign: 'center',
                                                 fontSize: 16,
@@ -313,7 +314,7 @@ export default function HomeScreen() {
                             color={Colors[colorScheme].icon}
                             style={{ marginRight: 16 }}
                         />
-                        <ThemedText type="defaultSemiBold" style={{ fontSize: 15, color: Colors[colorScheme].icon, flex: 1, lineHeight: 20 }}>
+                        <ThemedText type="defaultMedium" style={{ fontSize: 15, color: Colors[colorScheme].icon, flex: 1, lineHeight: 20 }}>
                             {funFact}
                         </ThemedText>
                     </View>

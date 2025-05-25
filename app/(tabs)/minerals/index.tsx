@@ -17,7 +17,7 @@ import { Link } from 'expo-router';
 import { Camera, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
 
 const LUSTER_OPTIONS = [
@@ -77,6 +77,7 @@ export default function HomeScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [predicting, setPredicting] = useState(false);
     const colorScheme = useColorScheme() ?? 'light';
+    const { bottom } = useSafeAreaInsets();
     const LIMIT = 10;
 
     // Only keep handlers that are actually needed for controlled inputs
@@ -355,10 +356,13 @@ export default function HomeScreen() {
                                     >
                                         <ThemedText style={{ fontSize: 22, color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }}>×</ThemedText>
                                     </TouchableOpacity>
-                                    <ThemedText style={[
-                                        styles.modalHeaderTitle,
-                                        { color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }
-                                    ]}>Filters</ThemedText>
+                                    <ThemedText
+                                        type="defaultMedium"
+                                        style={[
+                                            styles.modalHeaderTitle,
+                                            { color: colorScheme === 'light' ? Colors.light.text : Colors.dark.text }
+                                        ]}>Filters
+                                    </ThemedText>
                                     <TouchableOpacity
                                         onPress={() => {
                                             setFilters({
@@ -376,7 +380,7 @@ export default function HomeScreen() {
                                         style={styles.modalHeaderButton}
                                         accessibilityLabel="Reset"
                                     >
-                                        <ThemedText type="defaultSemiBold">Reset</ThemedText>
+                                        <ThemedText type="defaultSemiBold">Clear</ThemedText>
                                     </TouchableOpacity>
                                 </View>
                                 {/* Scrollable Content */}
@@ -527,7 +531,7 @@ export default function HomeScreen() {
                                         ]}
                                         onPress={() => setModalVisible(false)}
                                     >
-                                        <ThemedText>
+                                        <ThemedText type="defaultMedium">
                                             Show Results
                                         </ThemedText>
                                     </TouchableOpacity>
@@ -573,7 +577,7 @@ export default function HomeScreen() {
                                                         placeholderContentFit="cover"
                                                         transition={700}
                                                     />
-                                                    <ThemedText type="defaultSemiBold" style={styles.itemName}>{item.name}</ThemedText>
+                                                    <ThemedText type="defaultMedium" style={styles.itemName}>{item.name}</ThemedText>
                                                 </View>
                                             </TouchableOpacity>
                                         </Link>
@@ -759,6 +763,7 @@ const styles = StyleSheet.create({
     showResultsButton: {
         borderRadius: 8,
         height: 40,
+        marginBottom: 16,
         alignItems: 'center',
         justifyContent: 'center',
     },

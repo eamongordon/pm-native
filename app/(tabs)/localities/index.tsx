@@ -201,7 +201,7 @@ export default function LocalitiesScreen() {
                     colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark
                 ]}>
                     <ScrollView contentContainerStyle={{ padding: 16 }}>
-                        <ThemedText type="defaultSemiBold" style={{ fontSize: 18, marginBottom: 12 }}>Filters</ThemedText>
+                        <ThemedText type="subtitle" style={{ marginBottom: 12 }}>Filters</ThemedText>
                         {/* Minerals filter */}
                         <ThemedText style={{ marginBottom: 6 }}>Minerals</ThemedText>
                         <AssociatesSearch

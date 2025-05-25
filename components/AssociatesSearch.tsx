@@ -193,7 +193,7 @@ export default function AssociatesSearch({ selected, onChange }: ChipInputProps)
 
 const styles = StyleSheet.create({
     container: {
-        borderRadius: 8,
+        borderRadius: 12,
         marginBottom: 2,
     },
     containerLight: {
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     searchBar: {
         height: 40,
         borderColor: '#e0e0e0',
-        borderRadius: 8,
+        borderRadius: 12,
         paddingHorizontal: 12,
         flexDirection: 'row',
         alignItems: 'center',
