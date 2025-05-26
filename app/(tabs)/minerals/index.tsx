@@ -86,7 +86,9 @@ export default function HomeScreen() {
     // Debounce search input and update filters.search
     useEffect(() => {
         const timeout = setTimeout(() => {
-            setFilters(f => ({ ...f, search: searchInput }));
+            if (searchInput !== filters.search) {
+                setFilters(f => ({ ...f, search: searchInput }));
+            }
         }, 300);
         return () => clearTimeout(timeout);
     }, [searchInput]);
@@ -375,6 +377,7 @@ export default function HomeScreen() {
                                                 chemistry: [],
                                                 ids: [],
                                             });
+                                            setSearchInput('');
                                             setModalVisible(false);
                                         }}
                                         style={styles.modalHeaderButton}
@@ -583,7 +586,8 @@ export default function HomeScreen() {
                                             associateMinerals: [],
                                             chemistry: [],
                                             ids: [],
-                                        })
+                                        });
+                                        setSearchInput('');
                                     }}
                                 >
                                     <ThemedText>
