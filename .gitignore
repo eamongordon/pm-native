@@ -36,6 +36,9 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# VS Code
+.vscode/
+
 app-example
 
 # iOS
