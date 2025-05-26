@@ -3,7 +3,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { Image } from 'expo-image';
 import { Search, X } from 'lucide-react-native';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { ThemedIcon } from './ThemedIcon';
 import { ThemedText } from './ThemedText';
 
@@ -140,7 +140,7 @@ export default function AssociatesSearch({ selected, onChange }: ChipInputProps)
                                     style={styles.chipImage}
                                 />
                             )}
-                            <Text style={styles.chipText}>{mineral.name}</Text>
+                            <ThemedText style={styles.chipText}>{mineral.name}</ThemedText>
                             <TouchableOpacity onPress={() => handleRemove(mineral)} style={[styles.removeBtnContainer, colorScheme === 'light' ? styles.removeBtnContainerLight : styles.removeBtnContainerDark]}>
                                 <ThemedIcon
                                     Icon={X}
@@ -177,7 +177,10 @@ export default function AssociatesSearch({ selected, onChange }: ChipInputProps)
                                     style={styles.dropdownImage}
                                 />
                             )}
-                            <ThemedText style={styles.dropdownText}>{item.name}</ThemedText>
+                            <ThemedText style={[
+                                styles.dropdownText,
+                                colorScheme === 'light' ? styles.dropdownTextLight : styles.dropdownTextDark
+                            ]}>{item.name}</ThemedText>
                         </TouchableOpacity>
                     )}
                     ListFooterComponent={
@@ -233,7 +236,6 @@ const styles = StyleSheet.create({
         maxHeight: 180,
         borderColor: '#ccc',
         borderRadius: 8,
-        backgroundColor: '#fff',
         marginBottom: 8,
         // Add shadow for iOS and elevation for Android
         shadowColor: '#000',
@@ -258,7 +260,12 @@ const styles = StyleSheet.create({
     },
     dropdownText: {
         fontSize: 16,
-        color: '#333',
+    },
+    dropdownTextLight: {
+        color: Colors.light.inputText,
+    },
+    dropdownTextDark: {
+        color: Colors.dark.inputText,
     },
     chipsWrap: {
         flexDirection: 'row',
@@ -290,7 +297,6 @@ const styles = StyleSheet.create({
     },
     chipText: {
         fontSize: 15,
-        color: '#333',
         marginRight: 4,
     },
     removeBtnContainer: {
