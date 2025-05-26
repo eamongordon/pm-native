@@ -18,7 +18,7 @@ import { Link } from 'expo-router';
 import { Camera, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
 
 const LUSTER_OPTIONS = [
@@ -78,7 +78,6 @@ export default function HomeScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [predicting, setPredicting] = useState(false);
     const colorScheme = useColorScheme() ?? 'light';
-    const { bottom } = useSafeAreaInsets();
     const LIMIT = 10;
 
     // Only keep handlers that are actually needed for controlled inputs
@@ -552,7 +551,46 @@ export default function HomeScreen() {
                                 contentContainerStyle={{ paddingBottom: 16 }}
                             />
                         ) : minerals.length === 0 ? (
-                            <ThemedText>No minerals found</ThemedText>
+                            <View style={{ flex: 1, alignItems: 'center', paddingTop: 48 }}>
+                                <ThemedIcon
+                                    Icon={Search}
+                                    size={48}
+                                    style={{ marginBottom: 16, opacity: 0.4 }}
+                                    lightColor={Colors.light.text}
+                                    darkColor={Colors.dark.text}
+                                />
+                                <ThemedText type="defaultMedium" style={{ fontSize: 20, marginBottom: 8, textAlign: 'center', opacity: 0.8 }}>
+                                    No minerals found
+                                </ThemedText>
+                                <ThemedText style={{ fontSize: 15, color: Colors.light.inputPlaceholder, textAlign: 'center', maxWidth: 260, marginBottom: 20 }}>
+                                    Try adjusting your search or filter criteria.
+                                </ThemedText>
+                                <TouchableOpacity
+                                    style={{
+                                        backgroundColor: Colors[colorScheme].primary,
+                                        borderRadius: 10,
+                                        paddingVertical: 10,
+                                        paddingHorizontal: 24,
+                                        marginTop: 8,
+                                    }}
+                                    onPress={() => {
+                                        setFilters({
+                                            search: '',
+                                            hardnessRange: [1, 10],
+                                            lusters: [],
+                                            mineralClass: [],
+                                            crystalSystems: [],
+                                            associateMinerals: [],
+                                            chemistry: [],
+                                            ids: [],
+                                        })
+                                    }}
+                                >
+                                    <ThemedText>
+                                        Reset Filters
+                                    </ThemedText>
+                                </TouchableOpacity>
+                            </View>
                         ) : (
                             <FlatList
                                 data={
