@@ -14,7 +14,7 @@ import { AppleMaps, GoogleMaps } from 'expo-maps';
 import { Link } from 'expo-router';
 import { List as ListIcon, LocateFixed, Search, SlidersHorizontal, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { FlatList, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SORT_OPTIONS = [
@@ -195,107 +195,113 @@ export default function LocalitiesScreen() {
                     <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
                         <View style={{ flex: 1 }} />
                     </TouchableWithoutFeedback>
-                    <View
-                        style={[
-                            styles.modalContent,
-                            colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark
-                        ]}
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === "ios" ? "padding" : "height"}
+                        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+                        style={{ width: '100%', maxHeight: '80%', flex: 0 }}
                     >
-                        {/* Sticky Modal Header */}
-                        <View style={[
-                            styles.modalHeader,
-                            colorScheme === 'light' ? styles.modalHeaderLight : styles.modalHeaderDark
-                        ]}>
-                            <TouchableOpacity
-                                onPress={() => setModalVisible(false)}
-                                style={styles.modalHeaderButton}
-                                accessibilityLabel="Close"
-                            >
-                                <ThemedText style={{ fontSize: 22, color: Colors[colorScheme].text }}>×</ThemedText>
-                            </TouchableOpacity>
-                            <ThemedText
-                                type="defaultMedium"
-                                style={[
-                                    styles.modalHeaderTitle,
-                                    { color: Colors[colorScheme].text }
-                                ]}
-                            >
-                                Filters
-                            </ThemedText>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setFilters({
-                                        name: '',
-                                        minerals: [],
-                                        latitude: '',
-                                        longitude: '',
-                                        radius: '',
-                                    });
-                                    setModalVisible(false);
-                                }}
-                                style={styles.modalHeaderButton}
-                                accessibilityLabel="Clear"
-                            >
-                                <ThemedText type="defaultSemiBold">Clear</ThemedText>
-                            </TouchableOpacity>
-                        </View>
-                        {/* Scrollable Content */}
-                        <ScrollView contentContainerStyle={{ padding: 16 }}>
-                            {/* Minerals filter */}
-                            <ThemedText type="defaultMedium" style={{ marginBottom: 6 }}>Minerals</ThemedText>
-                            <AssociatesSearch
-                                selected={filters.minerals}
-                                onChange={minerals => setFilters(f => ({ ...f, minerals }))}
-                            />
-                            {/* Location filter */}
-                            <ThemedText type="defaultMedium" style={{ marginTop: 18, marginBottom: 6 }}>Location</ThemedText>
-                            <View style={{ flexDirection: 'column', gap: 12, marginBottom: 8 }}>
-                                <View style={{ flexDirection: 'row', gap: 12 }}>
-                                    <TextInput
-                                        style={[styles.filterInput, colorScheme === 'light' ? styles.filterInputLight : styles.filterInputDark]}
-                                        placeholder="Latitude"
-                                        keyboardType="numeric"
-                                        value={filters.latitude}
-                                        placeholderTextColor={Colors[colorScheme].inputPlaceholder}
-                                        onChangeText={v => setFilters(f => ({ ...f, latitude: v }))}
-                                    />
-                                    <TextInput
-                                        style={[styles.filterInput, colorScheme === 'light' ? styles.filterInputLight : styles.filterInputDark]}
-                                        placeholder="Longitude"
-                                        keyboardType="numeric"
-                                        value={filters.longitude}
-                                        placeholderTextColor={Colors[colorScheme].inputPlaceholder}
-                                        onChangeText={v => setFilters(f => ({ ...f, longitude: v }))}
-                                    />
-                                </View>
-                                <TextInput
-                                    style={[styles.filterInput, colorScheme === 'light' ? styles.filterInputLight : styles.filterInputDark]}
-                                    placeholder="Radius (km)"
-                                    placeholderTextColor={Colors[colorScheme].inputPlaceholder}
-                                    keyboardType="numeric"
-                                    value={filters.radius}
-                                    onChangeText={v => setFilters(f => ({ ...f, radius: v }))}
-                                />
+                        <View
+                            style={[
+                                styles.modalContent,
+                                colorScheme === 'light' ? styles.modalContentLight : styles.modalContentDark
+                            ]}
+                        >
+                            {/* Sticky Modal Header */}
+                            <View style={[
+                                styles.modalHeader,
+                                colorScheme === 'light' ? styles.modalHeaderLight : styles.modalHeaderDark
+                            ]}>
                                 <TouchableOpacity
-                                    style={[styles.currentLocationButton, colorScheme === 'light' ? styles.currentLocationButtonLight : styles.currentLocationButtonDark]}
-                                    onPress={handleUseCurrentLocation}
-                                    disabled={fetchingLocation}
+                                    onPress={() => setModalVisible(false)}
+                                    style={styles.modalHeaderButton}
+                                    accessibilityLabel="Close"
                                 >
-                                    <LocateFixed size={18} color={Colors[colorScheme].text} />
-                                    <ThemedText style={{ marginLeft: 4, display: 'flex' }}>Use Current Location</ThemedText>
+                                    <ThemedText style={{ fontSize: 22, color: Colors[colorScheme].text }}>×</ThemedText>
+                                </TouchableOpacity>
+                                <ThemedText
+                                    type="defaultMedium"
+                                    style={[
+                                        styles.modalHeaderTitle,
+                                        { color: Colors[colorScheme].text }
+                                    ]}
+                                >
+                                    Filters
+                                </ThemedText>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setFilters({
+                                            name: '',
+                                            minerals: [],
+                                            latitude: '',
+                                            longitude: '',
+                                            radius: '',
+                                        });
+                                        setModalVisible(false);
+                                    }}
+                                    style={styles.modalHeaderButton}
+                                    accessibilityLabel="Clear"
+                                >
+                                    <ThemedText type="defaultSemiBold">Clear</ThemedText>
                                 </TouchableOpacity>
                             </View>
-                        </ScrollView>
-                        {/* Sticky Modal Footer */}
-                        <View style={styles.modalFooter}>
-                            <TouchableOpacity
-                                style={[styles.showResultsButton, colorScheme === 'light' ? styles.showResultsButtonLight : styles.showResultsButtonDark]}
-                                onPress={() => setModalVisible(false)}
-                            >
-                                <ThemedText type="defaultMedium">Show Results</ThemedText>
-                            </TouchableOpacity>
+                            {/* Scrollable Content */}
+                            <ScrollView contentContainerStyle={{ padding: 16, flexGrow: 1 }}>
+                                {/* Minerals filter */}
+                                <ThemedText type="defaultMedium" style={{ marginBottom: 6 }}>Minerals</ThemedText>
+                                <AssociatesSearch
+                                    selected={filters.minerals}
+                                    onChange={minerals => setFilters(f => ({ ...f, minerals }))}
+                                />
+                                {/* Location filter */}
+                                <ThemedText type="defaultMedium" style={{ marginTop: 18, marginBottom: 6 }}>Location</ThemedText>
+                                <View style={{ flexDirection: 'column', gap: 12, marginBottom: 8 }}>
+                                    <View style={{ flexDirection: 'row', gap: 12 }}>
+                                        <TextInput
+                                            style={[styles.filterInput, colorScheme === 'light' ? styles.filterInputLight : styles.filterInputDark]}
+                                            placeholder="Latitude"
+                                            keyboardType="numeric"
+                                            value={filters.latitude}
+                                            placeholderTextColor={Colors[colorScheme].inputPlaceholder}
+                                            onChangeText={v => setFilters(f => ({ ...f, latitude: v }))}
+                                        />
+                                        <TextInput
+                                            style={[styles.filterInput, colorScheme === 'light' ? styles.filterInputLight : styles.filterInputDark]}
+                                            placeholder="Longitude"
+                                            keyboardType="numeric"
+                                            value={filters.longitude}
+                                            placeholderTextColor={Colors[colorScheme].inputPlaceholder}
+                                            onChangeText={v => setFilters(f => ({ ...f, longitude: v }))}
+                                        />
+                                    </View>
+                                    <TextInput
+                                        style={[styles.filterInput, colorScheme === 'light' ? styles.filterInputLight : styles.filterInputDark]}
+                                        placeholder="Radius (km)"
+                                        placeholderTextColor={Colors[colorScheme].inputPlaceholder}
+                                        keyboardType="numeric"
+                                        value={filters.radius}
+                                        onChangeText={v => setFilters(f => ({ ...f, radius: v }))}
+                                    />
+                                    <TouchableOpacity
+                                        style={[styles.currentLocationButton, colorScheme === 'light' ? styles.currentLocationButtonLight : styles.currentLocationButtonDark]}
+                                        onPress={handleUseCurrentLocation}
+                                        disabled={fetchingLocation}
+                                    >
+                                        <LocateFixed size={18} color={Colors[colorScheme].text} />
+                                        <ThemedText style={{ marginLeft: 4, display: 'flex' }}>Use Current Location</ThemedText>
+                                    </TouchableOpacity>
+                                </View>
+                            </ScrollView>
+                            {/* Sticky Modal Footer */}
+                            <View style={styles.modalFooter}>
+                                <TouchableOpacity
+                                    style={[styles.showResultsButton, colorScheme === 'light' ? styles.showResultsButtonLight : styles.showResultsButtonDark]}
+                                    onPress={() => setModalVisible(false)}
+                                >
+                                    <ThemedText type="defaultMedium">Show Results</ThemedText>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    </View>
+                    </KeyboardAvoidingView>
                 </View>
             </Modal>
             {/* Main Content */}
@@ -623,10 +629,9 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 16,
         borderTopRightRadius: 16,
         padding: 0,
-        minHeight: 200,
-        maxHeight: '80%',
-        overflow: 'hidden',
         alignItems: 'stretch',
+        minHeight: 200,
+        overflow: 'hidden',
     },
     modalContentLight: {
         backgroundColor: Colors.light.background,
