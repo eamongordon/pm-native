@@ -38,12 +38,6 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="explore"
-                options={{
-                    href: null,
-                }}
-            />
-            <Tabs.Screen
                 name="minerals/index"
                 options={{
                     title: 'Minerals',
