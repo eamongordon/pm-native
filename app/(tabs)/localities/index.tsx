@@ -1,4 +1,5 @@
 import AssociatesSearch from '@/components/AssociatesSearch';
+import { Glimmer } from '@/components/Glimmer';
 import Select from '@/components/Select';
 import { ThemedIcon } from '@/components/ThemedIcon';
 import { ThemedText } from '@/components/ThemedText';
@@ -12,7 +13,7 @@ import { AppleMaps, GoogleMaps } from 'expo-maps';
 import { Link } from 'expo-router';
 import { List as ListIcon, LocateFixed, Search, SlidersHorizontal, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { FlatList, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SORT_OPTIONS = [
@@ -298,8 +299,17 @@ export default function LocalitiesScreen() {
             </Modal>
             {/* Main Content */}
             <View style={{ flex: 1 }}>
-                {loading ? (
-                    <ActivityIndicator style={{ marginTop: 40 }} />
+                {loading && localities.length === 0 ? (
+                    viewMode === 'list' ? (
+                        <FlatList
+                            data={Array.from({ length: 6 })}
+                            keyExtractor={(_, i) => `skeleton-${i}`}
+                            renderItem={() => <LocalitySkeletonCard />}
+                            contentContainerStyle={{ padding: 12 }}
+                        />
+                    ) : (
+                        <LocalityMapSkeleton />
+                    )
                 ) : viewMode === 'map' ? (
                     Platform.OS === 'ios' ? (
                         <AppleMaps.View
@@ -705,3 +715,46 @@ const styles = StyleSheet.create({
         color: Colors.dark.inputText,
     },
 });
+
+// Skeleton card for loading state
+function LocalitySkeletonCard() {
+    const colorScheme = useColorScheme() ?? 'light';
+    const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
+    return (
+        <View style={[styles.listItem, { backgroundColor: baseColor, flexDirection: 'row', overflow: 'hidden' }]}>
+            <View style={{ width: 80, height: 80, backgroundColor: baseColor, borderTopLeftRadius: 12, borderBottomLeftRadius: 12, marginRight: 12, overflow: 'hidden' }}>
+                <Glimmer />
+            </View>
+            <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
+                <View style={{ width: '60%', height: 16, borderRadius: 8, backgroundColor: colorScheme === 'dark' ? '#333' : '#ddd', marginBottom: 4, overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+                <View style={{ width: '40%', height: 12, borderRadius: 6, backgroundColor: colorScheme === 'dark' ? '#333' : '#ddd', overflow: 'hidden' }}>
+                    <Glimmer />
+                </View>
+            </View>
+        </View>
+    );
+}
+
+// Skeleton for map view
+function LocalityMapSkeleton() {
+    const colorScheme = useColorScheme() ?? 'light';
+    return (
+        <View style={{
+            flex: 1,
+            backgroundColor: colorScheme === 'dark' ? '#222' : '#e0e0e0',
+            alignItems: 'stretch',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+        }}>
+            <Glimmer style={{ flex: 1, width: '100%', height: '100%' }} />
+        </View>
+    );
+}
