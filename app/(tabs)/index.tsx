@@ -5,7 +5,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { FlatList, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FlatList, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Glimmer } from '@/components/Glimmer';
@@ -27,11 +27,11 @@ function MineralSkeletonCard() {
     );
 }
 
-// TopMineralsCarousel with real data
+// TopMineralsCarousel with FlatList for horizontal scroll
 function TopMineralsCarousel() {
     const [minerals, setMinerals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const scrollRef = useRef<ScrollView>(null);
+    const flatListRef = useRef<FlatList>(null);
 
     useEffect(() => {
         let url = 'https://www.prospectorminerals.com/api/minerals?limit=10';
@@ -47,9 +47,9 @@ function TopMineralsCarousel() {
 
     // Scroll to the second item after data loads
     useEffect(() => {
-        if (!loading && minerals.length > 1 && scrollRef.current) {
+        if (!loading && minerals.length > 1 && flatListRef.current) {
             setTimeout(() => {
-                scrollRef.current?.scrollTo({ x: 120, animated: false });
+                flatListRef.current?.scrollToOffset({ offset: 120, animated: false });
             }, 0);
         }
     }, [loading, minerals.length]);
@@ -58,23 +58,21 @@ function TopMineralsCarousel() {
         <View style={{ marginVertical: 8 }}>
             <ThemedText type="subtitle" style={{ marginLeft: 16 }}>Minerals</ThemedText>
             {loading ? (
-                <ScrollView
+                <FlatList
                     horizontal
+                    data={Array.from({ length: 5 })}
+                    keyExtractor={(_, i) => `mineral-skeleton-${i}`}
+                    renderItem={({ index }) => <MineralSkeletonCard key={`mineral-skeleton-${index}`} />}
                     showsHorizontalScrollIndicator={false}
-                    style={{ paddingVertical: 8 }}
-                >
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <MineralSkeletonCard key={`mineral-skeleton-${i}`} />
-                    ))}
-                </ScrollView>
+                    contentContainerStyle={{ paddingVertical: 8 }}
+                />
             ) : (
-                <ScrollView
-                    ref={scrollRef}
+                <FlatList
+                    ref={flatListRef}
                     horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={{ paddingVertical: 8 }}
-                >
-                    {minerals.map(mineral => (
+                    data={minerals}
+                    keyExtractor={mineral => mineral.id}
+                    renderItem={({ item: mineral }) => (
                         <Link
                             key={mineral.id}
                             href={`/minerals/${mineral.slug}`}
@@ -98,7 +96,7 @@ function TopMineralsCarousel() {
                                         left: 0,
                                         right: 0,
                                         bottom: 0,
-                                        height: 64, // match the gradient height
+                                        height: 64,
                                         justifyContent: 'flex-end',
                                     }}>
                                         <LinearGradient
@@ -110,7 +108,7 @@ function TopMineralsCarousel() {
                                             locations={[0, 0.5, 1]}
                                             style={{
                                                 ...StyleSheet.absoluteFillObject,
-                                                height: 64, // extend the gradient higher
+                                                height: 64,
                                             }}
                                             start={{ x: 0.5, y: 0 }}
                                             end={{ x: 0.5, y: 1 }}
@@ -131,8 +129,10 @@ function TopMineralsCarousel() {
                                 </View>
                             </TouchableOpacity>
                         </Link>
-                    ))}
-                </ScrollView>
+                    )}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingVertical: 8 }}
+                />
             )}
         </View>
     );
@@ -280,44 +280,53 @@ export default function HomeScreen() {
     // Pick a random fun fact on each render
     const funFact = funFacts[Math.floor(Math.random() * funFacts.length)];
 
+    // Render sections as FlatList data
+    const sections = [
+        { key: 'search', render: () => <ThemedView><HomeSearchModal /></ThemedView> },
+        {
+            key: 'funfact',
+            render: () => (
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: Colors[colorScheme].inputBackground,
+                        borderRadius: 12,
+                        paddingVertical: 16,
+                        paddingHorizontal: 14,
+                        marginHorizontal: 16,
+                        marginTop: 0,
+                        marginBottom: 8,
+                    }}
+                >
+                    <Sparkles
+                        size={22}
+                        color={Colors[colorScheme].icon}
+                        style={{ marginRight: 16 }}
+                    />
+                    <ThemedText type="defaultMedium" style={{ fontSize: 15, color: Colors[colorScheme].icon, flex: 1, lineHeight: 20 }}>
+                        {funFact}
+                    </ThemedText>
+                </View>
+            )
+        },
+        { key: 'minerals', render: () => <TopMineralsCarousel /> },
+        { key: 'articles', render: () => <TopArticlesList /> }
+    ];
+
     return (
         <ThemedView style={styles.container}>
             <SafeAreaView style={styles.safeArea}>
-                <ScrollView
+                <FlatList
+                    data={sections}
+                    keyExtractor={item => item.key}
+                    renderItem={({ item }) => item.render()}
                     contentContainerStyle={[
                         styles.scrollContent,
                         { paddingBottom: bottom + 32 }
                     ]}
                     showsVerticalScrollIndicator={false}
-                >
-                    <ThemedView>
-                        <HomeSearchModal />
-                    </ThemedView>
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            backgroundColor: Colors[colorScheme].inputBackground,
-                            borderRadius: 12,
-                            paddingVertical: 16,
-                            paddingHorizontal: 14,
-                            marginHorizontal: 16,
-                            marginTop: 0,
-                            marginBottom: 8,
-                        }}
-                    >
-                        <Sparkles
-                            size={22}
-                            color={Colors[colorScheme].icon}
-                            style={{ marginRight: 16 }}
-                        />
-                        <ThemedText type="defaultMedium" style={{ fontSize: 15, color: Colors[colorScheme].icon, flex: 1, lineHeight: 20 }}>
-                            {funFact}
-                        </ThemedText>
-                    </View>
-                    <TopMineralsCarousel />
-                    <TopArticlesList />
-                </ScrollView>
+                />
             </SafeAreaView>
         </ThemedView>
     );
