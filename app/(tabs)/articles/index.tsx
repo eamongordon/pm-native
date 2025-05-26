@@ -4,6 +4,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { ArticleDisplayFieldset } from '@/types';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { Search } from 'lucide-react-native';
@@ -49,7 +50,7 @@ function ArticleSkeletonCard({ imageWidth }: { imageWidth: number }) {
 }
 
 export default function ArticlesScreen() {
-    const [articles, setArticles] = useState<any[]>([]);
+    const [articles, setArticles] = useState<ArticleDisplayFieldset[]>([]);
     const [loading, setLoading] = useState(true);
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [cursor, setCursor] = useState<string | null>(null);
@@ -102,9 +103,9 @@ export default function ArticlesScreen() {
             const res = await fetch(finalUrl, { signal });
             const data = await res.json();
             if (append) {
-                setArticles((prev) => [...prev, ...((data.results as any[]) || [])]);
+                setArticles((prev) => [...prev, ...((data.results as ArticleDisplayFieldset[]) || [])]);
             } else {
-                setArticles((data.results as any[]) || []);
+                setArticles((data.results as ArticleDisplayFieldset[]) || []);
             }
             setCursor((data as any).next || null);
         } catch {
@@ -217,8 +218,8 @@ export default function ArticlesScreen() {
                                                     borderRadius: 8,
                                                     backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
                                                 }}
-                                                source={{ uri: item.image }}
-                                                placeholder={{ uri: item.imageBlurhash }}
+                                                source={{ uri: item.image ?? undefined }}
+                                                placeholder={item.imageBlurhash ? { uri: item.imageBlurhash } : undefined}
                                                 contentFit="cover"
                                                 transition={700}
                                                 placeholderContentFit="cover"
@@ -228,8 +229,8 @@ export default function ArticlesScreen() {
                                                     {item.title}
                                                 </ThemedText>
                                                 <ThemedText type="default" style={{ color: Colors[colorScheme].inputPlaceholder, fontSize: 14 }}>
-                                                    {item.createdAt
-                                                        ? new Date(item.createdAt).toLocaleDateString(undefined, {
+                                                    {item.publishedAt
+                                                        ? new Date(item.publishedAt).toLocaleDateString(undefined, {
                                                             year: 'numeric',
                                                             month: 'short',
                                                             day: 'numeric',

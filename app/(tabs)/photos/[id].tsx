@@ -5,8 +5,9 @@ import { ThemedView } from '@/components/ThemedView';
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { PhotoFullFieldset } from '@/types';
 import { Image, useImage } from 'expo-image';
-import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, Modal, Platform, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -16,8 +17,7 @@ const { width } = Dimensions.get('window');
 
 export default function PhotoDetailsScreen() {
     const { id } = useLocalSearchParams();
-    const router = useRouter(); // Add router for navigation
-    const [photo, setPhoto] = useState<any>(null);
+    const [photo, setPhoto] = useState<PhotoFullFieldset | null>(null);
     const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
     const colorScheme = useColorScheme() ?? 'light';
@@ -112,7 +112,7 @@ export default function PhotoDetailsScreen() {
                 </View>
                 {loading ? (
                     <PhotoDetailSkeleton />
-                ) : (
+                ) : photo ? (
                     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                         <View style={styles.imageContainer}>
                             {/* Image with modal trigger */}
@@ -194,7 +194,7 @@ export default function PhotoDetailsScreen() {
                             )}
                         </ThemedView>
                     </ScrollView>
-                )}
+                ) : null}
             </View>
             {/* Fullscreen Modal for Image */}
             <Modal
@@ -204,14 +204,16 @@ export default function PhotoDetailsScreen() {
                 onRequestClose={() => setModalVisible(false)}
             >
                 <View style={styles.modalBackground}>
-                    <Image
-                        source={{ uri: photo?.image }}
-                        style={styles.fullImage}
-                        contentFit="contain"
-                        placeholder={photo?.imageBlurhash ? { uri: photo.imageBlurhash } : undefined}
-                        placeholderContentFit="contain"
-                        transition={700}
-                    />
+                    {photo && (
+                        <Image
+                            source={{ uri: photo.image ?? undefined }}
+                            style={styles.fullImage}
+                            contentFit="contain"
+                            placeholder={photo.imageBlurhash ? { uri: photo.imageBlurhash } : undefined}
+                            placeholderContentFit="contain"
+                            transition={700}
+                        />
+                    )}
                     <TouchableOpacity
                         style={styles.closeButton}
                         onPress={() => setModalVisible(false)}

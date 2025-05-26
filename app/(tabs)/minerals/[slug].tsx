@@ -5,6 +5,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { MineralFullFieldset } from '@/types';
 import { Image } from 'expo-image';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -18,7 +19,7 @@ const GALLERY_HEIGHT = 300;
 export default function DetailsScreen() {
     const { slug } = useLocalSearchParams();
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [mineral, setMineral] = useState<any>(null);
+    const [mineral, setMineral] = useState<MineralFullFieldset | null>(null);
     const [loading, setLoading] = useState(true);
     const [galleryVisible, setGalleryVisible] = useState(false);
     const [galleryIndex, setGalleryIndex] = useState(0);
@@ -98,12 +99,14 @@ export default function DetailsScreen() {
 
     const images =
         mineral && mineral.photos?.length > 0
-            ? mineral.photos.map((p: any) => ({ uri: p.photo?.image, blurhash: p.photo?.imageBlurhash })).filter((obj: any) => !!obj.uri)
-            : [
-                'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/459a90da-a3bf-4620-a324-ffddb2bba39f-nElxfP7Hr4OpAdvxC2moNoHVmpOMeL.jpg',
-                'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/965e7025-1ebd-469d-8793-cfae54c77d9e-FpEbGma6MpXAnt295UKzSUPnkoYEeZ.jpeg',
-                'https://ousfgajmtaam7m3j.public.blob.vercel-storage.com/220f2624-dcf4-46f0-b6ca-fa68f14c94c4-8Q78nYgLyTmjZmthfhrE4GoNIh3B52.jpeg',
-            ];
+            ? mineral.photos
+                .map((p) =>
+                    p && 'photo' in p && p.photo?.image
+                        ? { uri: p.photo.image, blurhash: p.photo.imageBlurhash }
+                        : null
+                )
+                .filter((obj): obj is { uri: string; blurhash: string | null } => !!obj && !!obj.uri)
+            : [];
 
     // Handler for scroll event to update currentIndex
     const handleGalleryScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -182,7 +185,7 @@ export default function DetailsScreen() {
                             onScroll={handleGalleryScroll}
                             scrollEventThrottle={16}
                         >
-                            {images.map((image: { uri: string, blurhash: string }, idx: number) => (
+                            {images.map((image, idx) => (
                                 <TouchableOpacity
                                     key={idx}
                                     activeOpacity={0.8}
@@ -195,7 +198,7 @@ export default function DetailsScreen() {
                                         <Image
                                             source={{ uri: image.uri }}
                                             style={styles.image}
-                                            placeholder={{ uri: image.blurhash }}
+                                            placeholder={image.blurhash ? { uri: image.blurhash } : undefined}
                                             contentFit="cover"
                                             placeholderContentFit="cover"
                                             transition={700}
@@ -206,7 +209,7 @@ export default function DetailsScreen() {
                         </ScrollView>
                     </View>
                     <View style={styles.indicatorContainer}>
-                        {images.map((_: string, idx: number) => (
+                        {images.map((_, idx) => (
                             <View
                                 key={idx}
                                 style={[
@@ -218,38 +221,38 @@ export default function DetailsScreen() {
                     </View>
                     <ThemedView style={[styles.mainSection, { paddingBottom: bottom + 24 }]}>
                         <ThemedText type="title">
-                            {mineral.name || 'Mineral Details'}
+                            {mineral?.name || 'Mineral Details'}
                         </ThemedText>
                         <ThemedText style={styles.section}>
-                            {mineral.description || `Details of user ${slug}`}
+                            {mineral?.description || `Details of user ${slug}`}
                         </ThemedText>
-                        {mineral.uses && (
+                        {mineral?.uses && (
                             <View style={styles.section}>
                                 <ThemedText type="subtitle">Uses</ThemedText>
                                 <ThemedText>
-                                    {mineral.uses || `Details of user ${slug}`}
+                                    {mineral.uses}
                                 </ThemedText>
                             </View>
                         )}
-                        {mineral.localities_description && (
+                        {mineral?.localities_description && (
                             <View style={styles.section}>
                                 <ThemedText type="subtitle">Notable Localities</ThemedText>
                                 <ThemedText>
-                                    {mineral.localities_description || `Details of user ${slug}`}
+                                    {mineral.localities_description}
                                 </ThemedText>
                             </View>
                         )}
                         {/* Properties Section */}
-                        {(mineral.chemical_formula ||
-                            mineral.hardness_min ||
-                            mineral.hardness_max ||
-                            mineral.crystal_system ||
-                            mineral.mineral_class ||
-                            mineral.luster) && (
+                        {(mineral?.chemical_formula ||
+                            mineral?.hardness_min ||
+                            mineral?.hardness_max ||
+                            mineral?.crystal_system ||
+                            mineral?.mineral_class ||
+                            mineral?.luster) && (
                                 <View style={styles.section}>
                                     <ThemedText type="subtitle">Properties</ThemedText>
                                     <View style={styles.propertiesTable}>
-                                        {mineral.chemical_formula && (
+                                        {mineral?.chemical_formula && (
                                             <View style={styles.propertyRow}>
                                                 <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
                                                     Chemical Formula
@@ -259,7 +262,7 @@ export default function DetailsScreen() {
                                                 </ThemedText>
                                             </View>
                                         )}
-                                        {(mineral.hardness_min || mineral.hardness_max) && (
+                                        {(mineral?.hardness_min || mineral?.hardness_max) && (
                                             <View style={styles.propertyRow}>
                                                 <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
                                                     Hardness
@@ -272,7 +275,7 @@ export default function DetailsScreen() {
                                                 </ThemedText>
                                             </View>
                                         )}
-                                        {mineral.crystal_system && (
+                                        {mineral?.crystal_system && (
                                             <View style={styles.propertyRow}>
                                                 <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
                                                     Crystal System
@@ -282,7 +285,7 @@ export default function DetailsScreen() {
                                                 </ThemedText>
                                             </View>
                                         )}
-                                        {mineral.mineral_class && (
+                                        {mineral?.mineral_class && (
                                             <View style={styles.propertyRow}>
                                                 <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
                                                     Mineral Class
@@ -292,7 +295,7 @@ export default function DetailsScreen() {
                                                 </ThemedText>
                                             </View>
                                         )}
-                                        {mineral.luster && (
+                                        {mineral?.luster && (
                                             <View style={styles.propertyRow}>
                                                 <ThemedText style={styles.propertyLabel} type="defaultSemiBold">
                                                     Luster
@@ -327,13 +330,13 @@ export default function DetailsScreen() {
                             setGalleryIndex(page);
                         }}
                     >
-                        {images.map((image: { uri: string, blurhash: string }, idx: number) => (
+                        {images.map((image, idx) => (
                             <View key={idx} style={{ width, height: '100%', justifyContent: 'center', alignItems: 'center' }}>
                                 <Image
                                     source={{ uri: image.uri }}
                                     style={styles.fullImage}
                                     contentFit="contain"
-                                    placeholder={{ uri: image.blurhash }}
+                                    placeholder={image.blurhash ? { uri: image.blurhash } : undefined}
                                     placeholderContentFit="contain"
                                     transition={700}
                                 />
@@ -342,7 +345,7 @@ export default function DetailsScreen() {
                     </ScrollView>
                     {/* Modal indicator */}
                     <View style={styles.modalIndicatorContainer}>
-                        {images.map((_: string, idx: number) => (
+                        {images.map((_, idx) => (
                             <View
                                 key={idx}
                                 style={[

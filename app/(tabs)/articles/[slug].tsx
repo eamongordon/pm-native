@@ -6,6 +6,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { ArticleFullFieldset } from '@/types';
 import { Image } from 'expo-image';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -18,7 +19,7 @@ const IMAGE_HEIGHT = 300;
 
 export default function ArticleDetailsScreen() {
     const { slug } = useLocalSearchParams();
-    const [article, setArticle] = useState<any>(null);
+    const [article, setArticle] = useState<ArticleFullFieldset | null>(null);
     const [loading, setLoading] = useState(true);
     const colorScheme = useColorScheme() ?? 'light';
     const insets = useSafeAreaInsets();
@@ -134,7 +135,7 @@ export default function ArticleDetailsScreen() {
                 </Link>
                 {/* Center: Title */}
                 <View style={styles.headerTitleContainer}>
-                    {headerSolid && (
+                    {headerSolid && article && (
                         <ThemedText
                             type="defaultSemiBold"
                             numberOfLines={1}
@@ -165,9 +166,10 @@ export default function ArticleDetailsScreen() {
                 >
                     {/* Article Image inside the scroll view */}
                     <View style={styles.imageContainer}>
+                        {/* article is guaranteed not null here */}
                         <Image
-                            source={{ uri: article.image }}
-                            placeholder={{ uri: article.imageBlurhash }}
+                            source={{ uri: article!.image ?? undefined }}
+                            placeholder={{ uri: article!.imageBlurhash ?? undefined }}
                             style={styles.image}
                             contentFit="cover"
                             transition={700}
@@ -176,25 +178,25 @@ export default function ArticleDetailsScreen() {
                     </View>
                     <ThemedView style={[styles.mainSection, { paddingBottom: bottom + 24 }]}>
                         <ThemedText type="title" style={{ fontSize: 26 }}>
-                            {article.title}
+                            {article!.title}
                         </ThemedText>
                         <ThemedText type="default" style={{ color: Colors[colorScheme].inputPlaceholder, fontSize: 16 }}>
-                            {article.publishedAt
-                                ? new Date(article.publishedAt).toLocaleDateString(undefined, {
+                            {article!.publishedAt
+                                ? new Date(article!.publishedAt).toLocaleDateString(undefined, {
                                     year: 'numeric',
                                     month: 'short',
                                     day: 'numeric',
                                 })
                                 : ''}
                         </ThemedText>
-                        {article.description && (
+                        {article!.description && (
                             <View style={styles.section}>
                                 <ThemedText type="defaultSemiBold" lightColor={Colors.light.icon} darkColor={Colors.dark.icon} style={{ fontSize: 17 }}>
-                                    {article.description}
+                                    {article!.description}
                                 </ThemedText>
                             </View>
                         )}
-                        {article.content && (
+                        {article!.content && (
                             <View style={styles.section}>
                                 <CustomMarkdown
                                     style={{
@@ -206,7 +208,7 @@ export default function ArticleDetailsScreen() {
                                         heading5: { color: Colors[colorScheme].text, fontFamily: 'WorkSans_600SemiBold', marginTop: 8 },
                                     }}
                                 >
-                                    {article.content}
+                                    {article!.content}
                                 </CustomMarkdown>
                             </View>
                         )}

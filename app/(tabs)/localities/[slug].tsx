@@ -4,6 +4,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { LocalityFullFieldset, MineralDisplayFieldset } from '@/types';
 import { Image, useImage } from 'expo-image';
 import { AppleMaps, GoogleMaps } from 'expo-maps';
 import { Link, useLocalSearchParams } from 'expo-router';
@@ -18,7 +19,7 @@ const HEADER_HEIGHT = 48;
 export default function LocalitySlugScreen() {
     const { slug } = useLocalSearchParams<{ slug: string }>();
     const colorScheme = useColorScheme() ?? 'light';
-    const [locality, setLocality] = useState<any>(null);
+    const [locality, setLocality] = useState<LocalityFullFieldset | null>(null);
     const [loading, setLoading] = useState(true);
     const bottom = useBottomTabOverflow();
     const insets = useSafeAreaInsets();
@@ -101,7 +102,7 @@ export default function LocalitySlugScreen() {
     }
 
     const hasCoords = locality.latitude && locality.longitude;
-    const minerals: any[] = locality.minerals || [];
+    const minerals: MineralDisplayFieldset[] = locality?.minerals || [];
 
     return (
         <ThemedView style={{ flex: 1 }}>

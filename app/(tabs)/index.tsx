@@ -12,6 +12,7 @@ import { Glimmer } from '@/components/Glimmer';
 import HomeSearchModal from '@/components/HomeSearchModal';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { ArticleDisplayFieldset, MineralDisplayFieldset } from '@/types';
 import { Sparkles } from 'lucide-react-native';
 
 // MineralSkeletonCard for homepage minerals carousel
@@ -29,7 +30,7 @@ function MineralSkeletonCard() {
 
 // TopMineralsCarousel with FlatList for horizontal scroll
 function TopMineralsCarousel() {
-    const [minerals, setMinerals] = useState<any[]>([]);
+    const [minerals, setMinerals] = useState<MineralDisplayFieldset[]>([]);
     const [loading, setLoading] = useState(true);
     const flatListRef = useRef<FlatList>(null);
 
@@ -170,7 +171,7 @@ function ArticleSkeletonCard({ imageWidth }: { imageWidth: number }) {
 
 // TopArticlesList with FlatList and same card layout as articles page
 function TopArticlesList() {
-    const [articles, setArticles] = useState<any[]>([]);
+    const [articles, setArticles] = useState<ArticleDisplayFieldset[]>([]);
     const [loading, setLoading] = useState(true);
     const colorScheme = useColorScheme() ?? 'light';
     // Use same width logic as articles page
@@ -219,7 +220,7 @@ function TopArticlesList() {
                                         borderRadius: 12,
                                         backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
                                     }}
-                                    source={{ uri: item.image }}
+                                    source={{ uri: item.image! }}
                                     placeholder={item.imageBlurhash ? { uri: item.imageBlurhash } : undefined}
                                     contentFit="cover"
                                     transition={700}

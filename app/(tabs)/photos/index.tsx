@@ -4,6 +4,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { PhotoDisplayFieldset } from '@/types';
 import { Image as ExpoImage, useImage } from 'expo-image';
 import { Link } from 'expo-router';
 import { Search } from 'lucide-react-native';
@@ -28,7 +29,7 @@ function PhotoSkeletonCard({ imageWidth }: { imageWidth: number }) {
 }
 
 export default function PhotosScreen() {
-    const [photos, setPhotos] = useState<any[]>([]);
+    const [photos, setPhotos] = useState<PhotoDisplayFieldset[]>([]);
     const [loading, setLoading] = useState(true);
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [cursor, setCursor] = useState<string | null>(null);
@@ -82,9 +83,9 @@ export default function PhotosScreen() {
             const res = await fetch(finalUrl, { signal });
             const data = await res.json();
             if (append) {
-                setPhotos((prev) => [...prev, ...((data.results as any[]) || [])]);
+                setPhotos((prev) => [...prev, ...((data.results as PhotoDisplayFieldset[]) || [])]);
             } else {
-                setPhotos((data.results as any[]) || []);
+                setPhotos((data.results as PhotoDisplayFieldset[]) || []);
             }
             setCursor((data as any).next || null);
         } catch {
@@ -262,7 +263,7 @@ const styles = StyleSheet.create({
 });
 
 type PhotoItemProps = {
-    item: any;
+    item: PhotoDisplayFieldset;
     imageWidth: number;
     colorScheme: string;
 };
@@ -287,7 +288,7 @@ function PhotoItem({ item, imageWidth, colorScheme }: PhotoItemProps) {
                         borderRadius: 12,
                         backgroundColor: colorScheme === 'light' ? Colors.light.inputBackground : Colors.dark.inputBackground,
                     }}
-                    source={{ uri: item.image }}
+                    source={{ uri: item.image ?? '' }}
                     placeholder={item.imageBlurhash ? { uri: item.imageBlurhash } : undefined}
                     contentFit="cover"
                     transition={700}

@@ -7,6 +7,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { LocalityDisplayFieldset } from '@/types';
 import { Image, useImage } from 'expo-image';
 import * as Location from 'expo-location';
 import { AppleMaps, GoogleMaps } from 'expo-maps';
@@ -24,7 +25,7 @@ const SORT_OPTIONS = [
 
 export default function LocalitiesScreen() {
     const colorScheme = useColorScheme() ?? 'light';
-    const [localities, setLocalities] = useState<any[]>([]);
+    const [localities, setLocalities] = useState<LocalityDisplayFieldset[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
     const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
@@ -39,7 +40,7 @@ export default function LocalitiesScreen() {
     const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
 
     const [fetchingLocation, setFetchingLocation] = useState(false);
-    const [selectedLocality, setSelectedLocality] = useState<any | null>(null);
+    const [selectedLocality, setSelectedLocality] = useState<LocalityDisplayFieldset | null>(null);
     const bottom = useBottomTabOverflow();
 
     // Debounce search input and update filters.search
@@ -94,7 +95,7 @@ export default function LocalitiesScreen() {
         try {
             const res = await fetch(finalUrl);
             const data = await res.json();
-            setLocalities(data.results || []);
+            setLocalities(data.results as LocalityDisplayFieldset[] || []);
         } catch {
             setLocalities([]);
         }
@@ -331,7 +332,7 @@ export default function LocalitiesScreen() {
                                 }))
                             }
                             onMarkerClick={(marker) => {
-                                setSelectedLocality(localities.find(loc => loc.id === marker.id));
+                                setSelectedLocality(localities.find(loc => loc.id === marker.id)!);
                             }}
                             onMapClick={() => setSelectedLocality(null)}
                         />
@@ -359,7 +360,7 @@ export default function LocalitiesScreen() {
                                 }))
                             }
                             onMarkerClick={(marker) => {
-                                setSelectedLocality(localities.find(loc => loc.id === marker.id));
+                                setSelectedLocality(localities.find(loc => loc.id === marker.id)!);
                             }}
                             onMapClick={() => setSelectedLocality(null)}
                         />
@@ -374,10 +375,10 @@ export default function LocalitiesScreen() {
                                 <TouchableOpacity>
                                     <View style={[styles.listItem, { backgroundColor: colorScheme === 'light' ? "#f8f8f8" : "#222" }]}>
                                         <Image
-                                            source={{ uri: item.photos?.[0]?.image }}
+                                            source={{ uri: item.photos?.[0]?.image ?? undefined }}
                                             style={{ width: 80, height: "100%", borderTopLeftRadius: 12, borderBottomLeftRadius: 12, marginRight: 12 }}
                                             contentFit="cover"
-                                            placeholder={{ uri: item.photos?.[0]?.imageBlurhash }}
+                                            placeholder={{ uri: item.photos?.[0]?.imageBlurhash ?? undefined }}
                                             placeholderContentFit="cover"
                                             transition={700}
                                         />
@@ -457,7 +458,7 @@ export default function LocalitiesScreen() {
                                                     backgroundColor: '#eee',
                                                 }}
                                                 contentFit="cover"
-                                                placeholder={{ uri: selectedLocality.photos[0].imageBlurhash }}
+                                                placeholder={{ uri: selectedLocality.photos[0].imageBlurhash ?? undefined }}
                                                 placeholderContentFit="cover"
                                                 transition={500}
                                             />

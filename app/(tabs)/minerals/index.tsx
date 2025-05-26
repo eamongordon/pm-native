@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { MineralDisplayFieldset } from '@/types';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import * as tf from '@tensorflow/tfjs';
 import { bundleResourceIO, decodeJpeg } from '@tensorflow/tfjs-react-native';
@@ -70,7 +71,7 @@ export default function HomeScreen() {
         ids: [] as string[],
     });
     const [sort, setSort] = useState<{ property: string, sort: 'asc' | 'desc' } | null>(null);
-    const [minerals, setMinerals] = useState<any[]>([]);
+    const [minerals, setMinerals] = useState<MineralDisplayFieldset[]>([]);
     const [loading, setLoading] = useState(true);
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [cursor, setCursor] = useState<string | null>(null);
@@ -148,9 +149,9 @@ export default function HomeScreen() {
             const data = await res.json();
             console.log("FETCH DONE")
             if (append) {
-                setMinerals((prev) => [...prev, ...((data.results as any[]) || [])]);
+                setMinerals((prev) => [...prev, ...((data.results as MineralDisplayFieldset[]) || [])]);
             } else {
-                setMinerals((data.results as any[]) || []);
+                setMinerals((data.results as MineralDisplayFieldset[]) || []);
             }
             setCursor((data as any).next || null);
         } catch {
@@ -556,7 +557,7 @@ export default function HomeScreen() {
                             <FlatList
                                 data={
                                     minerals.length === 1
-                                        ? [minerals[0], { id: '__empty__' }]
+                                        ? [minerals[0], { id: '__empty__' } as unknown as MineralDisplayFieldset]
                                         : minerals
                                 }
                                 keyExtractor={(item) => item.id || item.slug || '__empty__'}
@@ -573,7 +574,7 @@ export default function HomeScreen() {
                                                         source={{ uri: (item.photos && item.photos[0]?.photo?.image) || 'https://via.placeholder.com/60' }}
                                                         style={styles.itemImage}
                                                         contentFit="cover"
-                                                        placeholder={{ uri: item.photos && item.photos[0]?.photo?.imageBlurhash }}
+                                                        placeholder={item.photos && item.photos[0]?.photo?.imageBlurhash ? { uri: item.photos[0].photo.imageBlurhash } : undefined}
                                                         placeholderContentFit="cover"
                                                         transition={700}
                                                     />
