@@ -365,6 +365,42 @@ export default function LocalitiesScreen() {
                             onMapClick={() => setSelectedLocality(null)}
                         />
                     )
+                ) : localities.length === 0 ? (
+                    <View style={{ flex: 1, alignItems: 'center', paddingTop: 48 }}>
+                        <Search
+                            size={48}
+                            style={{ marginBottom: 16, opacity: 0.4 }}
+                            color={colorScheme === 'light' ? Colors.light.text : Colors.dark.text}
+                        />
+                        <ThemedText type="defaultMedium" style={{ fontSize: 20, marginBottom: 8, textAlign: 'center', opacity: 0.8 }}>
+                            No localities found
+                        </ThemedText>
+                        <ThemedText style={{ fontSize: 15, color: Colors.light.inputPlaceholder, textAlign: 'center', maxWidth: 260, marginBottom: 20 }}>
+                            Try adjusting your search or filter criteria.
+                        </ThemedText>
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: Colors[colorScheme].primary,
+                                borderRadius: 10,
+                                paddingVertical: 10,
+                                paddingHorizontal: 24,
+                                marginTop: 8,
+                            }}
+                            onPress={() => {
+                                setFilters({
+                                    name: '',
+                                    minerals: [],
+                                    latitude: '',
+                                    longitude: '',
+                                    radius: '',
+                                });
+                            }}
+                        >
+                            <ThemedText>
+                                Reset Filters
+                            </ThemedText>
+                        </TouchableOpacity>
+                    </View>
                 ) : (
                     <FlatList
                         data={localities}
