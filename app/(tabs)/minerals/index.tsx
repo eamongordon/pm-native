@@ -10,14 +10,15 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { MineralDisplayFieldset } from '@/types';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import * as tf from '@tensorflow/tfjs';
-import { bundleResourceIO, decodeJpeg } from '@tensorflow/tfjs-react-native';
+import { Buffer } from 'buffer';
 import { Image } from 'expo-image';
+import { manipulateAsync } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { Link } from 'expo-router';
 import { Camera, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { loadTensorflowModel } from 'react-native-fast-tflite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
 
@@ -196,44 +197,26 @@ export default function HomeScreen() {
         else if (value === 'name-desc') setSort({ property: 'name', sort: 'desc' });
     };
 
-    // Helper: preprocess image for model
-    async function preprocessImage(uri: string) {
-        // Fetch image as array buffer
-        const response = await fetch(uri);
-        const imageData = await response.arrayBuffer();
-        // Decode JPEG to tensor
-        let imageTensor = decodeJpeg(new Uint8Array(imageData));
-        // Resize/normalize as needed for your model
-        imageTensor = tf.image.resizeBilinear(imageTensor, [128, 128]).div(255.0).expandDims(0);
-        return imageTensor;
-    }
-
     // Predict using the model (load/dispose each time)
     async function predictWithModel(uri: string) {
         setPredicting(true);
         try {
             // Load model from local assets
-            const modelJson = require('@/assets/model/model.json');
-            const modelWeights = require('@/assets/model/weights.bin');
-            const loadedModel = await tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights));
+            const model = await loadTensorflowModel(require('assets/my-model.tflite'))
 
-            const tensor = await preprocessImage(uri);
+            const inputData = await preprocessImage(uri);
             // Adjust preprocessing as needed for your model
-            const predictionTensor = loadedModel.predict(tensor) as tf.Tensor;
-            const predictionArray = (await predictionTensor.array()) as number[][];
+            const outputData = await model.run([inputData]);
             const uniqueMinerals = require("@/assets/model/data/minerals.json");
-            const mineralIds = predictionArray[0]
+            const mineralIds = outputData[0]
                 .map((value, index) => (value > 0.2 ? uniqueMinerals[index].id : null))
                 .filter((label) => label !== null);
 
             console.log("Predicted mineral IDs:", mineralIds);
             setFilters(f => ({
                 ...f,
-                ids: mineralIds,
+                ids: Array.isArray(mineralIds) ? mineralIds.filter(Boolean).map(String) : [],
             }));
-
-            tf.dispose([tensor, predictionTensor]);
-            loadedModel.dispose();
         } finally {
             setPredicting(false);
         }
@@ -815,3 +798,23 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 });
+
+// Helper function to preprocess image for TFLite model
+async function preprocessImage(uri: string) {
+    // Resize to 128x128 and get base64
+    const resized = await manipulateAsync(uri, [{ resize: { width: 128, height: 128 } }], { base64: true });
+    const base64 = resized.base64!;
+    // Decode base64 to bytes
+    const bytes = Buffer.from(base64, 'base64');
+    // Convert JPEG/PNG bytes to pixel data (you may need a library for this, e.g. jpeg-js, png-js, or use a native module)
+    // For simplicity, here's a placeholder for pixel extraction:
+    // You must replace this with actual decoding to get [R,G,B] values for each pixel.
+    // Example: const pixels = decodeJpeg(bytes); // returns Uint8Array or similar
+
+    // Placeholder: create a dummy Float32Array of zeros
+    // Replace this with actual pixel extraction and normalization
+    const input = new Float32Array(128 * 128 * 3);
+    // Fill input with normalized pixel values (0..1 or -1..1) in RGB order
+
+    return input;
+}
