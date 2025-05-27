@@ -18,7 +18,7 @@ import { Link } from 'expo-router';
 import { decode as decodeJpeg } from 'jpeg-js';
 import { Camera, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { ActivityIndicator, Dimensions, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { loadTensorflowModel } from 'react-native-fast-tflite';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedIcon } from '../../../components/ThemedIcon';
@@ -42,19 +42,26 @@ const SORT_OPTIONS = [
     { label: 'Z-A', value: 'name-desc' },
 ];
 
+const NUM_COLUMNS = 2;
+const HORIZONTAL_PADDING = 16 * 2; // paddingHorizontal: 16 on parent
+const COLUMN_GAP = 8; // gap in columnWrapperStyle
+const CARD_WIDTH = (Dimensions.get('window').width - HORIZONTAL_PADDING - COLUMN_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
+
 // Removed the old Glimmer definition
 
 function MineralSkeletonCard() {
     const colorScheme = useColorScheme() ?? 'light';
     const baseColor = colorScheme === 'dark' ? '#222' : '#e0e0e0';
     return (
-        <View style={styles.card}>
-            <View style={styles.itemRow}>
-                <View style={[styles.itemImage, { backgroundColor: baseColor, overflow: 'hidden' }]}>
-                    <Glimmer />
-                </View>
-                <View style={{ width: '60%', height: 16, borderRadius: 8, backgroundColor: baseColor, marginBottom: 4, overflow: 'hidden' }}>
-                    <Glimmer />
+        <View style={{ width: CARD_WIDTH, marginBottom: 8 }}>
+            <View style={styles.card}>
+                <View style={styles.itemRow}>
+                    <View style={[styles.itemImage, { backgroundColor: baseColor, overflow: 'hidden' }]}>
+                        <Glimmer />
+                    </View>
+                    <View style={{ width: '60%', height: 16, borderRadius: 8, backgroundColor: baseColor, marginBottom: 4, overflow: 'hidden' }}>
+                        <Glimmer />
+                    </View>
                 </View>
             </View>
         </View>
@@ -549,8 +556,8 @@ export default function HomeScreen() {
                                 data={Array.from({ length: 6 })}
                                 keyExtractor={(_, i) => `skeleton-${i}`}
                                 renderItem={() => <MineralSkeletonCard />}
-                                numColumns={2}
-                                columnWrapperStyle={{ gap: 8, paddingTop: 8 }}
+                                numColumns={NUM_COLUMNS}
+                                columnWrapperStyle={{ gap: COLUMN_GAP, paddingTop: 8 }}
                                 contentContainerStyle={{ paddingBottom: 16 }}
                             />
                         ) : minerals.length === 0 ? (
@@ -597,18 +604,12 @@ export default function HomeScreen() {
                             </View>
                         ) : (
                             <FlatList
-                                data={
-                                    minerals.length === 1
-                                        ? [minerals[0], { id: '__empty__' } as unknown as MineralDisplayFieldset]
-                                        : minerals
-                                }
-                                keyExtractor={(item) => item.id || item.slug || '__empty__'}
+                                data={minerals}
+                                keyExtractor={(item) => item.id || item.slug}
                                 style={{ alignSelf: 'stretch', flex: 1 }}
                                 contentContainerStyle={{ paddingBottom: 16 }}
-                                renderItem={({ item }) =>
-                                    item.id === '__empty__' ? (
-                                        <View style={[styles.card, { backgroundColor: 'transparent' }]} />
-                                    ) : (
+                                renderItem={({ item }) => (
+                                    <View style={{ width: CARD_WIDTH }}>
                                         <Link href={`/minerals/${item.slug}`} asChild>
                                             <TouchableOpacity style={styles.card}>
                                                 <View style={styles.itemRow}>
@@ -624,10 +625,10 @@ export default function HomeScreen() {
                                                 </View>
                                             </TouchableOpacity>
                                         </Link>
-                                    )
-                                }
-                                numColumns={2}
-                                columnWrapperStyle={{ gap: 8, paddingTop: 8 }}
+                                    </View>
+                                )}
+                                numColumns={NUM_COLUMNS}
+                                columnWrapperStyle={{ gap: COLUMN_GAP, paddingTop: 8 }}
                                 onEndReached={handleEndReached}
                                 ListFooterComponent={
                                     isFetchingMore ? <ActivityIndicator style={{ margin: 16 }} /> : null
@@ -680,8 +681,6 @@ const styles = StyleSheet.create({
         color: Colors.dark.inputText,
     },
     card: {
-        flex: 1,
-        backgroundColor: 'transparent',
         borderRadius: 12,
     },
     itemRow: {
@@ -694,7 +693,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     itemImage: {
-        width: '100%',
+        width: '100%', // This is fine for the image inside the card
         aspectRatio: 1,
         borderRadius: 8,
         marginBottom: 8,
