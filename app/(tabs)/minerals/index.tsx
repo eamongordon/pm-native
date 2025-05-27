@@ -201,22 +201,29 @@ export default function HomeScreen() {
     async function predictWithModel(uri: string) {
         setPredicting(true);
         try {
-            // Load model from local assets
-            const model = await loadTensorflowModel(require('assets/my-model.tflite'))
+            // Use correct require path for the TFLite model
+            const model = await loadTensorflowModel(require('@/assets/model/model.tflite'))
 
             const inputData = await preprocessImage(uri);
             // Adjust preprocessing as needed for your model
             const outputData = await model.run([inputData]);
             const uniqueMinerals = require("@/assets/model/data/minerals.json");
-            const mineralIds = outputData[0]
-                .map((value, index) => (value > 0.2 ? uniqueMinerals[index].id : null))
-                .filter((label) => label !== null);
 
-            console.log("Predicted mineral IDs:", mineralIds);
+            let predictedMineralsIds: string[] = [];
+
+            outputData[0].forEach((value, index) => {
+                if (value < 0.4 && uniqueMinerals[index]) {
+                    console.log(`Mineral ID: ${uniqueMinerals[index].id}, Confidence: ${value}`);
+                    predictedMineralsIds.push(uniqueMinerals[index].id);
+                }
+            })
             setFilters(f => ({
                 ...f,
-                ids: Array.isArray(mineralIds) ? mineralIds.filter(Boolean).map(String) : [],
+                ids: predictedMineralsIds
             }));
+
+        } catch (error) {
+            console.error("Error predicting mineral:", error);
         } finally {
             setPredicting(false);
         }
