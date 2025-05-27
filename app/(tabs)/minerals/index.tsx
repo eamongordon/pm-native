@@ -12,9 +12,10 @@ import { MineralDisplayFieldset } from '@/types';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { Buffer } from 'buffer';
 import { Image } from 'expo-image';
-import { manipulateAsync } from 'expo-image-manipulator';
+import { ImageManipulator } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { Link } from 'expo-router';
+import { decode as decodeJpeg } from 'jpeg-js';
 import { Camera, Search, SlidersHorizontal } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
@@ -212,11 +213,14 @@ export default function HomeScreen() {
             let predictedMineralsIds: string[] = [];
 
             outputData[0].forEach((value, index) => {
-                if (value < 0.4 && uniqueMinerals[index]) {
+                if (value > 0.2 && uniqueMinerals[index]) {
                     console.log(`Mineral ID: ${uniqueMinerals[index].id}, Confidence: ${value}`);
                     predictedMineralsIds.push(uniqueMinerals[index].id);
                 }
-            })
+            });
+
+            console.log("Predicted minerals IDs:", outputData[0]);
+
             setFilters(f => ({
                 ...f,
                 ids: predictedMineralsIds
@@ -808,20 +812,23 @@ const styles = StyleSheet.create({
 
 // Helper function to preprocess image for TFLite model
 async function preprocessImage(uri: string) {
-    // Resize to 128x128 and get base64
-    const resized = await manipulateAsync(uri, [{ resize: { width: 128, height: 128 } }], { base64: true });
-    const base64 = resized.base64!;
-    // Decode base64 to bytes
+    // Resize to 128x128 pixels and convert to Float32Array
+    const context = await ImageManipulator.manipulate(uri);
+    context.resize({ width: 128, height: 128 });
+    const resized = await context.renderAsync();
+    const savedResized = await resized.saveAsync({ base64: true });
+    const base64 = savedResized.base64;
+    if (!base64) {
+        throw new Error("Failed to get base64 from resized image");
+    }
     const bytes = Buffer.from(base64, 'base64');
-    // Convert JPEG/PNG bytes to pixel data (you may need a library for this, e.g. jpeg-js, png-js, or use a native module)
-    // For simplicity, here's a placeholder for pixel extraction:
-    // You must replace this with actual decoding to get [R,G,B] values for each pixel.
-    // Example: const pixels = decodeJpeg(bytes); // returns Uint8Array or similar
-
-    // Placeholder: create a dummy Float32Array of zeros
-    // Replace this with actual pixel extraction and normalization
-    const input = new Float32Array(128 * 128 * 3);
-    // Fill input with normalized pixel values (0..1 or -1..1) in RGB order
-
-    return input;
+    const { data, width, height } = decodeJpeg(bytes, { useTArray: true });
+    // Convert RGBA to Float32Array [R,G,B, R,G,B, ...] normalized to 0..1
+    const floatArray = new Float32Array(width * height * 3);
+    for (let i = 0, j = 0; i < data.length; i += 4, j += 3) {
+        floatArray[j] = data[i] / 255;       // R
+        floatArray[j + 1] = data[i + 1] / 255; // G
+        floatArray[j + 2] = data[i + 2] / 255; // B
+    }
+    return floatArray;
 }
