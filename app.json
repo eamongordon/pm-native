@@ -57,6 +57,12 @@
           "photosPermission": "We use access to your photos in order to search for minerals."
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "We use your current location to find localities near you."
+        }
+      ],
       "expo-maps"
     ],
     "experiments": {
