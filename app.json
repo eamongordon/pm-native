@@ -39,7 +39,6 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "./withAndroid16KBSupport",
       "expo-router",
       [
         "expo-build-properties",
@@ -75,7 +74,8 @@
           "locationAlwaysAndWhenInUsePermission": "We use your current location to find localities near you."
         }
       ],
-      "expo-maps"
+      "expo-maps",
+      "./withAndroid16KBSupport"
     ],
     "experiments": {
       "typedRoutes": true
