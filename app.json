@@ -39,6 +39,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "./withAndroid16KBSupport",
       "expo-router",
       [
         "expo-build-properties",
