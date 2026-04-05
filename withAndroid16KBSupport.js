@@ -4,16 +4,14 @@ const { withAppBuildGradle, withAndroidManifest } = require('@expo/config-plugin
  * 16 KB Memory Page Size Support Plugin for EAS Managed Builds
  */
 const withAndroid16KBSupport = (config) => {
-  // 1. Force 16 KB compliance for all native modules
+  // 1. Force Fresco 3.2.0 and protect alignment
   config = withAppBuildGradle(config, (configWithProps) => {
-    const contents = configWithProps.modResults.contents;
-    if (!contents) {
-      return configWithProps;
-    }
+    let contents = configWithProps.modResults.contents;
+    if (!contents) return configWithProps;
 
     if (!contents.includes('16KB_ALIGNMENT_FIX_SIGNATURE')) {
-      configWithProps.modResults.contents += `
-// [16KB_ALIGNMENT_FIX_SIGNATURE] Ensure 16 KB compliance for core and third-party natives
+      contents += `
+// [16KB_ALIGNMENT_FIX_SIGNATURE] Ensure 16 KB compliance
 android {
     configurations.all {
         resolutionStrategy {
@@ -27,26 +25,29 @@ android {
             force 'com.facebook.fresco:imagepipeline-base:3.2.0'
             force 'com.facebook.fresco:drawee:3.2.0'
             force 'com.facebook.fresco:imagepipeline-native:3.2.0'
-            force 'com.facebook.soloader:soloader:0.11.0'
+            // REMOVED: soloader force (caused compilation error in RN 0.79)
         }
     }
     packaging {
         jniLibs {
             useLegacyPackaging = false
+            // Protect every library from being stripped of its 16KB padding
             doNotStrip "**/*.so"
         }
     }
 }
 `;
+      configWithProps.modResults.contents = contents;
     }
     return configWithProps;
   });
 
-  // 2. Update AndroidManifest (extractNativeLibs)
+  // 2. Set extractNativeLibs to false (Modern 16KB standard)
   config = withAndroidManifest(config, (configWithProps) => {
     const mainApplication = configWithProps.modResults.manifest.application[0];
     if (mainApplication && mainApplication.$) {
-      mainApplication.$['android:extractNativeLibs'] = 'true';
+      // For 16 KB alignment in modern AGP, this must be "false" to avoid extraction
+      mainApplication.$['android:extractNativeLibs'] = 'false';
     }
     return configWithProps;
   });
